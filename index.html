@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v131</title>
+<title>העולם של סול v132</title>
 </head>
 <body>
 <style>
@@ -256,13 +256,6 @@
   .houseWrap{ position:relative; width:100%; line-height:0; }
   .houseVid{ width:100%; height:auto; display:block; pointer-events:none; }
 
-  /* נייד מסובב לרוחב: הבית והלוח נכנסים לפי הגובה, בלי שייחתכו */
-  @media (orientation:landscape) and (max-height:560px){
-    .houseWrap{ width:auto; height:100%; max-width:100%; aspect-ratio:680/786; margin:0 auto; }
-    .houseVid{ width:100%; height:100%; object-fit:contain; }
-    .trailWrap{ height:100%; }
-    .boardCam{ width:auto; height:150%; aspect-ratio:1328/1488; }   /* לרוחב מראים יותר מהמסלול ופחות זום */
-  }
   .winLayer{ position:absolute; inset:0; pointer-events:none; z-index:5; }
 
   .doSpot{
@@ -502,6 +495,13 @@
   .roadLink svg{ width:100%; height:100%; display:block; }
   .boardCam{ position:absolute; left:50%; top:0; width:152%; aspect-ratio:1328 / 1488;
     transform:translate(-50%, 0); background:#fff center/100% 100% no-repeat; will-change:transform; }
+  /* נייד מסובב לרוחב: הבית והלוח נכנסים לפי הגובה, בלי שייחתכו */
+  @media (orientation:landscape) and (max-height:560px){
+    .houseWrap{ width:auto; height:100%; max-width:100%; aspect-ratio:680/786; margin:0 auto; }
+    .houseVid{ width:100%; height:100%; object-fit:contain; }
+    .bar{ left:auto; right:2%; bottom:50%; transform:translateY(50%); width:auto; padding:0; background:none; }   /* הכפתור עובר לשוליים הפנויים ולא מכסה את הבית */
+  }
+
 
   /* ---------- a lesson, inside the same page ---------- */
   .stage3{
