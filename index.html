@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v181</title>
+<title>העולם של סול v182</title>
 </head>
 <body>
 <style>
@@ -815,15 +815,60 @@
     var on = false, wanted = true;
     try{ var v = localStorage.getItem("solHouse.sound"); if (v === "0") wanted = false; }catch(e){}
     m.volume = 0.8;
+    // iOS מתעלם מ-volume של נגן אודיו, ולכן ההיחלשות בסוף הברכה לא קרתה שם
+    // בכלל והמנגינה פשוט נעצרה. כאן היא עוברת דרך מיקסר, ושם אפשר להחליש באמת
+    var hctx = null, hgain = null, hDead = false;
+    function wireMusic(){
+      if (hgain || hDead) return;
+      try{
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC || !AC.prototype.createMediaElementSource){ hDead = true; return; }
+        hctx = new AC();
+        hgain = hctx.createGain();
+        hgain.gain.setValueAtTime(0.8, hctx.currentTime);
+        hctx.createMediaElementSource(m).connect(hgain).connect(hctx.destination);
+        if (hctx.state === "suspended" && hctx.resume) hctx.resume();
+        document.addEventListener("visibilitychange", wake);
+        window.addEventListener("pageshow", wake);
+      }catch(e){ hDead = true; hgain = null; hctx = null; }
+    }
+    function wake(){ try{ if (hctx && hctx.state === "suspended" && hctx.resume) hctx.resume(); }catch(e){} }
+    function level(v){
+      m.volume = v;
+      if (hgain){ try{ var t = hctx.currentTime;
+        hgain.gain.cancelScheduledValues(t); hgain.gain.setValueAtTime(v, t); }catch(e){} }
+    }
     // a greeting, not a loop: it plays, fades and leaves the room quiet
-    var fadeT = 0;
+    var fadeT = 0, stepT = 0, offT = 0;
+    function stopFade(){ clearTimeout(fadeT); clearInterval(stepT); clearTimeout(offT); fadeT = stepT = offT = 0; }
+    function leave(){ try{ m.pause(); }catch(e){} try{ m.currentTime = 0; }catch(e){} level(0.8); }
     m.addEventListener("play", function(){
-      clearTimeout(fadeT);
+      stopFade();
       fadeT = setTimeout(function(){
-        var step = setInterval(function(){
-          m.volume = Math.max(0, m.volume - 0.05);
-          if (m.volume <= 0.01){ clearInterval(step); try{ m.pause(); }catch(e){} m.currentTime = 0; m.volume = 0.8; }
-        }, 120);
+        var MS = 3500;
+        if (hgain){
+          try{
+            var t = hctx.currentTime;
+            hgain.gain.cancelScheduledValues(t);
+            hgain.gain.setValueAtTime(0.8, t);
+            var ok = false;
+            try{
+              var curve = new Float32Array(33);
+              for (var q = 0; q <= 32; q++) curve[q] = Math.max(0.0001, 0.8 * 0.5 * (1 + Math.cos(Math.PI * q/32)));
+              hgain.gain.setValueCurveAtTime(curve, t, MS/1000);
+              ok = true;
+            }catch(e2){}
+            if (!ok) hgain.gain.linearRampToValueAtTime(0.0001, t + MS/1000);
+            offT = setTimeout(leave, MS + 90);
+            return;
+          }catch(e){}
+        }
+        var v0 = 0.8, i = 0, n = 40;
+        stepT = setInterval(function(){
+          i++;
+          m.volume = Math.max(0, v0 * 0.5 * (1 + Math.cos(Math.PI * i/n)));
+          if (i >= n){ clearInterval(stepT); stepT = 0; leave(); }
+        }, MS/n);
       }, 9000);
     });
 
@@ -836,6 +881,7 @@
     }
     function start(){
       if (on || !wanted) return;
+      wireMusic(); wake();
       try{
         var p = m.play();
         if (p && p.then) p.then(function(){ on = true; paint(); })
@@ -845,7 +891,7 @@
     }
     function toggle(){
       if (on){ try{ m.pause(); }catch(e){} on = false; wanted = false; }
-      else { wanted = true; try{ var p = m.play(); if (p && p.then) p.then(function(){ on = true; paint(); }).catch(function(){}); }catch(e){} on = true; }
+      else { wanted = true; wireMusic(); wake(); try{ var p = m.play(); if (p && p.then) p.then(function(){ on = true; paint(); }).catch(function(){}); }catch(e){} on = true; }
       try{ localStorage.setItem("solHouse.sound", wanted ? "1" : "0"); }catch(e){}
       paint();
     }
@@ -867,8 +913,9 @@
 
     // while a lesson plays, the lobby keeps quiet
     function hush(q){
-      if (q){ try{ m.pause(); }catch(e){} }
-      else if (wanted){ try{ var p=m.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+      if (q){ stopFade(); try{ m.pause(); }catch(e){} }
+      else if (wanted){ stopFade(); level(0.8); wake();
+        try{ var p=m.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
     }
     return { start:start, toggle:toggle, hush:hush };
   })();
