@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v201</title>
+<title>העולם של סול v202</title>
 </head>
 <body>
 <style>
@@ -986,6 +986,8 @@
     };
     function paintCoins(){
       if (purseN) purseN.textContent = coins;
+      // הארנק שבראש החדר של דו הוא אלמנט נפרד, והוא מראה את אותם תווים
+      var pn2 = document.getElementById("purseN2"); if (pn2) pn2.textContent = coins;
       var pc = document.getElementById("purseC"); if (pc) pc.textContent = round;
       try{ localStorage.setItem("solWorld.round", String(round)); }catch(e){}
       try{ localStorage.setItem("solWorld.coins", String(coins)); }catch(e){}
