@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v214</title>
+<title>העולם של סול v215</title>
 </head>
 <body>
 <style>
@@ -187,6 +187,23 @@
   .shelf::-webkit-scrollbar{ height:6px; }
   .shelf::-webkit-scrollbar-thumb{ background:#4c3f82; border-radius:3px; }
   .shelf .item{ flex:0 0 auto; }
+  /* הצצה לפריט לפני שקונים אותו */
+  .peek{ position:absolute; inset:0; z-index:60; display:none;
+    background:rgba(13,9,30,.86); align-items:center; justify-content:center; }
+  .peek.on{ display:flex; }
+  .peekBox{ width:min(86%,330px); background:linear-gradient(180deg,#372b69,#241c49);
+    border:2px solid #5b4b97; border-radius:22px; padding:16px 16px 14px; text-align:center;
+    box-shadow:0 18px 50px -12px rgba(0,0,0,.8); }
+  .peekBox img{ width:100%; height:190px; object-fit:contain; display:block; }
+  .peekP{ color:#FFE7AD; font-size:17px; font-weight:800; margin:10px 0 2px; }
+  .peekNote{ color:#b9a9e8; font-size:13px; font-weight:700; min-height:1.2em; }
+  .peekRow{ display:flex; gap:10px; margin-top:12px; }
+  .peekRow button{ flex:1; border:none; border-radius:999px; padding:11px 0;
+    font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .peekBuy{ background:linear-gradient(180deg,#FFD978,#F0B32E); color:#4A2F00;
+    box-shadow:0 3px 0 0 #B07C06; }
+  .peekBuy[disabled]{ filter:grayscale(.7); opacity:.55; box-shadow:none; cursor:default; }
+  .peekNo{ background:#443579; color:#e8e0ff; }
   .item{
     width:60px; border-radius:14px; padding:6px 4px 5px; text-align:center;
     background:linear-gradient(180deg,#372b69,#281f4f); border:1.5px solid #4c3f82;
@@ -673,6 +690,17 @@
 
     <button class="roomNav prev" id="roomPrev" aria-label="החדר הקודם" hidden><svg viewBox="0 0 24 24" fill="none" stroke="#FFE7AD" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg></button>
     <button class="roomNav next" id="roomNext" aria-label="החדר הבא" hidden><svg viewBox="0 0 24 24" fill="none" stroke="#FFE7AD" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 L16 12 L9 19"/></svg></button>
+    <div class="peek" id="itemPeek">
+      <div class="peekBox">
+        <img id="peekImg" alt="">
+        <div class="peekP" id="peekPrice"></div>
+        <div class="peekNote" id="peekNote"></div>
+        <div class="peekRow">
+          <button class="peekBuy" id="peekBuy">לקנות</button>
+          <button class="peekNo" id="peekNo">לא עכשיו</button>
+        </div>
+      </div>
+    </div>
     <div class="roomArt">
       <svg viewBox="0 0 480 360" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="החדר של דו">
   <defs>
@@ -2556,10 +2584,34 @@
         pr.textContent = have ? "שלי" : (it.p + " תווים");
         el.appendChild(im); el.appendChild(pr);
         el.style.cursor = "pointer";
-        el.addEventListener("click", function(){ buyItem(it); });
+        el.addEventListener("click", function(){ peekItem(it); });
         host.appendChild(el);
       });
     }
+    // נגיעה בפריט פותחת אותו בגדול. קונים רק מתוך ההצצה, כדי שנגיעה
+    // בזמן גלילה לא תוציא תווים בטעות
+    var peek = document.getElementById("itemPeek"), peekOn = null;
+    function peekItem(it){
+      peekOn = it;
+      var have = bought.indexOf(it.i) >= 0;
+      var here = pieces.some(function(p){ return p.src === it.s; });
+      var purse = window.__solNotes ? window.__solNotes() : 0;
+      document.getElementById("peekImg").src = it.s;
+      document.getElementById("peekPrice").textContent = have ? "שלי" : (it.p + " תווים");
+      var note = document.getElementById("peekNote"), buy = document.getElementById("peekBuy");
+      if (have && here){ note.textContent = "כבר בחדר"; buy.disabled = true; buy.textContent = "לקנות"; }
+      else if (have){ note.textContent = ""; buy.disabled = false; buy.textContent = "להחזיר לחדר"; }
+      else if (purse < it.p){ note.textContent = "עוד " + (it.p - purse) + " תווים"; buy.disabled = true; buy.textContent = "לקנות"; }
+      else { note.textContent = ""; buy.disabled = false; buy.textContent = "לקנות"; }
+      peek.classList.add("on");
+    }
+    function peekShut(){ peek.classList.remove("on"); peekOn = null; }
+    document.getElementById("peekNo").addEventListener("click", peekShut);
+    peek.addEventListener("click", function(ev){ if (ev.target === peek) peekShut(); });
+    document.getElementById("peekBuy").addEventListener("click", function(){
+      if (!peekOn) return;
+      var it = peekOn; peekShut(); buyItem(it);
+    });
     function buyItem(it){
       var here = pieces.some(function(p){ return p.src === it.s; });
       if (bought.indexOf(it.i) >= 0){
