@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v204</title>
+<title>העולם של סול v205</title>
 </head>
 <body>
 <style>
@@ -2274,6 +2274,8 @@
                rot:(at&&at.rot)||0, flip:(at&&at.flip)||1, size:(at&&at.size)||1,
                plane:(at&&at.plane)||plane||"floor", flat:!!(at&&at.flat), tilt:(at&&at.tilt)||0,
                lift:(at&&at.lift)||0 };
+      // ניסוי: הספה קבועה במקומה. הידיות נשארות, רק הגרירה בוטלה
+      p.noDrag = (typeof sofaSrc !== "undefined" && src === sofaSrc);
       var NOOP = { setAttribute:function(){}, style:{}, addEventListener:function(){} };
       p.hSpin = NOOP;
       p.hFlip = handle(g, -166, -54, "flip");
@@ -2289,7 +2291,7 @@
         if (ev.target.closest && ev.target.closest("g[opacity=\"1\"]") && ev.target !== im) {}
         var q = toScene(ev); if (!q) return;
         if (ev.target !== im){ return; }
-        dragging = true; moved = false;
+        dragging = !p.noDrag; moved = false;
         gx = p.x - q.x; gy = p.y - q.y;
         select(pieces.indexOf(p));
         try{ g.setPointerCapture(ev.pointerId); }catch(e){}
