@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v218</title>
+<title>העולם של סול v219</title>
 </head>
 <body>
 <style>
@@ -885,7 +885,7 @@
       // חלון של דמות שסיימו את המסע שלה הוא דלת לחדר שלה. השאר נשארים נעולים.
       // ההחלטה נופלת בזמן הלחיצה, כי בזמן בניית החלונות המסע עוד לא נטען
       w.addEventListener("click", function(){
-        if (window.__solOpenStair) window.__solOpenStair();
+        if (window.__solOpenStair) window.__solOpenStair(f.name);
       });
       w.style.cursor = "pointer";
       layer.appendChild(w);
@@ -2247,7 +2247,7 @@
     var w = document.getElementById("doSpot");
     if (w) w.addEventListener("click", function(){
       houseMusic.start();
-      if (window.__solOpenStair){ window.__solOpenStair(); return; }
+      if (window.__solOpenStair){ window.__solOpenStair("דו"); return; }
       if (window.openJourney) window.openJourney("דו"); else open();
     });
   })();
@@ -2529,7 +2529,7 @@
       camY = wantY(at); camK = k0; camCX = camXof(at); apply();
     }
 
-    window.__solOpenStair = function(){
+    window.__solOpenStair = function(who){
       paint();
       at = 0;                      // the house is always entered from the ground
       clearFlash();
@@ -2537,6 +2537,26 @@
       if (hint) hint.style.opacity = "1";
       frame();
       requestAnimationFrame(frame);
+      // and then the camera climbs on its own to the floor that was asked for,
+      // so the child sees every floor below it pass by on the way
+      var want = 0;
+      if (who){
+        var found = -1, top = 0;
+        for (var i = 0; i < DOORS.length; i++){
+          if (!isOpen(DOORS[i].n)) continue;
+          top = i;
+          if (DOORS[i].n === who) found = i;
+        }
+        want = (found >= 0) ? found : top;
+      }
+      if (want > 0){
+        busy = true;
+        setTimeout(function(){
+          glide(wantY(want), k0, camXof(want), 420 + want*520, function(){
+            at = want; busy = false;
+          });
+        }, 480);
+      }
     };
     window.__solCloseStair = function(){
       wrap.classList.remove("on");
