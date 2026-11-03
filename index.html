@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v217</title>
+<title>העולם של סול v218</title>
 </head>
 <body>
 <style>
@@ -2323,6 +2323,8 @@
     if (!wrap || !world || !ovEl) return;
 
     function isOpen(name){
+      // a door opens only for a character who really has a room. סי has none yet.
+      if (!(window.__solRoomArt && window.__solRoomArt[name])) return false;
       return !!(window.__solRoomOpen && window.__solRoomOpen(name));
     }
     function landY(i){ return DOORS[i].py + DROP + 1; }
@@ -2529,8 +2531,7 @@
 
     window.__solOpenStair = function(){
       paint();
-      at = 0;
-      for (var i = DOORS.length - 1; i >= 0; i--){ if (isOpen(DOORS[i].n)){ at = i; break; } }
+      at = 0;                      // the house is always entered from the ground
       clearFlash();
       wrap.classList.add("on");
       if (hint) hint.style.opacity = "1";
