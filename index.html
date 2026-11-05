@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v228</title>
+<title>העולם של סול v229</title>
 </head>
 <body>
 <style>
@@ -382,7 +382,11 @@
   .scroll{ display:flex; align-items:center; justify-content:center; }
   .world{ position:relative; width:100%; max-width:560px; margin:0 auto; }
   .houseWrap{ position:relative; width:100%; line-height:0; }
-  .houseVid{ width:100%; height:auto; display:block; pointer-events:none; }
+  /* האותיות צבועות בתוך הסרטון. עד שעיגולי החלונות נבנים ומכסים אותן,
+     הבניין מוסתר, אחרת רואים לרגע אותיות במקום דמויות */
+  .houseVid{ width:100%; height:auto; display:block; pointer-events:none;
+             opacity:0; transition:opacity .28s ease; }
+  .houseVid.ready{ opacity:1; }
 
   .winLayer{ position:absolute; inset:0; pointer-events:none; z-index:5; }
 
@@ -947,6 +951,9 @@
       w.style.cursor = "pointer";
       layer.appendChild(w);
     });
+    // החלונות מוכנים, אפשר להראות את הבניין
+    (function(){ var hv = document.getElementById("houseVid");
+      if (hv) requestAnimationFrame(function(){ hv.classList.add("ready"); }); })();
 
     // Do is not behind glass. he is outside, on his own floor, looking up at them.
     var d = document.createElement("div");
