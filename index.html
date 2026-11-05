@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v235</title>
+<title>העולם של סול v236</title>
 </head>
 <body>
 <style>
@@ -15,7 +15,10 @@
     --sky1:#120d2b; --sky2:#36205a; --sky3:#8a4468; --sky4:#df8260; --sky5:#f7c98e;
     --gold:#FFC44D; --gold-l:#FFE7AD; --gold-d:#C98A12;
   }
-  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  /* בנייד הדפדפן ממתין לראות אם הנגיעה היא התחלה של לחיצה כפולה להגדלה,
+     ובינתיים בולע אותה. כאן אין הגדלה בלחיצה כפולה, ולכן כל נגיעה נתפסת מיד */
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;
+     touch-action:manipulation; }
   html,body{ height:100%; }
   body{
     font-family:'Gisha','Segoe UI',sans-serif; direction:rtl; background:#1b1038;
@@ -2407,7 +2410,17 @@ window.onerror = function(m, u, l){
     function shut(){ veil.classList.remove("on"); sheet.classList.remove("on"); }
     (function(){ var g = document.getElementById("vtag");
       if (g && !g.__err) g.textContent = g.textContent + " ok"; })();
-    document.getElementById("cta").addEventListener("click", function(){
+    var ctaEl = document.getElementById("cta"), ctaGone = false;
+    function ctaGo(ev){
+      if (ctaGone) return;
+      ctaGone = true;
+      if (ev && ev.preventDefault) ev.preventDefault();
+      ctaEl.__fire();
+    }
+    ctaEl.addEventListener("pointerup", ctaGo);
+    ctaEl.addEventListener("touchend", ctaGo);
+    ctaEl.__fire = function(){
+      (function(){
       // the journey opens first. if the music fails on some device, it must not
       // take the button with it
       var say = function(t){ var g = document.getElementById("vtag"); if (g) g.textContent = t; };
@@ -2423,7 +2436,9 @@ window.onerror = function(m, u, l){
         say(ver + (on ? " ON" : " OFF") + (r ? " t" + Math.round(r.top) + " h" + Math.round(r.height) : ""));
       }, 700);
       try{ houseMusic.start(); }catch(e){}
-    });
+      })();
+    };
+    ctaEl.addEventListener("click", ctaGo);
     veil.addEventListener("click", shut);
     var w = document.getElementById("doSpot");
     if (w) w.addEventListener("click", function(){
