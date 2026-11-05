@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v233</title>
+<title>העולם של סול v234</title>
 </head>
 <body>
 <style>
@@ -362,8 +362,9 @@
   }
   .winName{
     position:absolute; left:50%; bottom:6%; transform:translateX(-50%);
-    font-family:"Rod",serif; font-size:17px; line-height:1; color:#f1e6ff; white-space:nowrap;
-    padding:3px 11px 4px; border-radius:999px; pointer-events:none;
+    font-family:"Rod",serif; font-size:clamp(9px, 2.9vw, 15px); line-height:1;
+    color:#f1e6ff; white-space:nowrap;
+    padding:2px 8px 3px; border-radius:999px; pointer-events:none;
     background:rgba(60,34,12,.6); backdrop-filter:blur(2px);
     text-shadow:0 1px 4px rgba(0,0,0,.9);
   }
@@ -2399,8 +2400,18 @@
     document.getElementById("cta").addEventListener("click", function(){
       // the journey opens first. if the music fails on some device, it must not
       // take the button with it
-      try{ if (window.openJourney) window.openJourney("\u05d3\u05d5"); else open(); }
-      catch(e){ try{ open(); }catch(e2){} }
+      var say = function(t){ var g = document.getElementById("vtag"); if (g) g.textContent = t; };
+      var ver = (document.title.match(/v\d+/) || [""])[0];
+      try{
+        if (window.openJourney){ window.openJourney("\u05d3\u05d5"); say(ver + " A"); }
+        else { open(); say(ver + " B"); }
+      }catch(e){ say(ver + " X " + (e && e.message ? String(e.message).slice(0, 40) : "?")); }
+      setTimeout(function(){
+        var sh = document.getElementById("sheet");
+        var on = sh && sh.className.indexOf("on") >= 0;
+        var r = sh ? sh.getBoundingClientRect() : null;
+        say(ver + (on ? " ON" : " OFF") + (r ? " t" + Math.round(r.top) + " h" + Math.round(r.height) : ""));
+      }, 700);
       try{ houseMusic.start(); }catch(e){}
     });
     veil.addEventListener("click", shut);
