@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v239</title>
+<title>העולם של סול v241</title>
 </head>
 <body>
 <style>
@@ -1004,8 +1004,13 @@ window.onerror = function(m, u, l){
   // ---- the house has its own melody ----
   // Browsers only credit a gesture when play() is called inside the handler itself,
   // and Safari does not count pointerdown. So every way in starts it directly.
+  // המספר מוצג רק כשמבקשים אותו בכתובת. מדווח השגיאות עצמו עובד תמיד,
+  // והוא נראה רק אם משהו באמת נפל
   (function(){ var t = document.getElementById("vtag");
-    if (t) t.textContent = (document.title.match(/v\d+/) || [""])[0];
+    if (!t) return;
+    var show = false;
+    try{ show = location.search.indexOf("v=") >= 0; }catch(e){}
+    if (show) t.textContent = (document.title.match(/v\d+/) || [""])[0];
   })();
 
   var houseMusic = (function(){
@@ -2429,7 +2434,7 @@ window.onerror = function(m, u, l){
     function open(){ veil.classList.add("on"); sheet.classList.add("on"); }
     function shut(){ veil.classList.remove("on"); sheet.classList.remove("on"); }
     (function(){ var g = document.getElementById("vtag");
-      if (g && !g.__err) g.textContent = g.textContent + " ok"; })();
+      if (g && !g.__err && g.textContent) g.textContent = g.textContent + " ok"; })();
     var ctaEl = document.getElementById("cta"), ctaGone = false;
     function ctaGo(ev){
       if (ctaGone) return;
@@ -2443,7 +2448,7 @@ window.onerror = function(m, u, l){
       (function(){
       // the journey opens first. if the music fails on some device, it must not
       // take the button with it
-      var say = function(t){ var g = document.getElementById("vtag"); if (g) g.textContent = t; };
+      var say = function(t){ var g = document.getElementById("vtag"); if (g && g.textContent) g.textContent = t; };
       var ver = (document.title.match(/v\d+/) || [""])[0];
       try{
         if (window.openJourney){ window.openJourney("\u05d3\u05d5"); say(ver + " A"); }
