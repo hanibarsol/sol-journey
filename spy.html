@@ -9,16 +9,21 @@
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ height:100%; }
   body{ margin:0; background:#fff; font-family:system-ui,"Segoe UI",Arial,sans-serif; }
-  /* exactly the box the lesson lives in inside the game */
+  /* the same box the lesson lives in inside the game */
   #box{ position:fixed; inset:0; z-index:60; background:#fff; display:flex; flex-direction:column; }
   #frameBox{ flex:1 1 auto; min-height:0; overflow:hidden; display:flex;
     align-items:flex-start; justify-content:center; background:#fff; }
   #f{ width:100%; flex:1 1 auto; min-width:0; border:0; display:block; background:#fff; }
+  #ask{ position:fixed; z-index:150; left:10px; bottom:10px; display:none;
+    font:800 14px/1 system-ui,Arial; padding:11px 16px; border-radius:999px; border:0;
+    background:#17A79B; color:#04231f; box-shadow:0 6px 18px -8px rgba(0,0,0,.8); }
+  #ask.on{ display:block; }
   #panel{ position:fixed; inset:0; z-index:200; overflow:auto; padding:18px 16px 28px;
     background:rgba(8,5,22,.96); color:#fff; direction:rtl; }
   #panel.off{ display:none; }
   #panel h1{ font-size:19px; margin:0 0 8px; color:#FFD987; }
   #panel p{ margin:0 0 14px; font-size:14px; line-height:1.55; color:#d6d0f0; }
+  #panel ol{ margin:0 0 16px; padding-inline-start:20px; font-size:14px; line-height:1.7; color:#d6d0f0; }
   #panel button{ font:inherit; font-size:17px; font-weight:800; padding:13px 26px;
     border-radius:999px; border:0; background:#17A79B; color:#04231f; }
   #panel table{ width:100%; border-collapse:collapse; margin-top:14px; }
@@ -26,20 +31,24 @@
   #panel td.v{ text-align:left; font-weight:800; }
   #panel .bad{ color:#FF8A6B; } #panel .ok{ color:#8FD9D2; }
   #panel .verdict{ margin-top:16px; font-size:18px; font-weight:800; color:#FFD987; }
-  #panel .note{ margin-top:12px; font-size:13px; color:#9d94c9; }
+  #panel .note{ margin-top:10px; font-size:13px; color:#9d94c9; }
 </style>
 </head>
 <body>
 <div id="box">
   <div id="frameBox"><iframe id="f" title="שיעור" allow="autoplay; fullscreen"></iframe></div>
 </div>
+<button id="ask">מה מצאת?</button>
 
 <div id="panel">
   <h1>בדיקת הקפיצה בשיר של מי</h1>
-  <p>הבדיקה פותחת את השיעור האמיתי, בדיוק כמו במשחק, ואז מפעילה בנפרד כל דבר שקורה
-     כשמתקבל תו. אחרי כל אחד היא מודדת אם המסך זז, ובסוף אומרת מי מהם אשם.</p>
-  <p>אורכת כעשרים שניות. אין צורך לנגן ואין צורך לגעת.</p>
-  <button id="go">להתחיל</button>
+  <p>הדף פותח את השיעור האמיתי, בדיוק כמו במשחק, ומודד ברקע כל תזוזה על המסך בזמן שאת מנגנת.</p>
+  <ol>
+    <li>ללחוץ "לפתוח את השיעור"</li>
+    <li>לשחק עד החלק שבו מנגנים לפי המוסיקה</li>
+    <li>ברגע שהמסך קופץ, ללחוץ על הכפתור הירוק "מה מצאת?" בפינה למטה</li>
+  </ol>
+  <button id="go">לפתוח את השיעור</button>
   <div id="out"></div>
 </div>
 
@@ -49,6 +58,7 @@
   var box = document.getElementById("frameBox");
   var panel = document.getElementById("panel");
   var out = document.getElementById("out");
+  var ask = document.getElementById("ask");
 
   function fitFrame(){
     var h = box.clientHeight;
@@ -57,10 +67,8 @@
   window.addEventListener("resize", fitFrame);
   fitFrame();
 
-  function show(html){ panel.classList.remove("off"); out.innerHTML = html; }
-
   document.getElementById("go").addEventListener("click", function(){
-    this.disabled = true; this.textContent = "רץ...";
+    this.disabled = true; this.textContent = "פותחת...";
     start();
   });
 
@@ -68,93 +76,107 @@
     fetch("lessons/mire.html").then(function(r){ return r.ok ? r.text() : null; })
       .catch(function(){ return null; })
       .then(function(doc){
-        if (!doc){ show('<p class="verdict">לא הצלחתי לטעון את השיעור.</p>'); return; }
-        var boot = '<scr' + 'ipt>window.__solBase=0;window.__solFirst=true;' +
-                   'window.__solWhich="mire";</scr' + 'ipt>';
-        /* the pieces that run on a scored note live inside the lesson's closure,
-           so a hook is opened for them right where they are defined */
-        var hook = 'window.__dbg={celebrate:celebrate,flyCoin:flyCoin,addCoin:addCoin,' +
-          'payGold:payGold,key:function(){var k=(typeof keyEl!=="undefined"&&keyEl[0])?keyEl[0]:doKey;' +
-          'if(!k)return;k.classList.add("hit");setTimeout(function(){k.classList.remove("hit");},320);}};\n';
-        if (doc.indexOf("function onHit(){") < 0){
-          show('<p class="verdict">השיעור השתנה ואני לא מוצאת בו את רגע קבלת התו. תגידי לי ואתקן.</p>');
+        if (!doc){
+          panel.classList.remove("off");
+          out.innerHTML = '<p class="verdict">לא הצלחתי לטעון את השיעור.</p>';
           return;
         }
-        doc = doc.replace("function onHit(){", hook + "function onHit(){");
+        var boot = '<scr' + 'ipt>window.__solBase=0;window.__solFirst=true;' +
+                   'window.__solWhich="mire";</scr' + 'ipt>';
         frame.srcdoc = boot + doc + probe();
         panel.classList.add("off");
+        ask.classList.add("on");
         fitFrame(); setTimeout(fitFrame, 60); setTimeout(fitFrame, 320);
       });
   }
 
-  /* the probe runs inside the lesson, where the real layout is */
+  /* the watcher runs inside the lesson, where the real layout is */
   function probe(){
     return [
 '<scr' + 'ipt>(function(){',
-'  function R(){',
-'    var e = document.getElementById("stage");',
+'  var WATCH = [',
+'    ["החמשה", "stage"], ["הפס העליון", null, ".top"], ["שורת הטקסט", null, ".say"],',
+'    ["המסגרת הפנימית", null, ".fit"], ["הפסנתר", "piano"], ["המסלול", "track"]',
+'  ];',
+'  var seen = {}, stat = {}, recent = [], t0 = performance.now();',
+'  var lastWin = "", winHits = 0, winWorst = "";',
+'  function box(w){',
+'    var e = w[1] ? document.getElementById(w[1]) : document.querySelector(w[2]);',
 '    if (!e) return null;',
 '    var r = e.getBoundingClientRect();',
-'    return { x:r.left, y:r.top, w:r.width, h:r.height };',
+'    return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];',
 '  }',
-'  function watch(ms){',
-'    return new Promise(function(res){',
-'      var a = R(), worst = 0, how = "";',
-'      var t0 = performance.now();',
-'      (function loop(){',
-'        var b = R();',
-'        if (a && b){',
-'          var dy = Math.abs(b.y - a.y), dx = Math.abs(b.x - a.x);',
-'          var d = Math.max(dy, dx, Math.abs(b.w - a.w), Math.abs(b.h - a.h));',
-'          if (d > worst){ worst = d; how = dy >= dx ? "למעלה ולמטה" : "לצדדים"; }',
+'  function tick(){',
+'    for (var i = 0; i < WATCH.length; i++){',
+'      var name = WATCH[i][0], b = box(WATCH[i]);',
+'      if (!b) continue;',
+'      var key = b.join(",");',
+'      if (seen[name] && seen[name] !== key){',
+'        var a = seen[name].split(",").map(Number);',
+'        var dy = Math.abs(b[1] - a[1]), dx = Math.abs(b[0] - a[0]);',
+'        var dh = Math.abs(b[3] - a[3]), dw = Math.abs(b[2] - a[2]);',
+'        var d = Math.max(dy, dx, dh, dw);',
+'        var s = stat[name] || (stat[name] = { n:0, max:0, how:"" });',
+'        s.n++;',
+'        if (d > s.max){ s.max = d; s.how = (dy >= dx ? "למעלה ולמטה" : "לצדדים"); }',
+'        if (d >= 2){',
+'          recent.unshift(((performance.now() - t0) / 1000).toFixed(1) + "s  " + name + "  " + d + "px");',
+'          recent = recent.slice(0, 5);',
 '        }',
-'        if (performance.now() - t0 < ms) requestAnimationFrame(loop);',
-'        else res({ d:Math.round(worst), how:how });',
-'      })();',
-'    });',
-'  }',
-'  var TESTS = [',
-'    ["הבזק הקליד", function(d){ d.key(); }],',
-'    ["ניצוצות", function(d){ var r = R() || { x:120, y:300 }; d.celebrate(r.x + 60, r.y + 120); }],',
-'    ["מטבע מעופף", function(d){ var r = R() || { x:120, y:300 }; d.flyCoin(r.x + 60, r.y + 120); }],',
-'    ["ספירת המטבע", function(d){ d.addCoin(); }],',
-'    ["תו הזהב", function(d){ d.payGold(); }]',
-'  ];',
-'  function report(html){ try{ parent.__spyReport(html); }catch(e){} }',
-'  setTimeout(function(){',
-'    var b = document.getElementById("ovB"); if (b) b.click();',
-'    setTimeout(run, 2200);',
-'  }, 600);',
-'  async function run(){',
-'    var d = window.__dbg;',
-'    if (!d){ report(\'<p class="verdict">לא הצלחתי להיכנס לשיעור. תגידי לי ואבדוק.</p>\'); return; }',
-'    var rows = [], worstName = "", worstVal = -1;',
-'    rows.push(["בלי לעשות כלום", await watch(700)]);',
-'    for (var i = 0; i < TESTS.length; i++){',
-'      try{ TESTS[i][1](d); }catch(e){}',
-'      var r = await watch(900);',
-'      rows.push([TESTS[i][0], r]);',
-'      if (r.d > worstVal){ worstVal = r.d; worstName = TESTS[i][0]; }',
-'      await new Promise(function(z){ setTimeout(z, 300); });',
+'      }',
+'      seen[name] = key;',
 '    }',
-'    var html = "<table>";',
-'    rows.forEach(function(p){',
-'      var bad = p[1].d > 2;',
-'      html += "<tr><td>" + p[0] + "</td><td class=\\"v " + (bad ? "bad" : "ok") + "\\">" +',
-'        (bad ? p[1].d + " פיקסלים " + p[1].how : "לא זז") + "</td></tr>";',
-'    });',
-'    html += "</table>";',
-'    html += \'<p class="verdict">\' + (worstVal > 2',
-'      ? "האשם: " + worstName + ", " + worstVal + " פיקסלים"',
-'      : "שום דבר מהם לא הזיז את המסך") + "</p>";',
-'    html += \'<p class="note">גודל החלון: \' + window.innerWidth + "x" + window.innerHeight + "</p>";',
-'    report(html);',
+'    var vv = window.visualViewport;',
+'    var w = window.innerWidth + "x" + window.innerHeight +',
+'      (vv ? " / " + Math.round(vv.width) + "x" + Math.round(vv.height) : "");',
+'    if (lastWin && w !== lastWin){ winHits++; winWorst = lastWin + "  ->  " + w; }',
+'    lastWin = w;',
+'    requestAnimationFrame(tick);',
 '  }',
+'  requestAnimationFrame(tick);',
+'  window.__spyAsk = function(){',
+'    return { stat:stat, recent:recent, winHits:winHits, winWorst:winWorst,',
+'             win:window.innerWidth + "x" + window.innerHeight };',
+'  };',
 '})();</scr' + 'ipt>'
     ].join("\n");
   }
 
-  window.__spyReport = function(html){ show(html); };
+  ask.addEventListener("click", function(){
+    var d = null;
+    try{ d = frame.contentWindow.__spyAsk(); }catch(e){}
+    panel.classList.remove("off");
+    if (!d){
+      out.innerHTML = '<p class="verdict">לא הצלחתי לקרוא את המדידות. תגידי לי ואבדוק.</p>';
+      return;
+    }
+    var names = Object.keys(d.stat);
+    var worstName = "", worstVal = -1, worstHow = "";
+    names.forEach(function(k){
+      if (d.stat[k].max > worstVal){
+        worstVal = d.stat[k].max; worstName = k; worstHow = d.stat[k].how;
+      }
+    });
+    var html = "<table>";
+    names.forEach(function(k){
+      var s = d.stat[k], bad = s.max >= 2;
+      html += "<tr><td>" + k + "</td><td class=\"v " + (bad ? "bad" : "ok") + "\">" +
+        (bad ? s.max + " פיקסלים " + s.how + ", " + s.n + " פעמים" : "לא זז") + "</td></tr>";
+    });
+    html += "<tr><td>גודל החלון</td><td class=\"v " + (d.winHits ? "bad" : "ok") + "\">" +
+      (d.winHits ? "השתנה " + d.winHits + " פעמים" : "לא השתנה") + "</td></tr>";
+    html += "</table>";
+    html += '<p class="verdict">' + (worstVal >= 2
+      ? "הכי זז: " + worstName + ", " + worstVal + " פיקסלים " + worstHow
+      : "שום דבר לא זז") + "</p>";
+    if (d.winWorst) html += '<p class="note">שינוי החלון האחרון: ' + d.winWorst + "</p>";
+    if (d.recent.length) html += '<p class="note">אחרונים: ' + d.recent.join("  |  ") + "</p>";
+    html += '<p class="note">מסך: ' + d.win + "</p>";
+    html += '<p class="note" style="margin-top:16px"><button id="back">לחזור לשיעור</button></p>';
+    out.innerHTML = html;
+    var b = document.getElementById("back");
+    if (b) b.addEventListener("click", function(){ panel.classList.add("off"); });
+  });
 })();
 </script>
 </body>
