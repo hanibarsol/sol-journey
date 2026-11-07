@@ -1397,7 +1397,9 @@
     if (smT < 0){ smT = target; smMark = now; smRate = 1; return target; }
     smT += (now - smMark) / 1000 * smRate; smMark = now;
     var err = target - smT;
-    if (err > 0.3 || err < -0.3){ smT = target; smRate = 1; }
+    // מדביקים קדימה בלבד. זריקה אחורה נראית כקפיצה של כל המסך
+    if (err > 0.3){ smT = target; smRate = 1; }
+    else if (err < -0.3){ smRate = 0.92; }
     else { var r = err * 0.5; smRate = 1 + (r > 0.08 ? 0.08 : (r < -0.08 ? -0.08 : r)); }
     return smT;
   }
