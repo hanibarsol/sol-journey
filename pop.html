@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מונה התווים: שלוש האפשרויות</title>
+<style>
+  :root{ color-scheme:light; --violet:#4b3f7a; --gold:#FFC44D; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; padding:12px 10px 26px; direction:rtl; background:#fff;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif; color:#2b2350; }
+  h1{ font-size:17px; margin:0 0 4px; }
+  p.lead{ margin:0 0 12px; font-size:13px; line-height:1.5; color:#5d5484; }
+
+  /* the bar, the badge and its pop, copied from the lesson as they are */
+  .top{ width:100%; max-width:560px; flex:0 0 auto; display:flex; align-items:center;
+    justify-content:space-between; gap:10px; }
+  .title{ font-size:17px; color:var(--violet); font-weight:800; }
+  .coin{ position:relative; overflow:hidden; display:flex; align-items:center; gap:7px;
+    background:linear-gradient(180deg,#FFF3CF 0%,#FFD978 45%,#F0B32E 100%);
+    border:2px solid #C98A00; border-radius:999px; padding:5px 14px 5px 9px;
+    font-size:14.5px; font-weight:800; color:#5A3B00;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85), inset 0 -3px 6px rgba(169,114,10,.35),
+      0 3px 0 0 #B07C06, 0 6px 16px -6px rgba(176,124,6,.75); }
+  .coin .n{ color:#4A2F00; font-variant-numeric:tabular-nums; min-width:1.4em; text-align:center;
+    display:inline-block; text-shadow:0 1px 0 rgba(255,255,255,.6); }
+  .coin::after{ content:""; position:absolute; top:-60%; left:-40%; width:30%; height:220%;
+    background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.85), rgba(255,255,255,0));
+    transform:rotate(18deg); animation:shine 4.5s ease-in-out infinite; pointer-events:none; }
+  @keyframes shine{ 0%{ left:-40% } 55%{ left:130% } 100%{ left:130% } }
+
+  /* 1 — as it is today: thirty per cent */
+  .coin.big{ animation:popBig .5s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popBig{
+    0%{ transform:scale(1) } 45%{ transform:scale(1.3) } 100%{ transform:scale(1) } }
+  /* 2 — a glow only, the badge does not change size */
+  .coin.glow{ animation:popGlow .5s ease-out; }
+  @keyframes popGlow{
+    0%{ box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 3px 0 0 #B07C06, 0 6px 16px -6px rgba(176,124,6,.75) }
+    45%{ box-shadow:inset 0 1px 0 rgba(255,255,255,.95), 0 3px 0 0 #B07C06, 0 0 30px 10px rgba(255,196,77,.95) }
+    100%{ box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 3px 0 0 #B07C06, 0 6px 16px -6px rgba(176,124,6,.75) } }
+  /* 3 — eight per cent */
+  .coin.soft{ animation:popSoft .45s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popSoft{
+    0%{ transform:scale(1) } 45%{ transform:scale(1.08) } 100%{ transform:scale(1) } }
+
+  /* a strip of staff with notes flowing, so the eye has something to hold */
+  .fit{ position:relative; margin-top:10px; height:190px; border-radius:18px; overflow:hidden;
+    background:linear-gradient(180deg,#fdfbff,#f3eeff); border:1.5px solid #e3dcf5; }
+  .lines{ position:absolute; left:0; right:0; top:46px; }
+  .lines i{ display:block; height:2px; background:#cdc4ea; margin-bottom:22px; }
+  .note{ position:absolute; width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(circle at 34% 32%, #ff8f8f, #e23b3b);
+    border:2px solid #a81f1f; }
+  .playhead{ position:absolute; top:34px; bottom:34px; right:84px; width:3px;
+    background:#17A79B; opacity:.6; }
+
+  .row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  button.m{ font:inherit; font-size:14px; font-weight:800; padding:11px 15px; border-radius:999px;
+    border:2px solid #d8d0f0; background:#fff; color:#3b3173; }
+  button.m.on{ background:#17A79B; color:#04231f; border-color:transparent; }
+  .hint{ margin-top:12px; font-size:13px; line-height:1.55; color:#5d5484; }
+  .hint b{ color:#2b2350; }
+</style>
+</head>
+<body>
+<h1>מונה התווים: שלוש האפשרויות</h1>
+<p class="lead">התווים זורמים כמו בשיר, והמונה מקבל תו כל שנייה וחצי. אפשר להחליף בין
+   שלוש ההתנהגויות ולראות איזו תופסת את העין מהתווים.</p>
+
+<div class="top">
+  <span class="title">מי</span>
+  <span class="coin" id="coin">
+    <svg viewBox="0 0 26 36" width="18" height="25" aria-hidden="true">
+      <defs><linearGradient id="gq" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFE9A8"/><stop offset="0.5" stop-color="#FFC44D"/>
+        <stop offset="1" stop-color="#E09A12"/></linearGradient></defs>
+      <rect x="16" y="3" width="3.4" height="22" rx="1.7" fill="url(#gq)" stroke="#A9720A" stroke-width="1"/>
+      <ellipse cx="10.5" cy="26.5" rx="9" ry="6.6" transform="rotate(-18 10.5 26.5)" fill="url(#gq)" stroke="#A9720A" stroke-width="1.4"/>
+      <ellipse cx="7.5" cy="23.5" rx="2.6" ry="1.5" transform="rotate(-18 7.5 23.5)" fill="#FFF6DC" opacity=".75"/>
+    </svg>
+    <span class="n" id="coinN">0</span>
+  </span>
+</div>
+
+<div class="fit" id="fit">
+  <div class="lines"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="playhead"></div>
+</div>
+
+<div class="row">
+  <button class="m on" data-mode="big">1. כמו היום, 30%</button>
+  <button class="m" data-mode="glow">2. זוהר בלבד</button>
+  <button class="m" data-mode="soft">3. עדין, 8%</button>
+</div>
+
+<p class="hint">תסתכלי על <b>התווים</b>, לא על המונה, ותראי איזו מהשלוש מושכת את העין אליה.
+  אצלי ההמלצה היא 2 בזמן השיר ו-1 בסוף השלב, כשהמטבעות נשפכות.</p>
+
+<script>
+(function(){
+  var coin = document.getElementById("coin");
+  var n = document.getElementById("coinN");
+  var fit = document.getElementById("fit");
+  var mode = "big", count = 0;
+
+  document.querySelectorAll("button.m").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("button.m").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+      mode = b.getAttribute("data-mode");
+    });
+  });
+
+  /* the class is dropped and put back on the next frame, so the animation
+     starts again without forcing the browser to measure the page */
+  function pop(){
+    var on = mode;
+    coin.classList.remove("big", "glow", "soft");
+    requestAnimationFrame(function(){ coin.classList.add(on); });
+  }
+
+  var notes = [], NOTE_MS = 1500, TRAVEL = 3400;
+  function addNote(){
+    var e = document.createElement("div");
+    e.className = "note";
+    e.style.top = (34 + Math.floor(Math.random() * 5) * 24) + "px";
+    fit.appendChild(e);
+    notes.push({ el:e, born:performance.now() });
+  }
+  function tick(now){
+    var w = fit.clientWidth;
+    for (var i = notes.length - 1; i >= 0; i--){
+      var p = (now - notes[i].born) / TRAVEL;
+      if (p > 1.05){ notes[i].el.remove(); notes.splice(i, 1); continue; }
+      notes[i].el.style.left = Math.round(-30 + (w + 60) * (1 - p)) + "px";
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  setInterval(function(){ addNote(); }, 520);
+  setInterval(function(){ count++; n.textContent = String(count); pop(); }, NOTE_MS);
+})();
+</script>
+</body>
+</html>
