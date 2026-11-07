@@ -98,8 +98,30 @@
 '    ["החמשה", "stage"], ["הפס העליון", null, ".top"], ["שורת הטקסט", null, ".say"],',
 '    ["המסגרת הפנימית", null, ".fit"], ["הפסנתר", "piano"], ["המסלול", "track"]',
 '  ];',
-'  var seen = {}, stat = {}, recent = [], t0 = performance.now();',
+'  /* a banner that speaks the moment it happens, so nothing has to be caught */',
+'  var bn = document.createElement("div");',
+'  bn.setAttribute("style", "position:fixed;left:0;right:0;top:0;z-index:99999;" +',
+'    "pointer-events:none;background:rgba(10,6,28,.92);color:#FFD987;direction:rtl;" +',
+'    "font:800 16px/1.35 system-ui,Arial;padding:10px 12px;text-align:center;display:none");',
+'  document.body.appendChild(bn);',
+'  var bnTimer = 0;',
+'  function shout(txt){',
+'    bn.textContent = txt;',
+'    bn.style.display = "block";',
+'    clearTimeout(bnTimer);',
+'    bnTimer = setTimeout(function(){ bn.style.display = "none"; }, 3000);',
+'  }',
+'  var seen = {}, stat = {}, recent = [], t0 = performance.now(), born = t0;',
 '  var lastWin = "", winHits = 0, winWorst = "";',
+'  /* the page itself being dragged sideways, and safari\'s own visible window,',
+'     are the two things that look exactly like "left and then right" */',
+'  var lastPan = "";',
+'  function panNow(){',
+'    var vv = window.visualViewport;',
+'    return Math.round(window.scrollX) + "," + Math.round(window.scrollY) +',
+'      (vv ? "," + Math.round(vv.offsetLeft) + "," + Math.round(vv.offsetTop) +',
+'            "," + vv.scale.toFixed(2) : "");',
+'  }',
 '  function box(w){',
 '    var e = w[1] ? document.getElementById(w[1]) : document.querySelector(w[2]);',
 '    if (!e) return null;',
@@ -122,6 +144,7 @@
 '        if (d >= 2){',
 '          recent.unshift(((performance.now() - t0) / 1000).toFixed(1) + "s  " + name + "  " + d + "px");',
 '          recent = recent.slice(0, 5);',
+'          if (performance.now() - born > 4000) shout(name + " זזה " + d + " פיקסלים " + s.how);',
 '        }',
 '      }',
 '      seen[name] = key;',
@@ -131,6 +154,15 @@
 '      (vv ? " / " + Math.round(vv.width) + "x" + Math.round(vv.height) : "");',
 '    if (lastWin && w !== lastWin){ winHits++; winWorst = lastWin + "  ->  " + w; }',
 '    lastWin = w;',
+'    var p = panNow();',
+'    if (lastPan && p !== lastPan){',
+'      var s2 = stat["הדף נגרר"] || (stat["הדף נגרר"] = { n:0, max:0, how:"לצדדים" });',
+'      s2.n++; s2.max = Math.max(s2.max, 1);',
+'      recent.unshift(((performance.now() - t0) / 1000).toFixed(1) + "s  הדף נגרר  " + lastPan + " -> " + p);',
+'      recent = recent.slice(0, 5);',
+'      if (performance.now() - born > 4000) shout("הדף נגרר: " + lastPan + "  ->  " + p);',
+'    }',
+'    lastPan = p;',
 '    requestAnimationFrame(tick);',
 '  }',
 '  requestAnimationFrame(tick);',
@@ -183,6 +215,37 @@
     var b = document.getElementById("back");
     if (b) b.addEventListener("click", function(){ panel.classList.add("off"); });
   });
+
+  /* the outer page can be dragged or pinched too, and from inside the frame
+     that is invisible, so it is watched here and shouted at the bottom */
+  (function(){
+    var b = document.createElement("div");
+    b.setAttribute("style", "position:fixed;left:0;right:0;bottom:0;z-index:199;" +
+      "pointer-events:none;background:rgba(10,6,28,.92);color:#8FD9D2;direction:rtl;" +
+      "font:800 15px/1.35 system-ui,Arial;padding:9px 12px;text-align:center;display:none");
+    document.body.appendChild(b);
+    var timer = 0, last = "", born = performance.now();
+    function now(){
+      var vv = window.visualViewport;
+      var r = frame.getBoundingClientRect();
+      return Math.round(window.scrollX) + "," + Math.round(window.scrollY) +
+        (vv ? "," + Math.round(vv.offsetLeft) + "," + Math.round(vv.offsetTop) +
+              "," + vv.scale.toFixed(2) : "") +
+        " | מסגרת " + Math.round(r.left) + "," + Math.round(r.top) +
+        "," + Math.round(r.width) + "," + Math.round(r.height);
+    }
+    (function tick(){
+      var v = now();
+      if (last && v !== last && performance.now() - born > 4000){
+        b.textContent = "הדף החיצוני זז: " + last + "  ->  " + v;
+        b.style.display = "block";
+        clearTimeout(timer);
+        timer = setTimeout(function(){ b.style.display = "none"; }, 3000);
+      }
+      last = v;
+      requestAnimationFrame(tick);
+    })();
+  })();
 })();
 </script>
 </body>
