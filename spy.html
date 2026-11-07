@@ -134,9 +134,14 @@
 '    requestAnimationFrame(tick);',
 '  }',
 '  requestAnimationFrame(tick);',
+'  /* each answer closes a chapter: the counters start again, so the next one',
+'     speaks only about what happened since */',
 '  window.__spyAsk = function(){',
-'    return { stat:stat, recent:recent, winHits:winHits, winWorst:winWorst,',
-'             win:window.innerWidth + "x" + window.innerHeight };',
+'    var out = { stat:stat, recent:recent, winHits:winHits, winWorst:winWorst,',
+'                secs:((performance.now() - t0) / 1000).toFixed(0),',
+'                win:window.innerWidth + "x" + window.innerHeight };',
+'    stat = {}; recent = []; winHits = 0; winWorst = ""; t0 = performance.now();',
+'    return out;',
 '  };',
 '})();</scr' + 'ipt>'
     ].join("\n");
@@ -171,7 +176,8 @@
       : "שום דבר לא זז") + "</p>";
     if (d.winWorst) html += '<p class="note">שינוי החלון האחרון: ' + d.winWorst + "</p>";
     if (d.recent.length) html += '<p class="note">אחרונים: ' + d.recent.join("  |  ") + "</p>";
-    html += '<p class="note">מסך: ' + d.win + "</p>";
+    html += '<p class="note">מסך: ' + d.win + "  |  נמדדו " + d.secs + " שניות אחרונות</p>";
+    html += '<p class="note">הספירה מתחילה מחדש עכשיו, אז הפעם הבאה תספר רק על מה שקרה מכאן והלאה.</p>';
     html += '<p class="note" style="margin-top:16px"><button id="back">לחזור לשיעור</button></p>';
     out.innerHTML = html;
     var b = document.getElementById("back");
