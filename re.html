@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ההנפשה של רה</title>
+<style>
+  :root{ --sagol:#43225A; --katom:#F2A412; --turkiz:#189E8A; --dim:#6f6f6f; --line:#e2e0e6; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; }
+  body{ background:#f6f5f8; color:#2b2b2b; font-family:system-ui,"Segoe UI",Arial,sans-serif;
+    padding:16px 14px 36px; }
+  .wrap{ max-width:620px; margin:0 auto; }
+  h1{ margin:0 0 6px; font-size:19px; color:var(--sagol); }
+  p.sub{ margin:0 0 14px; font-size:14px; line-height:1.6; color:var(--dim); }
+
+  .pair{ display:flex; gap:10px; }
+  .one{ flex:1 1 0; min-width:0; }
+  .tag{ font-size:13.5px; font-weight:800; margin-bottom:6px; }
+  .tag.old{ color:#CC3717; }
+  .tag.new{ color:var(--turkiz); }
+  /* רקע הקיר של החדר, כדי שהחיתוך ייבחן על מה שבאמת יהיה מאחוריו */
+  .box{ position:relative; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+    background:#efe7d8; }
+  .box img{ display:block; width:100%; }
+  .box.sq{ background:
+      repeating-conic-gradient(#d9d4e0 0% 25%, #fff 0% 50%) 50%/16px 16px; }
+
+  .row{ display:flex; gap:8px; margin:14px 0 0; }
+  .row button{ flex:1 1 0; font:inherit; font-size:14.5px; font-weight:800; padding:11px 8px;
+    border:1.5px solid var(--line); border-radius:999px; background:#fff; color:var(--sagol); cursor:pointer; }
+  .row button.on{ background:var(--turkiz); color:#042b26; border-color:var(--turkiz); }
+
+  ul{ margin:16px 0 0; padding-inline-start:20px; font-size:14px; line-height:1.75; color:#2b2b2b; }
+  ul b{ color:var(--sagol); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ההנפשה של רה בחדר</h1>
+  <p class="sub">משמאל מה שיש עכשיו באפליקציה, מימין החיתוך החדש. שתיהן רצות באותו קצב.
+    הכפתורים מחליפים את מה שמאחור, כדי לראות אם נשארו שאריות לבנות.</p>
+
+  <div class="pair">
+    <div class="one">
+      <div class="tag new">החדש</div>
+      <div class="box" id="b1"><img src="demo/re_new.webp" alt="רה, החיתוך החדש"></div>
+    </div>
+    <div class="one">
+      <div class="tag old">מה שיש היום</div>
+      <div class="box" id="b2"><img src="demo/re_old.webp" alt="רה, החיתוך הנוכחי"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="on" data-bg="wall">קיר החדר</button>
+    <button data-bg="sq">משבצות</button>
+    <button data-bg="dark">כהה</button>
+  </div>
+
+  <ul>
+    <li>ב<b>ישן</b>: המלבן הלבן שמאחורי כן הציור, ובד הציור נאכל מלמעלה כך שהראש של דו נגע בקצה.</li>
+    <li>ב<b>חדש</b>: הרקע הלבן הוסר, ובד הציור שלם עם שוליים מסביב לדו.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var boxes = [document.getElementById("b1"), document.getElementById("b2")];
+  var btns = document.querySelectorAll(".row button");
+  function set(bg){
+    boxes.forEach(function(b){
+      b.classList.remove("sq");
+      b.style.background = "";
+      if (bg === "sq") b.classList.add("sq");
+      else if (bg === "dark") b.style.background = "#2a1f4d";
+      else b.style.background = "#efe7d8";
+    });
+  }
+  Array.prototype.forEach.call(btns, function(b){
+    b.addEventListener("click", function(){
+      Array.prototype.forEach.call(btns, function(o){ o.classList.remove("on"); });
+      b.classList.add("on");
+      set(b.getAttribute("data-bg"));
+    });
+  });
+})();
+</script>
+</body>
+</html>
