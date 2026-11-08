@@ -250,6 +250,14 @@
     color:var(--ink-soft); min-height:1.6em; margin:8px 0 0; transition:color .2s ease; }
   .say.good{ color:var(--teal); } .say.warn{ color:#E07A1F; }
 
+  /* מסך ההמשך אחרי יציאה מהאפליקציה */
+  .waitLay{ position:fixed; left:0; top:0; right:0; bottom:0; z-index:300;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(16,10,38,.72); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); }
+  .waitLay button{ font:inherit; font-size:19px; font-weight:800; line-height:1;
+    padding:16px 30px; border:0; border-radius:999px; background:#189E8A; color:#042b26;
+    box-shadow:0 10px 24px -12px rgba(0,0,0,.85); cursor:pointer; }
+  .waitLay button:active{ transform:translateY(1px); }
   .overlay{ position:absolute; inset:0; z-index:40; border-radius:18px; background:rgba(255,255,255,.96);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
     text-align:center; padding:20px; direction:rtl; }
@@ -1444,6 +1452,38 @@
     raf=requestAnimationFrame(loop);
   }
 
+  /* יציאה מהאפליקציה באמצע שיר: עוצרים במקום ומחכים לנגיעה אחת. באייפון
+     אי אפשר להחזיר קול בלי מגע, ובלי זה השיר ממשיך בשקט והתווים בורחים */
+  var waitLay = null;
+  function holdForTouch(){
+    if (waitLay) return;
+    running = false;
+    try{ cancelAnimationFrame(raf); }catch(e){}
+    try{ song.pause(); }catch(e){}
+    try{ holdStop(); }catch(e){}
+    var lay = document.createElement("div");
+    lay.className = "waitLay";
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = "\u05d2\u05e2\u05d5 \u05db\u05d3\u05d9 \u05dc\u05d4\u05de\u05e9\u05d9\u05da";
+    lay.appendChild(b);
+    document.body.appendChild(lay);
+    waitLay = lay;
+    lay.addEventListener("click", function again(){
+      lay.removeEventListener("click", again);
+      try{ var c = ac(); if (c && c.state === "suspended" && c.resume) c.resume(); }catch(e){}
+      if (lay.parentNode) lay.parentNode.removeChild(lay);
+      waitLay = null;
+      // השעון נמדד מחדש, אחרת הוא חושב שעברו כל שניות ההמתנה
+      clkBase = -1; smT = -1;
+      try{ var p = song.play(); if (p && p.catch) p.catch(function(){}); }catch(e){}
+      running = true; lastT = performance.now();
+      raf = requestAnimationFrame(loop);
+    });
+  }
+  function leftTheApp(){ if (document.hidden && running) holdForTouch(); }
+  document.addEventListener("visibilitychange", leftTheApp);
+  window.addEventListener("pagehide", function(){ if (running) holdForTouch(); });
   function finish(){
     running=false; cancelAnimationFrame(raf); holdStop();
     cueStop();
