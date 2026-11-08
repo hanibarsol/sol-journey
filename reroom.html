@@ -53,12 +53,15 @@
       tries++;
       var w = null;
       try{ w = frame.contentWindow; }catch(e){ w = null; }
-      if (w && typeof w.__solOpenRoom === "function"){
+      if (w && typeof w.__solOpenRoom === "function" && tries > 4){
         try{
-          // נגיעה ראשונה בתוך העולם, כדי שהשמע ייפתח שם גם הוא
-          w.document.body.click();
           w.__solOpenRoom("רה");
-          note.style.display = "none";
+          /* ציור מחדש של הלוח מחזיר את החדר למי שעומדים עליו במסע, ולכן
+             אומרים לו שוב כמה פעמים אחרי שהכול נרגע */
+          [250, 700, 1400, 2400].forEach(function(t){
+            setTimeout(function(){ try{ w.__solSetRoom("רה"); }catch(e){} }, t);
+          });
+          setTimeout(function(){ note.style.display = "none"; }, 2600);
           return;
         }catch(e){}
       }
