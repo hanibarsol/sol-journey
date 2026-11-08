@@ -44,7 +44,8 @@
     this.disabled = true; this.textContent = "פותחת...";
     gate.classList.add("off");
     note.style.display = "block";
-    frame.src = "index.html";
+    // מעקף מטמון. בלעדיו ספארי מגיש את העולם הישן ששמר, והתיקונים לא מגיעים
+    frame.src = "index.html?cb=" + Date.now();
   });
 
   frame.addEventListener("load", function(){
