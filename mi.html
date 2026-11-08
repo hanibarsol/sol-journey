@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>השיר של מי</title>
+<style>
+  :root{ color-scheme:light; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{ margin:0; background:#fff; font-family:system-ui,"Segoe UI",Arial,sans-serif; }
+  /* אותה קופסה שבה השיעור יושב בתוך המשחק */
+  #box{ position:fixed; inset:0; z-index:60; background:#fff; display:flex; flex-direction:column; }
+  #frameBox{ flex:1 1 auto; min-height:0; overflow:hidden; display:flex;
+    align-items:flex-start; justify-content:center; background:#fff; }
+  #f{ width:100%; flex:1 1 auto; min-width:0; border:0; display:block; background:#fff; }
+  #gate{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; padding:24px;
+    background:linear-gradient(180deg,#1b1038,#2a1f4d); color:#fff; text-align:center; }
+  #gate.off{ display:none; }
+  #gate h1{ margin:0; font-size:22px; color:#FFD987; }
+  #gate p{ margin:0; font-size:15px; line-height:1.6; color:#d6d0f0; max-width:22em; }
+  #gate button{ font:inherit; font-size:18px; font-weight:800; padding:14px 30px;
+    border-radius:999px; border:0; background:#17A79B; color:#04231f;
+    box-shadow:0 8px 20px -10px rgba(0,0,0,.8); }
+</style>
+</head>
+<body>
+<div id="box">
+  <div id="frameBox"><iframe id="f" title="השיר של מי" allow="autoplay; fullscreen"></iframe></div>
+</div>
+
+<div id="gate">
+  <h1>השיר של מי</h1>
+  <p>הקישור פותח את השיעור האמיתי, בדיוק כמו בתוך המשחק. געי בכפתור כדי שהצלילים ייפתחו.</p>
+  <button id="go">להתחיל</button>
+</div>
+
+<script>
+(function(){
+  var frame = document.getElementById("f");
+  var box = document.getElementById("frameBox");
+  var gate = document.getElementById("gate");
+
+  function fitFrame(){
+    var h = box.clientHeight;
+    if (h) frame.style.height = Math.round(h) + "px";
+  }
+  window.addEventListener("resize", fitFrame);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", fitFrame);
+  fitFrame();
+
+  document.getElementById("go").addEventListener("click", function(){
+    this.disabled = true; this.textContent = "פותחת...";
+    var self = this;
+    // ללא מעקף מטמון. אם הדף הישן עוד מוגש, הבדיקה תהיה על גרסה לא נכונה
+    fetch("lessons/mire.html?cb=" + Date.now()).then(function(r){ return r.ok ? r.text() : null; })
+      .then(function(doc){
+        if (!doc){ self.textContent = "לא נטען, לנסות שוב"; self.disabled = false; return; }
+        // סקריפט ההגדרות חייב לקדום לגוף השיעור, אחרת השלב נפתח עם ההגדרות שלו
+        var boot = '<scr' + 'ipt>window.__solBase=0;window.__solFirst=true;' +
+                   'window.__solWhich="mire";</scr' + 'ipt>';
+        frame.srcdoc = boot + doc;
+        gate.classList.add("off");
+        fitFrame();
+      })
+      .catch(function(){ self.textContent = "לא נטען, לנסות שוב"; self.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
