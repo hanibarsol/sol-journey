@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>תווים לבדיקה</title>
+<style>
+  :root{ --sagol:#43225A; --katom:#F2A412; --turkiz:#189E8A; --dim:#6f6f6f; --line:#e2e0e6; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; min-height:100%; }
+  body{ background:#f6f5f8; color:#2b2b2b; font-family:system-ui,"Segoe UI",Arial,sans-serif;
+    display:flex; align-items:center; justify-content:center; padding:24px 18px 40px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:24px 20px;
+    max-width:430px; width:100%; box-shadow:0 14px 34px -24px rgba(67,34,90,.7); }
+  h1{ margin:0 0 6px; font-size:20px; color:var(--sagol); }
+  p{ margin:0 0 16px; font-size:14.5px; line-height:1.6; color:var(--dim); }
+  .now{ display:flex; align-items:baseline; gap:8px; margin:0 0 18px;
+    font-size:15px; color:#2b2b2b; }
+  .now b{ font-size:30px; color:var(--katom); font-variant-numeric:tabular-nums; }
+  button{ font:inherit; font-size:17px; font-weight:800; width:100%; padding:15px 20px;
+    border:0; border-radius:999px; background:var(--turkiz); color:#042b26; cursor:pointer; }
+  button:active{ transform:translateY(1px); }
+  button.ghost{ background:#fff; color:var(--sagol); border:1.5px solid var(--line); margin-top:10px; }
+  .msg{ margin-top:14px; font-size:14px; color:var(--turkiz); font-weight:700; min-height:1.2em; }
+  a.go{ display:block; text-align:center; margin-top:18px; font-size:16px; font-weight:800;
+    color:var(--sagol); text-decoration:none; padding:13px; border-radius:999px; border:1.5px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>תווים לבדיקה</h1>
+  <p>הדף הזה מוסיף תווים לארנק שלך באותו דפדפן, כדי שיהיה במה לקנות בחנות של החדר.
+    הוא משנה את השמירה האמיתית בטלפון הזה בלבד.</p>
+
+  <div class="now">בארנק עכשיו: <b id="now">0</b> תווים</div>
+
+  <button id="add">להוסיף 300 תווים</button>
+  <button id="zero" class="ghost">לאפס את הארנק</button>
+
+  <div class="msg" id="msg"></div>
+
+  <a class="go" href="./">לפתוח את העולם של סול</a>
+</div>
+
+<script>
+(function(){
+  var KEY = "solWorld.coins";
+  var nowEl = document.getElementById("now");
+  var msg = document.getElementById("msg");
+
+  function read(){
+    try{ return parseInt(localStorage.getItem(KEY), 10) || 0; }catch(e){ return 0; }
+  }
+  function write(n){
+    try{ localStorage.setItem(KEY, String(n)); return true; }catch(e){ return false; }
+  }
+  function paint(){ nowEl.textContent = read(); }
+  paint();
+
+  document.getElementById("add").addEventListener("click", function(){
+    var n = read() + 300;
+    msg.textContent = write(n) ? ("הוספתי. בארנק " + n + " תווים")
+                               : "הדפדפן לא נותן לשמור כאן";
+    paint();
+  });
+  document.getElementById("zero").addEventListener("click", function(){
+    msg.textContent = write(0) ? "הארנק רוקן" : "הדפדפן לא נותן לשמור כאן";
+    paint();
+  });
+})();
+</script>
+</body>
+</html>
