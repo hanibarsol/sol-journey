@@ -1586,19 +1586,23 @@
     setTimeout(function(){ finish(0); }, 16000);   // ובכל מקרה לא יותר מזה
     try{ v.muted = false; }catch(e){}   // שלב קודם אולי השתיק אותו
     wireClip(v); clipVol(1);            // והעוצמה מוחזרת רק כאן, רגע לפני הנגינה
-    var isLa = (window.__solWhich === "meetla");
+    var which = window.__solWhich || "";
+    var isLa = (which === "meetla");
     v.classList.toggle("fillAll", isLa);
-    if (isLa){
-      // שמונת הפריימים הראשונים הם תקריב, והחתך לצילום הרחב נופל בתשיעי
+    // שני הסרטונים האלה נפתחים בתקריב שבו הדמות חתוכה, ורק אחר כך בא
+    // הצילום הרחב שבו רואים אותה שלמה. מתחילים אחרי החתך
+    var START = { meetla: 0.34, meetsol: 0.75 };
+    var from = START[which] || 0;
+    if (from){
       v.addEventListener("loadedmetadata", function(){
-        try{ v.currentTime = 0.34; }catch(e){}
+        try{ v.currentTime = from; }catch(e){}
       }, { once:true });
     }
     // המקור כבר נקבע בטעינה המוקדמת, ואסור לקבוע אותו שוב: זה מתחיל
     // את ההורדה והפענוח מהתחלה ומחזיר בדיוק את הגמגום שרצינו למנוע
     if (!clipReady) v.src = src;
     // אם הוא כבר נטען, האירוע כבר קרה ולא יקרה שוב, אז מדלגים כאן
-    if (isLa && v.readyState >= 1){ try{ v.currentTime = 0.34; }catch(e){} }
+    if (from && v.readyState >= 1){ try{ v.currentTime = from; }catch(e){} }
     v.classList.add("on");
     try{
       var p = v.play();
