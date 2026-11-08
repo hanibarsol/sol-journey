@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>החדר של רה</title>
+<style>
+  :root{ color-scheme:light; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{ margin:0; background:#1b1038; font-family:system-ui,"Segoe UI",Arial,sans-serif; }
+  #f{ position:fixed; inset:0; width:100%; height:100%; border:0; display:block; }
+  #gate{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; padding:24px; text-align:center;
+    background:linear-gradient(180deg,#1b1038,#2a1f4d); color:#fff; }
+  #gate.off{ display:none; }
+  #gate h1{ margin:0; font-size:22px; color:#FFD987; }
+  #gate p{ margin:0; font-size:15px; line-height:1.6; color:#d6d0f0; max-width:22em; }
+  #gate button{ font:inherit; font-size:18px; font-weight:800; padding:14px 30px;
+    border-radius:999px; border:0; background:#189E8A; color:#042b26;
+    box-shadow:0 8px 20px -10px rgba(0,0,0,.8); }
+  #note{ position:fixed; left:50%; bottom:14px; transform:translateX(-50%); z-index:150;
+    font:700 13px system-ui; color:#FFE7AD; background:rgba(26,16,56,.86);
+    padding:8px 14px; border-radius:999px; display:none; }
+</style>
+</head>
+<body>
+<iframe id="f" title="החדר של רה" allow="autoplay; fullscreen"></iframe>
+<div id="note">פותחת את החדר של רה...</div>
+
+<div id="gate">
+  <h1>החדר של רה</h1>
+  <p>הקישור פותח את העולם ונוחת ישר בחדר של רה. געי בכפתור כדי שהצלילים ייפתחו.</p>
+  <button id="go">להתחיל</button>
+</div>
+
+<script>
+(function(){
+  var frame = document.getElementById("f");
+  var gate = document.getElementById("gate");
+  var note = document.getElementById("note");
+
+  document.getElementById("go").addEventListener("click", function(){
+    this.disabled = true; this.textContent = "פותחת...";
+    gate.classList.add("off");
+    note.style.display = "block";
+    frame.src = "index.html";
+  });
+
+  frame.addEventListener("load", function(){
+    var tries = 0;
+    (function hunt(){
+      tries++;
+      var w = null;
+      try{ w = frame.contentWindow; }catch(e){ w = null; }
+      if (w && typeof w.__solOpenRoom === "function"){
+        try{
+          // נגיעה ראשונה בתוך העולם, כדי שהשמע ייפתח שם גם הוא
+          w.document.body.click();
+          w.__solOpenRoom("רה");
+          note.style.display = "none";
+          return;
+        }catch(e){}
+      }
+      if (tries < 60) setTimeout(hunt, 250);
+      else note.textContent = "לא הצלחתי לפתוח לבד. אפשר לגעת בפס לעצב את החדר";
+    })();
+  });
+})();
+</script>
+</body>
+</html>
