@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>הקול של ההתקדמות</title>
+<style>
+  :root{
+    --sagol:#43225A; --katom:#F2A412; --kachol:#3B6BB2; --adom:#CC3717; --turkiz:#189E8A;
+    --ink:#2b2b2b; --dim:#6f6f6f; --line:#e2e0e6; --card:#fff;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; }
+  body{
+    background:#f6f5f8; color:var(--ink); min-height:100%;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif;
+    padding:18px 16px 40px;
+  }
+  .wrap{ max-width:620px; margin:0 auto; }
+  h1{ font-size:21px; margin:0 0 6px; color:var(--sagol); }
+  .sub{ font-size:14.5px; line-height:1.6; color:var(--dim); margin:0 0 18px; }
+
+  /* ---- לוח מוקטן, באותו קצב של הלוח האמיתי ---- */
+  .board{
+    position:relative; background:var(--card); border:1px solid var(--line);
+    border-radius:18px; padding:26px 18px 22px; margin-bottom:18px;
+    box-shadow:0 10px 26px -20px rgba(67,34,90,.6); overflow:hidden;
+  }
+  .trail{ position:relative; height:104px; }
+  .stone{
+    position:absolute; top:26px; width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:15px; color:#fff; background:var(--kachol);
+    box-shadow:0 5px 0 0 rgba(0,0,0,.16);
+    transition:transform .45s cubic-bezier(.34,1.56,.64,1), opacity .45s ease;
+  }
+  .stone.done{ background:var(--turkiz); }
+  .stone.next{ background:var(--katom); }
+  .stone.unborn{ opacity:0; transform:scale(.4); }
+  .stone .tick{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+  .stone.marked .tick{ display:flex; }
+  .stone.marked .lbl{ opacity:.25; }
+  .stone .tick svg{ width:30px; height:30px; }
+  .pin{
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent;
+    border-top:11px solid var(--adom);
+  }
+  .dust{
+    position:absolute; top:50px; height:5px; border-radius:99px;
+    background:linear-gradient(90deg, rgba(242,164,18,0), var(--katom), rgba(242,164,18,0));
+    opacity:0; transform:scaleX(0); transform-origin:right center;
+  }
+  .dust.run{ animation:dustRun 1.3s ease-out forwards; }
+  @keyframes dustRun{
+    0%{ opacity:0; transform:scaleX(0) } 18%{ opacity:.95 }
+    70%{ opacity:.8; transform:scaleX(1) } 100%{ opacity:0; transform:scaleX(1) } }
+
+  /* ---- הבחירה ---- */
+  .opts{ display:grid; gap:10px; }
+  .opt{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:right;
+    background:var(--card); border:1.5px solid var(--line); border-radius:15px;
+    padding:13px 14px; font:inherit; color:inherit; cursor:pointer;
+  }
+  .opt:active{ transform:translateY(1px); }
+  .opt .num{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--sagol);
+    color:#fff; font-weight:800; font-size:15px; display:flex; align-items:center; justify-content:center;
+  }
+  .opt.n2 .num{ background:var(--kachol); }
+  .opt.n3 .num{ background:var(--katom); }
+  .opt.n4 .num{ background:#9a96a3; }
+  .opt b{ display:block; font-size:16px; margin-bottom:2px; }
+  .opt span{ display:block; font-size:13.5px; color:var(--dim); line-height:1.45; }
+  .opt[disabled]{ opacity:.5; }
+
+  .note{ margin-top:16px; font-size:13.5px; line-height:1.6; color:var(--dim); }
+  .note b{ color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>איך ההתקדמות על הלוח אמורה להישמע</h1>
+  <p class="sub">כל כפתור מריץ את אותו רצף שקורה היום על הלוח האמיתי, באותם זמנים בדיוק:
+    הווי נחתם על האבן של פה, האבק נמתח קדימה, והאבן של סול נולדת. ההבדל בין האפשרויות הוא רק הקול.</p>
+
+  <div class="board">
+    <div class="trail" id="trail">
+      <div class="dust" id="dust"></div>
+      <div class="stone done" id="s1" style="right:6px"><span class="lbl">דו</span></div>
+      <div class="stone done" id="s2" style="right:33%"><span class="lbl">מי</span></div>
+      <div class="stone next" id="s3" style="right:62%">
+        <span class="lbl">פה</span>
+        <span class="pin" id="pin"></span>
+        <span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#5A3B00" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.6 L10 17.5 L19 7"/></svg></span>
+      </div>
+      <div class="stone unborn" id="s4" style="left:6px"><span class="lbl">סול</span></div>
+    </div>
+  </div>
+
+  <div class="opts">
+    <button class="opt n1" data-mode="1">
+      <span class="num">1</span>
+      <span><b>שלושה צלילים קצרים</b><span>נקישה רכה כשהווי נחתם, רשרוש עדין עם האבק, וצליל פתיחה כשהאבן נולדת</span></span>
+    </button>
+    <button class="opt n2" data-mode="2">
+      <span class="num">2</span>
+      <span><b>צליל אחד בלבד</b><span>רק ברגע שהאבן של סול נולדת</span></span>
+    </button>
+    <button class="opt n3" data-mode="3">
+      <span class="num">3</span>
+      <span><b>המנגינה של הברכה מתחת להליכה</b><span>אותה מנגינה שיש היום בכניסה, נחלשת בסוף הרצף</span></span>
+    </button>
+    <button class="opt n4" data-mode="4">
+      <span class="num">4</span>
+      <span><b>בלי קול</b><span>מה שקורה היום, לשם השוואה</span></span>
+    </button>
+  </div>
+
+  <p class="note">אם את לא שומעת כלום, לוודא שהטלפון לא על מצב שקט.
+    אפשר ללחוץ על אותה אפשרות שוב ושוב, ולעבור בין האפשרויות כמה שרוצים.</p>
+</div>
+
+<audio id="house" preload="auto" src="demo/house.mp3"></audio>
+
+<script>
+(function(){
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null;
+  function ac(){
+    if (!ctx && AC) ctx = new AC();
+    if (ctx && ctx.state === "suspended" && ctx.resume) ctx.resume();
+    return ctx;
+  }
+
+  // ---- הקולות ----
+  // נקישה רכה: עץ קצר עם פעמון קטן מעליו, בדיוק אורך של חותמת
+  function sndStamp(){
+    var c = ac(); if (!c) return;
+    var t = c.currentTime + 0.01;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(420, t);
+    o.frequency.exponentialRampToValueAtTime(150, t + 0.09);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.5, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.2);
+    [1046.5, 1568].forEach(function(f, i){
+      var b = c.createOscillator(), bg = c.createGain();
+      b.type = "sine"; b.frequency.setValueAtTime(f, t + 0.02 + i*0.02);
+      bg.gain.setValueAtTime(0.0001, t + 0.02 + i*0.02);
+      bg.gain.exponentialRampToValueAtTime(0.16, t + 0.05 + i*0.02);
+      bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+      b.connect(bg).connect(c.destination); b.start(t + 0.02 + i*0.02); b.stop(t + 0.45);
+    });
+  }
+
+  // רשרוש האבק: רעש מסונן שעולה ויורד, שקט מאוד, רק כדי שהשובל יורגש
+  function sndDust(){
+    var c = ac(); if (!c) return;
+    var t = c.currentTime + 0.01, dur = 1.1;
+    var n = c.createBufferSource();
+    var buf = c.createBuffer(1, Math.ceil(c.sampleRate * dur), c.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = (Math.random()*2 - 1) * 0.6;
+    n.buffer = buf;
+    var bp = c.createBiquadFilter();
+    bp.type = "bandpass"; bp.Q.value = 0.9;
+    bp.frequency.setValueAtTime(900, t);
+    bp.frequency.linearRampToValueAtTime(2400, t + dur*0.6);
+    bp.frequency.linearRampToValueAtTime(1200, t + dur);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.1, t + 0.18);
+    g.gain.linearRampToValueAtTime(0.055, t + dur*0.65);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(bp).connect(g).connect(c.destination);
+    n.start(t); n.stop(t + dur);
+  }
+
+  // אבן חדשה נולדת: שני צלילים עולים, סול ואז דו, פתיחה ולא סיום
+  function sndBorn(){
+    var c = ac(); if (!c) return;
+    var t = c.currentTime + 0.01;
+    [[783.99, 0], [1046.5, 0.13]].forEach(function(p, i){
+      [[1, 0.34, "sine"], [2, 0.09, "sine"], [3, 0.04, "triangle"]].forEach(function(h){
+        var o = c.createOscillator(), g = c.createGain();
+        var st = t + p[1];
+        o.type = h[2]; o.frequency.setValueAtTime(p[0]*h[0], st);
+        g.gain.setValueAtTime(0.0001, st);
+        g.gain.exponentialRampToValueAtTime(h[1] * (i ? 1 : 0.8), st + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, st + (i ? 1.5 : 0.7));
+        o.connect(g).connect(c.destination); o.start(st); o.stop(st + 1.6);
+      });
+    });
+  }
+
+  // ---- המנגינה של הברכה, לאפשרות 3 ----
+  var house = document.getElementById("house");
+  var hctx = null, hgain = null, wired = false;
+  function wireHouse(){
+    if (wired) return;
+    wired = true;
+    try{
+      var c = ac(); if (!c || !c.createMediaElementSource) return;
+      hgain = c.createGain();
+      hgain.gain.setValueAtTime(0.0001, c.currentTime);
+      c.createMediaElementSource(house).connect(hgain).connect(c.destination);
+      hctx = c;
+    }catch(e){ hgain = null; }
+  }
+  function houseLevel(v, ms){
+    if (hgain && hctx){
+      try{
+        var t = hctx.currentTime;
+        hgain.gain.cancelScheduledValues(t);
+        hgain.gain.setValueAtTime(Math.max(0.0001, hgain.gain.value), t);
+        hgain.gain.linearRampToValueAtTime(Math.max(0.0001, v), t + (ms||0)/1000);
+        return;
+      }catch(e){}
+    }
+    try{ house.volume = v; }catch(e){}
+  }
+  function houseStop(){
+    try{ house.pause(); house.currentTime = 0; }catch(e){}
+  }
+
+  // ---- הרצף, באותם זמנים של הלוח האמיתי ----
+  var s3 = document.getElementById("s3"), s4 = document.getElementById("s4");
+  var dust = document.getElementById("dust"), pin = document.getElementById("pin");
+  var trail = document.getElementById("trail");
+  var timers = [];
+  function clearAll(){ timers.forEach(clearTimeout); timers = []; }
+  function at(ms, fn){ timers.push(setTimeout(fn, ms)); }
+
+  function placeDust(){
+    var a = s3.getBoundingClientRect(), b = s4.getBoundingClientRect(), r = trail.getBoundingClientRect();
+    var right = (r.right - a.left) ;
+    var width = Math.max(10, (a.left - b.right));
+    dust.style.right = Math.round(right) + "px";
+    dust.style.width = Math.round(width) + "px";
+  }
+
+  function reset(){
+    clearAll();
+    houseStop(); houseLevel(0.0001, 0);
+    s3.classList.remove("marked");
+    s4.classList.add("unborn");
+    pin.style.display = "block";
+    dust.classList.remove("run");
+    void dust.offsetWidth;
+  }
+
+  function run(mode){
+    // לחיצה חוזרת מתחילה מחדש מיד, בלי להמתין לסוף הרצף הקודם
+    ac();
+    reset();
+    placeDust();
+
+    if (mode === "3"){
+      wireHouse();
+      try{
+        house.currentTime = 0;
+        var p = house.play();
+        if (p && p.catch) p.catch(function(){});
+      }catch(e){}
+      houseLevel(0.0001, 0);
+      houseLevel(0.55, 400);
+    }
+
+    // 420ms: הווי נחתם והסיכה נעלמת
+    at(420, function(){
+      s3.classList.add("marked");
+      pin.style.display = "none";
+      if (mode === "1") sndStamp();
+    });
+    // 900ms: שובל האבק
+    at(900, function(){
+      dust.classList.add("run");
+      if (mode === "1") sndDust();
+    });
+    // 2250ms: האבן החדשה נולדת
+    at(2250, function(){
+      s4.classList.remove("unborn");
+      if (mode === "1" || mode === "2") sndBorn();
+      if (mode === "3") houseLevel(0.0001, 1400);
+    });
+    at(3800, function(){
+      if (mode === "3") houseStop();
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(b){
+    b.addEventListener("click", function(){ run(b.getAttribute("data-mode")); });
+  });
+  window.addEventListener("resize", placeDust);
+  placeDust();
+})();
+</script>
+</body>
+</html>
