@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v262</title>
+<title>העולם של סול v263</title>
 </head>
 <body>
 <style>
@@ -3235,6 +3235,61 @@ window.onerror = function(m, u, l){
 
     var pieces = [], sel = -1;
 
+    /* מפת שקיפות לכל תמונה, כדי שנגיעה על פינה ריקה לא תיחשב נגיעה בחפץ.
+       נקראת פעם אחת לכל תמונה, בגודל קטן, ונשמרת */
+    var AMAP = {}, AW = 96, AH = 64;
+    function alphaOf(src){
+      var e = AMAP[src];
+      if (e) return e;
+      e = AMAP[src] = { ready:false, nw:0, nh:0, data:null };
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var c = document.createElement("canvas");
+          c.width = AW; c.height = AH;
+          var g2 = c.getContext("2d");
+          g2.drawImage(img, 0, 0, AW, AH);
+          var d = g2.getImageData(0, 0, AW, AH).data;
+          var a = new Uint8Array(AW * AH);
+          for (var i = 0; i < AW * AH; i++) a[i] = d[i*4 + 3];
+          e.nw = img.naturalWidth || 1; e.nh = img.naturalHeight || 1;
+          e.data = a; e.ready = true;
+        }catch(err){ e.ready = false; }
+      };
+      img.src = src;
+      return e;
+    }
+    /* האם הפיקסל שמתחת לאצבע באמת מצויר. כל עוד המפה לא מוכנה, מניחים שכן */
+    function paintedAt(p, ev){
+      var e = alphaOf(p.src);
+      if (!e.ready || !p.im) return true;
+      var m; try{ m = p.im.getScreenCTM(); }catch(err){ return true; }
+      if (!m) return true;
+      var pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+      var loc; try{ loc = pt.matrixTransform(m.inverse()); }catch(err){ return true; }
+      /* התמונה יושבת בקופסה x מ-126- עד 126, y מ-166- עד 0, ומוצמדת
+         למרכז למטה, ולכן הציור עצמו קטן מהקופסה בצד אחד */
+      var k = Math.min(252 / e.nw, 166 / e.nh);
+      var dw = e.nw * k, dh = e.nh * k;
+      var u = (loc.x + dw / 2) / dw, v = (loc.y + dh) / dh;
+      if (u < 0 || u > 1 || v < 0 || v > 1) return false;
+      var x = Math.min(AW - 1, Math.max(0, Math.floor(u * AW)));
+      var y = Math.min(AH - 1, Math.max(0, Math.floor(v * AH)));
+      return e.data[y * AW + x] > 24;
+    }
+    /* מי באמת מתחת לאצבע: מלמעלה למטה לפי סדר הציור, הראשון שמצויר שם */
+    function pickAt(ev){
+      var kids = layer.childNodes;
+      for (var i = kids.length - 1; i >= 0; i--){
+        for (var j = 0; j < pieces.length; j++){
+          var p = pieces[j];
+          if (p.g !== kids[i]) continue;
+          if (paintedAt(p, ev)) return p;
+          break;
+        }
+      }
+      return null;
+    }
     function restack(){
       var list = pieces.map(function(p){
         return { wall:p.plane === "wall", flat:!!p.flat, k:(p.y - (p.lift||0)), n:p.g };
@@ -3396,12 +3451,15 @@ window.onerror = function(m, u, l){
       spin.appendChild(im);
       g.appendChild(spin);
 
+
       var p = { src:src, g:g, spin:spin, x:(at&&at.x)||240, y:(at&&at.y)||344,
                rot:(at&&at.rot)||0, flip:(at&&at.flip)||1, size:(at&&at.size)||1,
                plane:(at&&at.plane)||plane||"floor", flat:!!(at&&at.flat), tilt:(at&&at.tilt)||0,
                lift:(at&&at.lift)||0 };
       // ניסוי: הספה קבועה במקומה. הידיות נשארות, רק הגרירה בוטלה
       p.noDrag = (typeof sofaSrc !== "undefined" && src === sofaSrc);
+      p.im = im;   // בדיקת השקיפות צריכה את אלמנט התמונה עצמו
+      alphaOf(src);
       var NOOP = { setAttribute:function(){}, style:{}, addEventListener:function(){} };
       p.hSpin = NOOP;
       p.hFlip = handle(g, -166, -54, "flip");
@@ -3413,15 +3471,29 @@ window.onerror = function(m, u, l){
       draw(p);
 
       var dragging = false, gx = 0, gy = 0, moved = false;
-      g.addEventListener("pointerdown", function(ev){
-        if (ev.target.closest && ev.target.closest("g[opacity=\"1\"]") && ev.target !== im) {}
+      /* נקודת הכניסה לנגיעה. חפץ אחר יכול להעביר אליה את הנגיעה שלו,
+         אם התברר שאצלו המקום שקוף וכאן הוא מצויר */
+      p.begin = function(ev){
         var q = toScene(ev); if (!q) return;
-        if (ev.target !== im){ return; }
+        var mine = pieces.indexOf(p);
+        if (sel !== mine){
+          // נגיעה ראשונה רק בוחרת. בלי זה נגיעה בטעות כבר מזיזה חפץ מעוצב
+          select(mine);
+          try{ p.g.setPointerCapture(ev.pointerId); }catch(e){}
+          ev.preventDefault();
+          return;
+        }
         dragging = !p.noDrag; moved = false;
         gx = p.x - q.x; gy = p.y - q.y;
-        select(pieces.indexOf(p));
-        try{ g.setPointerCapture(ev.pointerId); }catch(e){}
+        try{ p.g.setPointerCapture(ev.pointerId); }catch(e){}
         ev.preventDefault();
+      };
+      g.addEventListener("pointerdown", function(ev){
+        if (ev.target !== im){ return; }
+        var hit = pickAt(ev);
+        if (!hit){ ev.preventDefault(); return; }   // נגיעה על שקוף בלבד
+        if (hit !== p){ hit.begin(ev); return; }
+        p.begin(ev);
       });
       g.addEventListener("pointermove", function(ev){
         if (!dragging) return;
