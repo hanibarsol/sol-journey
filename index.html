@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v260</title>
+<title>העולם של סול v261</title>
 </head>
 <body>
 <style>
@@ -3255,6 +3255,10 @@ window.onerror = function(m, u, l){
       }catch(e){}
     }
 
+    function sizeK(p){
+      if (p.plane === "wall") return 0.52 * p.size;
+      return scaleAt(depthOf(p.y)) * p.size;
+    }
     function sizeHandles(p, k){
       var inv = (1 / Math.max(0.25, k)).toFixed(3);
       ["hFlip","hSize","hLift","hKill"].forEach(function(h){
@@ -3454,21 +3458,50 @@ window.onerror = function(m, u, l){
       });
       p.hSpin.addEventListener("pointerup", function(ev){ spinning = false; save(); ev.stopPropagation(); });
 
-      var sizing = false, s0 = 1, d0 = 1;
+      // 25 אחוז ולא 45: אפשר להקטין חפץ עד שהוא באמת קטן
+      var SIZE_MIN = 0.25, SIZE_MAX = 1.8;
+      // כמה פיקסלים של תנועה שווים שינוי של גודל שלם. חישוב ישר ולא יחס,
+      // כדי שהתנועה תהיה אחידה מכל גודל התחלתי ולא תתפרע בקצה
+      var SIZE_SPAN = 150;
+      var sizing = false, s0 = 1, d0 = 1, hx0 = 0, hy0 = 0, ux = 1, uy = 0, hMoved = false;
+      function originY(){ return p.y - (p.lift || 0); }
       p.hSize.addEventListener("pointerdown", function(ev){
         var q = toScene(ev); if (!q) return;
-        sizing = true; s0 = p.size; d0 = Math.max(12, Math.hypot(q.x - p.x, q.y - p.y));
+        var dx = q.x - p.x, dy = q.y - originY();
+        d0 = Math.hypot(dx, dy) || 1;
+        // מודדים לאורך הכיוון שבו התחילה הגרירה. מרחק גולמי היה מתחיל
+        // להגדיל ברגע שהאצבע חוצה את מרכז החפץ
+        ux = dx / d0; uy = dy / d0;
+        sizing = true; s0 = p.size;
+        hx0 = p.hSize.__hx; hy0 = p.hSize.__hy;
         try{ p.hSize.setPointerCapture(ev.pointerId); }catch(e){}
         ev.stopPropagation(); ev.preventDefault();
       });
       p.hSize.addEventListener("pointermove", function(ev){
         if (!sizing) return;
         var q = toScene(ev); if (!q) return;
-        var d = Math.max(12, Math.hypot(q.x - p.x, q.y - p.y));
-        p.size = Math.max(0.45, Math.min(1.8, s0 * (d / d0))); draw(p);
+        var d = (q.x - p.x) * ux + (q.y - originY()) * uy;
+        p.size = Math.max(SIZE_MIN, Math.min(SIZE_MAX, s0 + (d - d0) / SIZE_SPAN));
+        // הידית נשארת מתחת לאצבע. היא יושבת בתוך הקבוצה המוקטנת, ובלי זה
+        // היא מתכווצת יחד עם החפץ ובורחת פנימה בזמן הגרירה
+        var k = sizeK(p);
+        if (k > 0.02){
+          p.hSize.__hx = (q.x - p.x) / k;
+          p.hSize.__hy = (q.y - originY()) / k;
+          hMoved = true;
+        }
+        draw(p);
         ev.stopPropagation(); ev.preventDefault();
       });
-      p.hSize.addEventListener("pointerup", function(ev){ sizing = false; save(); ev.stopPropagation(); });
+      // מאזין ברמת החלון מאפס את sizing לפני שהשורה הזאת רצה, ולכן יש דגל משלה
+      function sizeDone(ev){
+        if (hMoved){ p.hSize.__hx = hx0; p.hSize.__hy = hy0; hMoved = false; draw(p); }
+        sizing = false; save();
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+      }
+      p.hSize.addEventListener("pointerup", sizeDone);
+      p.hSize.addEventListener("pointercancel", sizeDone);
+      window.addEventListener("pointerup", function(){ if (hMoved) sizeDone(null); });
 
       var lifting = false, l0 = 0, ly0 = 0;
       p.hLift.addEventListener("pointerdown", function(ev){
