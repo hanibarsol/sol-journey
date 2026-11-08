@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v263</title>
+<title>העולם של סול v264</title>
 </head>
 <body>
 <style>
@@ -1193,8 +1193,15 @@ window.onerror = function(m, u, l){
     // while a lesson plays, the lobby keeps quiet
     function hush(q){
       if (q){ stopFade(); try{ m.pause(); }catch(e){} }
-      else if (wanted){ stopFade(); level(0.8); wake();
-        try{ var p=m.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+      else if (wanted){
+        stopFade();
+        /* תמיד מתחילים מחדש. על נגן שכבר מתנגן אירוע play לא נורה שוב,
+           והדהייה שביטלנו לא הייתה נקבעת מחדש */
+        try{ m.pause(); }catch(e){}
+        try{ m.currentTime = 0; }catch(e){}
+        level(0.8); wake();
+        try{ var p=m.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+      }
     }
     return { start:start, toggle:toggle, hush:hush };
   })();
@@ -2684,6 +2691,8 @@ window.onerror = function(m, u, l){
     });
     document.getElementById("roomBack").addEventListener("click", function(){
       if (window.__solCloseShop) window.__solCloseShop();
+      // חזרה מהחדר מחזירה את המנגינה, בדיוק כמו חזרה משיעור
+      try{ houseMusic.hush(false); }catch(e){}
       rv.classList.remove("on");
       if (window.__solStairBack && window.__solStairBack()) {}
       else { var bk0 = document.getElementById("roomBack"); if (bk0) bk0.textContent = "חזרה למסע"; }
