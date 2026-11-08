@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>הפתיח של המסע</title>
+<style>
+  :root{ --sagol:#43225A; --katom:#F2A412; --turkiz:#189E8A; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{ margin:0; background:#1b1038; color:#fff; overflow:hidden;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif; }
+
+  #stage{ position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:20px; padding:20px 14px 28px;
+    background:radial-gradient(120% 90% at 50% 10%, #2a1f4d 0%, #1b1038 70%); }
+  #clip{ width:100%; max-width:560px; border-radius:18px; display:block;
+    background:#000; box-shadow:0 22px 50px -26px rgba(0,0,0,.95); }
+  #skip{ font:inherit; font-size:16px; font-weight:800; padding:12px 26px;
+    border:0; border-radius:999px; background:rgba(255,255,255,.14); color:#FFE7AD;
+    display:none; }
+  #skip.on{ display:block; }
+
+  #gate{ position:fixed; inset:0; z-index:20; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; padding:24px; text-align:center;
+    background:radial-gradient(120% 90% at 50% 10%, #2a1f4d 0%, #1b1038 70%); }
+  #gate.off{ display:none; }
+  #gate h1{ margin:0; font-size:23px; color:#FFD987; }
+  #gate p{ margin:0; font-size:15px; line-height:1.6; color:#d6d0f0; max-width:24em; }
+  #gate button{ font:inherit; font-size:18px; font-weight:800; padding:15px 32px;
+    border-radius:999px; border:0; background:var(--turkiz); color:#042b26;
+    box-shadow:0 10px 24px -12px rgba(0,0,0,.9); }
+
+  #after{ position:fixed; inset:0; z-index:30; display:none; flex-direction:column;
+    align-items:center; justify-content:center; gap:16px; padding:24px; text-align:center;
+    background:radial-gradient(120% 90% at 50% 10%, #2a1f4d 0%, #1b1038 70%); }
+  #after.on{ display:flex; }
+  #after h2{ margin:0; font-size:21px; color:#FFD987; }
+  #after p{ margin:0; font-size:15px; line-height:1.65; color:#d6d0f0; max-width:24em; }
+  #after .row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  #after button, #after a{ font:inherit; font-size:16px; font-weight:800; padding:13px 24px;
+    border-radius:999px; border:0; text-decoration:none; }
+  #again{ background:rgba(255,255,255,.14); color:#FFE7AD; }
+  #go{ background:var(--turkiz); color:#042b26; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <video id="clip" playsinline preload="auto" src="demo/journey.mp4"></video>
+  <button id="skip" type="button">לדלג</button>
+</div>
+
+<div id="gate">
+  <h1>הפתיח של המסע</h1>
+  <p>ככה זה ייראה לילד שנכנס לעולם בפעם הראשונה: הסרטון מתנגן, ואפשר לדלג בכל רגע.
+    מי שחוזר שוב לא יראה אותו.</p>
+  <button id="go1" type="button">להתחיל</button>
+</div>
+
+<div id="after">
+  <h2>כאן העולם נפתח</h2>
+  <p>בגרסה האמיתית, ברגע הזה המסך הזה נעלם ולוח המסע עולה.</p>
+  <div class="row">
+    <button id="again" type="button">לראות שוב</button>
+    <a id="go" href="index.html">לפתוח את העולם</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var v = document.getElementById("clip");
+  var gate = document.getElementById("gate");
+  var after = document.getElementById("after");
+  var skip = document.getElementById("skip");
+
+  function done(){
+    try{ v.pause(); }catch(e){}
+    skip.classList.remove("on");
+    after.classList.add("on");
+  }
+
+  function play(){
+    after.classList.remove("on");
+    gate.classList.add("off");
+    try{ v.currentTime = 0; }catch(e){}
+    var p = v.play();
+    if (p && p.catch) p.catch(function(){
+      // ספארי לא נותן קול בלי מגע. אז לפחות שייראה
+      v.muted = true;
+      var q = v.play(); if (q && q.catch) q.catch(function(){ done(); });
+    });
+    // הכפתור מופיע אחרי רגע, כדי שהוא לא ייתפס בטעות בנגיעה הראשונה
+    setTimeout(function(){ skip.classList.add("on"); }, 900);
+  }
+
+  document.getElementById("go1").addEventListener("click", play);
+  document.getElementById("again").addEventListener("click", play);
+  skip.addEventListener("click", done);
+  v.addEventListener("ended", done);
+  v.addEventListener("error", done);
+})();
+</script>
+</body>
+</html>
