@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v266</title>
+<title>העולם של סול v267</title>
 </head>
 <body>
 <style>
@@ -1154,14 +1154,39 @@ window.onerror = function(m, u, l){
 
     /* יציאה מהאפליקציה באמצע מנגינה השאירה זרם קטוע בתוך המיקסר, והמשך שלו
        בחזרה נשמע כעיוות ממש. לכן יוצאים נקי ולא ממשיכים מאמצע */
+    var wasOn = false;
     function sleepMixer(){
+      wasOn = !m.paused;
       stopFade(); leave();
       try{ if (hctx && hctx.state === "running" && hctx.suspend) hctx.suspend(); }catch(e){}
     }
+    /* חזרה למסך: לא ממשיכים את הזרם שנקטע, מתחילים אותו מחדש */
+    function wakeMixer(){
+      if (!wasOn || hushed || !wanted) return;
+      wasOn = false;
+      stopFade();
+      try{ m.pause(); }catch(e){}
+      try{ m.currentTime = 0; }catch(e){}
+      level(0.8); wake();
+      try{
+        var p = m.play();
+        // ספארי לפעמים מסרב לנגן בלי מגע. אז מחכים לנגיעה הבאה
+        if (p && p.catch) p.catch(function(){
+          function retry(){
+            document.removeEventListener("click", retry, true);
+            document.removeEventListener("touchend", retry, true);
+            try{ wake(); level(0.8); var q = m.play(); if (q && q.catch) q.catch(function(){}); }catch(e){}
+          }
+          document.addEventListener("click", retry, true);
+          document.addEventListener("touchend", retry, true);
+        });
+      }catch(e){}
+    }
     document.addEventListener("visibilitychange", function(){
-      if (document.hidden) sleepMixer();
+      if (document.hidden) sleepMixer(); else wakeMixer();
     });
     window.addEventListener("pagehide", sleepMixer);
+    window.addEventListener("pageshow", wakeMixer);
 
     function paint(){
       if (!w1) return;
@@ -1203,7 +1228,9 @@ window.onerror = function(m, u, l){
     });
 
     // while a lesson plays, the lobby keeps quiet
+    var hushed = false;   // הלובי מושתק כי שיעור פתוח
     function hush(q){
+      hushed = !!q;
       if (q){ stopFade(); try{ m.pause(); }catch(e){} }
       else if (wanted){
         stopFade();
