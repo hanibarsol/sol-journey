@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v274</title>
+<title>העולם של סול v275</title>
 </head>
 <body>
 <style>
@@ -167,6 +167,17 @@
     background:rgba(16,10,24,.78); backdrop-filter:blur(6px);
     box-shadow:0 4px 14px -4px rgba(0,0,0,.8);
   }
+  /* הלהבה: מבהירה את מה שמצויר מתחתיה במקום לכסות אותו */
+  .stFlame{ mix-blend-mode:screen; transform-box:fill-box; transform-origin:50% 92%;
+    animation:flameLive 2.1s ease-in-out infinite; will-change:transform,opacity; }
+  @keyframes flameLive{
+    0%,100%{ opacity:.42; transform:scale(1,1) }
+    22%    { opacity:.72; transform:scale(1.05,1.12) }
+    41%    { opacity:.38; transform:scale(.97,.93) }
+    63%    { opacity:.64; transform:scale(1.03,1.07) }
+    82%    { opacity:.46; transform:scale(.99,.97) }
+  }
+  @media (prefers-reduced-motion:reduce){ .stFlame{ animation:none; opacity:.5 } }
   .stairHint{
     position:absolute; z-index:6; left:0; right:0;
     top:calc(14px + env(safe-area-inset-top,0px));
@@ -3096,10 +3107,28 @@ window.onerror = function(m, u, l){
         '<stop offset=".45" stop-color="#FFC167" stop-opacity=".34"/>' +
         '<stop offset="1" stop-color="#FFB04F" stop-opacity="0"/></radialGradient>' +
       '<filter id="stBlur" x="-60%" y="-60%" width="220%" height="220%">' +
-        '<feGaussianBlur stdDeviation="2"/></filter></defs>';
+        '<feGaussianBlur stdDeviation="2"/></filter>' +
+      '<radialGradient id="stFlameG" cx=".5" cy=".55" r=".5">' +
+        '<stop offset="0" stop-color="#FFF6DF" stop-opacity=".95"/>' +
+        '<stop offset=".35" stop-color="#FFD089" stop-opacity=".55"/>' +
+        '<stop offset="1" stop-color="#FFA83C" stop-opacity="0"/></radialGradient></defs>';
+
+    /* מרכזי הלהבות, נמדדו מהתמונה של הבית במרחב 864 על 1920 */
+    var CANDLES = [
+      { x:264, y:313 }, { x:264, y:637 }, { x:264, y:963 },
+      { x:264, y:1296 }, { x:263, y:1628 },
+      { x:613, y:481 }, { x:612, y:805 }, { x:613, y:1132 }, { x:613, y:1465 }
+    ];
 
     function paint(){
       var s = [DEFS];
+      /* כל נר בקצב משלו, אחרת תשע להבות נושמות כאיש אחד וזה נראה מכני */
+      CANDLES.forEach(function(c, i){
+        var dur = (1.75 + (i % 4) * 0.28).toFixed(2);
+        var del = (-(i * 0.47) % 2).toFixed(2);
+        s.push('<ellipse class="stFlame" cx="' + c.x + '" cy="' + c.y + '" rx="7.5" ry="12" ' +
+               'fill="url(#stFlameG)" style="animation-duration:' + dur + 's;animation-delay:' + del + 's"/>');
+      });
       DOORS.forEach(function(d, i){
         var open = isOpen(d.n), land = d.py + DROP;
         if (!d.si){
