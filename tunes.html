@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>שתי המנגינות</title>
+<style>
+  :root{ --sagol:#43225A; --katom:#F2A412; --turkiz:#189E8A; --dim:#6f6f6f; --line:#e2e0e6; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; }
+  body{ background:#f6f5f8; color:#2b2b2b; font-family:system-ui,"Segoe UI",Arial,sans-serif;
+    padding:20px 16px 40px; }
+  .wrap{ max-width:560px; margin:0 auto; }
+  h1{ margin:0 0 6px; font-size:20px; color:var(--sagol); }
+  p.sub{ margin:0 0 18px; font-size:14.5px; line-height:1.6; color:var(--dim); }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:16px;
+    margin-bottom:12px; box-shadow:0 10px 26px -22px rgba(67,34,90,.7); }
+  .card h2{ margin:0 0 4px; font-size:16.5px; color:var(--sagol); }
+  .card p{ margin:0 0 12px; font-size:13.5px; line-height:1.55; color:var(--dim); }
+  .card button{ font:inherit; font-size:16px; font-weight:800; width:100%; padding:14px;
+    border:0; border-radius:999px; background:var(--turkiz); color:#042b26; cursor:pointer; }
+  .card.b button{ background:var(--katom); color:#4a2f00; }
+  .card button.playing{ background:#43225A; color:#fff; }
+  .len{ display:inline-block; margin-top:9px; font-size:12.5px; color:var(--dim); }
+
+  .both{ background:#fff; border:1.5px dashed var(--line); border-radius:18px; padding:16px; }
+  .both h2{ margin:0 0 4px; font-size:16.5px; color:var(--sagol); }
+  .both p{ margin:0 0 12px; font-size:13.5px; line-height:1.55; color:var(--dim); }
+  .both button{ font:inherit; font-size:16px; font-weight:800; width:100%; padding:14px;
+    border:1.5px solid var(--line); border-radius:999px; background:#fff; color:var(--sagol); cursor:pointer; }
+  .stop{ margin-top:14px; }
+  .stop button{ font:inherit; font-size:15px; font-weight:800; width:100%; padding:12px;
+    border:0; border-radius:999px; background:#CC3717; color:#fff; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>שתי המנגינות שמתנגנות בפתיח</h1>
+  <p class="sub">כל כפתור מנגן אחת מהן לבד, והכפתור למטה מנגן את שתיהן יחד, כמו שקורה היום.
+    תגידי לי איזו להשאיר.</p>
+
+  <div class="card a">
+    <h2>1. הפסקול של הסרטון</h2>
+    <p>זה שהגיע עם הסרטון שערכת בגרוק. 12 שניות.</p>
+    <button id="p1" type="button">להשמיע</button>
+  </div>
+
+  <div class="card b">
+    <h2>2. מנגינת הברכה של הבית</h2>
+    <p>זאת שמתנגנת כשנכנסים לעולם ונחלשת אחרי תשע שניות. 17.8 שניות.</p>
+    <button id="p2" type="button">להשמיע</button>
+  </div>
+
+  <div class="both">
+    <h2>שתיהן יחד</h2>
+    <p>מה שקורה היום כשלוחצים "להתחיל" בפתיח.</p>
+    <button id="p3" type="button">להשמיע את שתיהן</button>
+  </div>
+
+  <div class="stop"><button id="stop" type="button">לעצור הכול</button></div>
+</div>
+
+<audio id="a1" src="demo/journey_tune.mp3" preload="auto"></audio>
+<audio id="a2" src="demo/house.mp3" preload="auto"></audio>
+
+<script>
+(function(){
+  var a1 = document.getElementById("a1"), a2 = document.getElementById("a2");
+  var b1 = document.getElementById("p1"), b2 = document.getElementById("p2"), b3 = document.getElementById("p3");
+
+  function stopAll(){
+    [a1, a2].forEach(function(a){ try{ a.pause(); a.currentTime = 0; }catch(e){} });
+    [b1, b2, b3].forEach(function(b){ b.classList.remove("playing"); });
+  }
+  function play(list, btn){
+    stopAll();
+    btn.classList.add("playing");
+    list.forEach(function(a){
+      try{ a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function(){}); }catch(e){}
+    });
+  }
+  b1.addEventListener("click", function(){ play([a1], b1); });
+  b2.addEventListener("click", function(){ play([a2], b2); });
+  b3.addEventListener("click", function(){ play([a1, a2], b3); });
+  document.getElementById("stop").addEventListener("click", stopAll);
+  [a1, a2].forEach(function(a){ a.addEventListener("ended", function(){
+    if (a1.paused && a2.paused) [b1, b2, b3].forEach(function(b){ b.classList.remove("playing"); });
+  }); });
+})();
+</script>
+</body>
+</html>
