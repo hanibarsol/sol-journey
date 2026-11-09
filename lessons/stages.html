@@ -1235,6 +1235,27 @@
         due(POOL);
       }, 400 + seq.length*720 + 260));
     }
+    /* השמעה חוזרת שלא מוחקת כלום: מה שכבר נמצא נשאר על המסך, והתור ממשיך
+       מהמקום שבו הוא עצר */
+    function replayFrom(){
+      clearTones();
+      playing = true;
+      staffShown(false);
+      seq.forEach(function(k, i){
+        toneT.push(setTimeout(function(){
+          tone(N[k].f, 1.0);
+          if (seats[i] && seats[i].parentNode){
+            seats[i].classList.add("now");
+            toneT.push(setTimeout(function(){ if (seats[i]) seats[i].classList.remove("now"); }, 460));
+          }
+        }, 300 + i*720));
+      });
+      toneT.push(setTimeout(function(){
+        playing = false;
+        if (seats[step] && seats[step].parentNode) seats[step].classList.add("now");
+        due(POOL);
+      }, 300 + seq.length*720 + 200));
+    }
     function round(){
       seq = [ pick(), pick() ];
       play();
@@ -1282,10 +1303,10 @@
         if (step >= seq.length) reveal();
       } else {
         flash(i, true);
-        clearNotes(); placed = []; step = 0;
         clearTones();
+        /* מה שכבר זוהה נכון נשאר על מקומו. טעות לא מוחקת הצלחה */
         playing = true;                 // עד שהשניים חוזרים, אין עוד תשובות
-        replayT = setTimeout(play, 750);  // קודם מה שלחצת, ואז השניים חוזרים מההתחלה
+        replayT = setTimeout(replayFrom, 750);  // קודם מה שלחצת, ואז השניים חוזרים
       }
     };
     onUp = function(){ holdOff(); };
