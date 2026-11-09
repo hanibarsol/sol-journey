@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v270</title>
+<title>העולם של סול v271</title>
 </head>
 <body>
 <style>
@@ -1123,7 +1123,11 @@ window.onerror = function(m, u, l){
     var KEY = "solWorld.intro";
     var seen = false;
     try{ seen = localStorage.getItem(KEY) === "1"; }catch(e){}
-    if (seen) return;              // ראו אותו פעם אחת, וזה מספיק
+    /* כתובת שמסתיימת ב-intro=1 מראה את הפתיח שוב, גם למי שכבר ראה.
+       זה הקישור שבו בודקים אותו בלי למחוק שום דבר */
+    var force = false;
+    try{ force = /[?&]intro=1/.test(location.search); }catch(e){}
+    if (seen && !force) return;    // ראו אותו פעם אחת, וזה מספיק
     lay.hidden = false;
     function mark(){ try{ localStorage.setItem(KEY, "1"); }catch(e){} }
     function close(){
