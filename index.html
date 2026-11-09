@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v267</title>
+<title>העולם של סול v268</title>
 </head>
 <body>
 <style>
@@ -295,6 +295,25 @@
   @media (prefers-reduced-motion:reduce){
     .str.ring .wire, .str.ring .glow{ animation:none } }
   /* ---------- the room ---------- */
+  /* ---------- הפתיח, בכניסה הראשונה בלבד ---------- */
+  .introLay{ position:fixed; inset:0; z-index:900; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:20px; padding:20px 14px 28px;
+    background:radial-gradient(120% 90% at 50% 10%, #2a1f4d 0%, #1b1038 70%);
+    transition:opacity .55s ease; }
+  .introLay.gone{ opacity:0; pointer-events:none; }
+  .introLay video{ width:100%; max-width:560px; border-radius:18px; display:block;
+    background:#000; box-shadow:0 22px 50px -26px rgba(0,0,0,.95); }
+  .introLay h2{ margin:0; font-size:23px; color:#FFD987; font-weight:800; }
+  .introLay p{ margin:0; font-size:15px; line-height:1.6; color:#d6d0f0; max-width:24em;
+    text-align:center; }
+  .introLay button{ font:inherit; font-size:18px; font-weight:800; padding:15px 32px;
+    border:0; border-radius:999px; background:#189E8A; color:#042b26;
+    box-shadow:0 10px 24px -12px rgba(0,0,0,.9); }
+  .introLay button.skip{ font-size:16px; padding:12px 26px;
+    background:rgba(255,255,255,.14); color:#FFE7AD; display:none; }
+  .introLay button.skip.on{ display:block; }
+  .introLay .hello{ display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .introLay.rolling .hello{ display:none; }
   .roomView{
     position:absolute; inset:0; z-index:50; background:#15102c;
     display:flex; flex-direction:column;
@@ -769,6 +788,15 @@
     </mask>
   </defs>
 </svg>
+  <div class="introLay" id="introLay" hidden>
+    <div class="hello">
+      <h2>המסע של סול</h2>
+      <p>בואו נצא לדרך</p>
+      <button type="button" id="introGo">להתחיל</button>
+    </div>
+    <video id="introClip" playsinline preload="auto" hidden></video>
+    <button type="button" class="skip" id="introSkip">לדלג</button>
+  </div>
 <div id="app">
   <div class="scroll" id="scroll">
     <div class="world">
@@ -1082,6 +1110,43 @@ window.onerror = function(m, u, l){
     if (show) t.textContent = (document.title.match(/v\d+/) || [""])[0];
   })();
 
+  /* ---------- הפתיח ---------- */
+  (function intro(){
+    var lay = document.getElementById("introLay");
+    var v = document.getElementById("introClip");
+    var go = document.getElementById("introGo");
+    var skip = document.getElementById("introSkip");
+    if (!lay || !v) return;
+    var KEY = "solWorld.intro";
+    var seen = false;
+    try{ seen = localStorage.getItem(KEY) === "1"; }catch(e){}
+    if (seen) return;              // ראו אותו פעם אחת, וזה מספיק
+    lay.hidden = false;
+    function mark(){ try{ localStorage.setItem(KEY, "1"); }catch(e){} }
+    function close(){
+      mark();
+      try{ v.pause(); }catch(e){}
+      lay.classList.add("gone");
+      setTimeout(function(){ lay.hidden = true; v.removeAttribute("src"); }, 600);
+    }
+    go.addEventListener("click", function(){
+      lay.classList.add("rolling");
+      v.hidden = false;
+      v.src = "demo/journey.mp4";
+      var p = v.play();
+      if (p && p.catch) p.catch(function(){
+        // בלי רשות לקול, לפחות שייראה
+        v.muted = true;
+        var q = v.play(); if (q && q.catch) q.catch(close);
+      });
+      setTimeout(function(){ skip.classList.add("on"); }, 900);
+    });
+    skip.addEventListener("click", close);
+    v.addEventListener("ended", close);
+    v.addEventListener("error", close);
+    // רשת ביטחון: אם משום מה הוא לא התחיל, לא נשארים תקועים על מסך כחול
+    setTimeout(function(){ if (!lay.hidden && !v.src) close(); }, 20000);
+  })();
   var houseMusic = (function(){
     var m = document.getElementById("houseMusic");
     var btn = document.getElementById("sound");
