@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v271</title>
+<title>העולם של סול v272</title>
 </head>
 <body>
 <style>
@@ -3965,6 +3965,7 @@ window.onerror = function(m, u, l){
       }
       step();
       paintNav();
+      if (window.__solLiveAgain) window.__solLiveAgain();
       if (window.__solPlaceLive){
         window.__solPlaceLive();
         setTimeout(window.__solPlaceLive, 120);
@@ -4021,15 +4022,28 @@ window.onerror = function(m, u, l){
       im.style.objectFit = "contain";
       im.style.objectPosition = "bottom center";
     }
+    /* ההנפשה בחדר רצה חמש שניות ואז הדמות נחה. הציור הסטטי שלה כבר נמצא
+       מתחת, ולכן אין רגע שבו היא נעלמת מהמסך */
+    var LIVE_MS = 5000, liveT = 0, liveWho = "";
+    function liveRest(){
+      var im = document.getElementById("charLive");
+      var ci = document.getElementById("charImg");
+      clearTimeout(liveT); liveT = 0;
+      if (ci) ci.setAttribute("opacity", "1");
+      if (im){ im.style.display = "none"; im.removeAttribute("src"); }
+    }
     function setLive(who){
       var im = document.getElementById("charLive");
       var ci = document.getElementById("charImg");
       if (!im) return;
-      var src = (window.__solRoomLive || {})[who];
+      liveWho = who || liveWho;
+      var src = (window.__solRoomLive || {})[liveWho];
+      clearTimeout(liveT); liveT = 0;
       if (src){
         im.src = src;
         im.style.display = "block";
         if (ci) ci.setAttribute("opacity", "0");
+        liveT = setTimeout(liveRest, LIVE_MS);
       } else {
         im.removeAttribute("src");
         im.style.display = "none";
@@ -4039,6 +4053,8 @@ window.onerror = function(m, u, l){
       setTimeout(placeLive, 80);
       setTimeout(placeLive, 420);
     }
+    // בכל כניסה לחדר ההנפשה מתחילה מהתחלה
+    window.__solLiveAgain = function(){ setLive(liveWho); };
     window.__solPlaceLive = placeLive;
     window.addEventListener("resize", placeLive);
     window.addEventListener("orientationchange", placeLive);
