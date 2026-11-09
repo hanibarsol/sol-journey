@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v277</title>
+<title>העולם של סול v278</title>
 </head>
 <body>
 <style>
@@ -1698,17 +1698,21 @@ window.onerror = function(m, u, l){
       var MODES = { ear:"ear", hunter:"hunter", read:"read", read1:"read", meet:"meet",
                     ear3:"ear", hunter3:"hunter", read3:"read", meetmi:"meet",
                     meetfa:"meet", ear4:"ear", hunter4:"hunter", read4:"read",
-                    meetsol:"meet", ear5:"ear", hunter5:"hunter", read5:"read",
-                    meetla:"meet", ear6:"ear", hunter6:"hunter", read6:"read" };
+                    meetsol:"meet", ear5:"ear", ear5b:"ear", hunter5:"hunter", hunter5b:"hunter", read5:"read",
+                    meetla:"meet", ear6:"ear", ear6b:"ear", hunter6:"hunter", hunter6b:"hunter", read6:"read" };
       var POOLS = { read1:[0], meet:[0],                 // דו בלבד
                     ear3:[0,1,2], hunter3:[0,1,2], read3:[0,1,2],   // דו רה ומי
                     meetmi:[2],                                      // מי לבדה
                     meetfa:[3],                                      // פה לבדה
                     ear4:[0,1,2,3], hunter4:[0,1,2,3], read4:[0,1,2,3],
                     meetsol:[4],                                      // סול לבדו
-                    ear5:[0,1,2,3,4], hunter5:[0,1,2,3,4], read5:[0,1,2,3,4],
+                    /* לעולם לא יותר מארבעה לבחור מהם: קודם דו רה מי פה, ואז רה מי פה סול */
+                    ear5:[0,1,2,3], ear5b:[1,2,3,4],
+                    hunter5:[0,1,2,3], hunter5b:[1,2,3,4], read5:[0,1,2,3,4],
                     meetla:[5],                                       // לה לבדה
-                    ear6:[0,1,2,3,4,5], hunter6:[0,1,2,3,4,5], read6:[0,1,2,3,4,5] };   // וכולן יחד
+                    /* ואצל לה: דו רה מי פה, ואז מי פה סול לה */
+                    ear6:[0,1,2,3], ear6b:[2,3,4,5],
+                    hunter6:[0,1,2,3], hunter6b:[2,3,4,5], read6:[0,1,2,3,4,5] };
       var key = MODES[which] ? "stages" : which;
       if (!LESSON_URL[key]) { toast("\u05d4\u05e9\u05d9\u05e2\u05d5\u05e8 \u05d4\u05d6\u05d4 \u05e2\u05d5\u05d3 \u05d1\u05d3\u05e8\u05da"); return; }
       var doc = LESSON_BODY[key];
@@ -1736,7 +1740,8 @@ window.onerror = function(m, u, l){
                       "meetfa":FA_FACE, "fasong":FA_FACE, "ear4":FA_FACE,
                       "hunter4":FA_FACE, "read4":FA_FACE,
                       "meetsol":SOL_FACE, "solsong":SOL_FACE, "ear5":SOL_FACE,
-                      "hunter5":SOL_FACE, "read5":SOL_FACE };
+                      "ear5b":SOL_FACE, "hunter5":SOL_FACE, "hunter5b":SOL_FACE,
+                      "read5":SOL_FACE };
       var nxt = CHAIN[which];
       var boot = "window.__solBase=" + coins + ";";
       // איפה השלב הזה יושב בתוך הפרק, כדי שהשיעור יראה את זה בכניסה
@@ -1929,8 +1934,8 @@ window.onerror = function(m, u, l){
     "re":"רה","dore":"רה","ear":"רה","hunter":"רה","read":"רה",
     "meetmi":"מי","mire":"מי","ear3":"מי","hunter3":"מי","read3":"מי",
     "meetfa":"פה","fasong":"פה","ear4":"פה","hunter4":"פה","read4":"פה",
-    "meetsol":"סול","solsong":"סול","ear5":"סול","hunter5":"סול","read5":"סול",
-    "meetla":"לה","lasong":"לה","ear6":"לה","hunter6":"לה","read6":"לה"
+    "meetsol":"סול","solsong":"סול","ear5":"סול","ear5b":"סול","hunter5":"סול","hunter5b":"סול","read5":"סול",
+    "meetla":"לה","lasong":"לה","ear6":"לה","ear6b":"לה","hunter6":"לה","hunter6b":"לה","read6":"לה"
   };
   var ROOM_WHO = "דו";
   // החנות: לכל דמות הסט שלה, עם המחיר של כל פריט
@@ -2087,8 +2092,8 @@ window.onerror = function(m, u, l){
     var PATH = ["do", "meet", "re", "ear", "hunter", "read", "dore",
                 "meetmi", "ear3", "hunter3", "read3", "mire",
                 "meetfa", "ear4", "hunter4", "read4", "fasong",
-                "meetsol", "ear5", "hunter5", "read5", "solsong",
-                "meetla", "ear6", "hunter6", "read6", "lasong"];
+                "meetsol", "ear5", "ear5b", "hunter5", "hunter5b", "read5", "solsong",
+                "meetla", "ear6", "ear6b", "hunter6", "hunter6b", "read6", "lasong"];
     var JOURNEYS = {
       "דו": { id:"do", face:DO_IMG,  open:PATH },
       "רה": { id:"re", face:RE_FACE, open:PATH }
@@ -2129,13 +2134,17 @@ window.onerror = function(m, u, l){
                  "re":[RE_FACE], "dore":[RE_FACE], "ear":[RE_FACE], "hunter":[RE_FACE], "read":[RE_FACE],
                  "meetmi":[MI_FACE], "mire":[MI_FACE], "ear3":[MI_FACE], "hunter3":[MI_FACE], "read3":[MI_FACE],
                  "meetfa":[FA_FACE], "fasong":[FA_FACE], "ear4":[FA_FACE], "hunter4":[FA_FACE], "read4":[FA_FACE],
-                 "meetsol":[SOL_FACE], "solsong":[SOL_FACE], "ear5":[SOL_FACE], "hunter5":[SOL_FACE], "read5":[SOL_FACE],
-                 "meetla":[LA_FACE], "ear6":[LA_FACE], "hunter6":[LA_FACE], "read6":[LA_FACE], "lasong":[LA_FACE] };
+                 "meetsol":[SOL_FACE], "solsong":[SOL_FACE], "ear5":[SOL_FACE], "ear5b":[SOL_FACE],
+                 "hunter5":[SOL_FACE], "hunter5b":[SOL_FACE], "read5":[SOL_FACE],
+                 "meetla":[LA_FACE], "ear6":[LA_FACE], "ear6b":[LA_FACE], "hunter6":[LA_FACE],
+                 "hunter6b":[LA_FACE], "read6":[LA_FACE], "lasong":[LA_FACE] };
     var KIND = { "do":"song", "re":"song", "dore":"song", "ear":"one", "hunter":"two", "read":"read", "read1":"read", "mire":"song", "meet":"meet",
                  "meetmi":"meet", "ear3":"one", "hunter3":"two", "read3":"read",
                  "meetfa":"meet", "fasong":"song", "ear4":"one", "hunter4":"two", "read4":"read",
-                 "meetsol":"meet", "solsong":"song", "ear5":"one", "hunter5":"two", "read5":"read",
-                 "meetla":"meet", "ear6":"one", "hunter6":"two", "read6":"read", "lasong":"song" };
+                 "meetsol":"meet", "solsong":"song", "ear5":"one", "ear5b":"one",
+                 "hunter5":"two", "hunter5b":"two", "read5":"read",
+                 "meetla":"meet", "ear6":"one", "ear6b":"one", "hunter6":"two",
+                 "hunter6b":"two", "read6":"read", "lasong":"song" };
     // הדרך נחלקת לפרקים. כל פרק הוא לוח אחד, ובקצה שלו מציצה האבן הראשונה של הבא.
     // כל פרק הוא מקום אחר: אותה דרך, צבעים אחרים
     var CHAPTERS = [
@@ -2143,8 +2152,8 @@ window.onerror = function(m, u, l){
       ["re", "ear", "hunter", "read", "dore"],
       ["meetmi", "ear3", "hunter3", "read3", "mire"],
       ["meetfa", "ear4", "hunter4", "read4", "fasong"],
-      ["meetsol", "ear5", "hunter5", "read5", "solsong"],
-      ["meetla", "ear6", "hunter6", "read6", "lasong"]
+      ["meetsol", "ear5", "ear5b", "hunter5", "hunter5b", "read5", "solsong"],
+      ["meetla", "ear6", "ear6b", "hunter6", "hunter6b", "read6", "lasong"]
     ];
     var CH = -1;   // איזה פרק פתוח כרגע. מינוס אחד אומר: זה שבו הילד עומד
     function chapterOf(i){
