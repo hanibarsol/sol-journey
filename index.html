@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v272</title>
+<title>העולם של סול v273</title>
 </head>
 <body>
 <style>
@@ -2797,8 +2797,9 @@ window.onerror = function(m, u, l){
       mg.appendChild(m);
     }
 
-    document.getElementById("room").addEventListener("click", function(){
-      if (window.__solOpenRoom) window.__solOpenRoom("", null); else rv.classList.add("on");
+    /* נכנסו לחדר, מאיזה מקום שלא יהיה: מדלת בבית, מהחצים שבין החדרים או
+       מקישור ישיר. הספה מגיעה וההודעה עליה מופיעה */
+    window.__solRoomEntered = function(){
       slot.setAttribute("opacity","0");
       slot.classList.remove("gifted");
       setTimeout(function(){
@@ -2815,6 +2816,13 @@ window.onerror = function(m, u, l){
         dp.__in = setTimeout(function(){ dp.classList.add("here"); }, 260);
         dp.__out = setTimeout(function(){ dp.classList.remove("here"); }, 9160);
       }
+    };
+    /* הכפתור פותח את הבית עם המדרגות, ומשם בוחרים דלת. המצלמה מטפסת אל
+       הקומה של הדמות שעומדים עליה, ובדרך רואים את כל הקומות שמתחת */
+    document.getElementById("room").addEventListener("click", function(){
+      if (window.__solOpenStair){ window.__solOpenStair(window.__solRoomWho || ""); return; }
+      if (window.__solOpenRoom) window.__solOpenRoom("", null); else rv.classList.add("on");
+      window.__solRoomEntered();
     });
     document.getElementById("roomBack").addEventListener("click", function(){
       if (window.__solCloseShop) window.__solCloseShop();
@@ -3966,6 +3974,7 @@ window.onerror = function(m, u, l){
       step();
       paintNav();
       if (window.__solLiveAgain) window.__solLiveAgain();
+      if (window.__solRoomEntered) window.__solRoomEntered();
       if (window.__solPlaceLive){
         window.__solPlaceLive();
         setTimeout(window.__solPlaceLive, 120);
@@ -4059,6 +4068,7 @@ window.onerror = function(m, u, l){
     window.addEventListener("resize", placeLive);
     window.addEventListener("orientationchange", placeLive);
     window.__solSetRoom = function(who){
+      if (who) window.__solRoomWho = who;   // הבית צריך לדעת לאיזו קומה לטפס
       if (!who || who === WHO_ROOM) return;
       var art = (window.__solRoomArt || {})[who];
       WHO_ROOM = who;
