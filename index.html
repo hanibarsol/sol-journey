@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v282</title>
+<title>העולם של סול v283</title>
 </head>
 <body>
 <style>
@@ -338,6 +338,22 @@
   .introLay.rolling button.skip{ display:block; }
   .introLay .hello{ display:flex; flex-direction:column; align-items:center; gap:18px; }
   .introLay.rolling .hello{ display:none; }
+  /* הסיפור של המשפחה: פס משלו מתחת לפס של החדר */
+  .story{ display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:18px;
+    background:linear-gradient(180deg,#2e4a74,#22365a); border:1.5px solid #3f5f91;
+    cursor:pointer; margin-top:10px; }
+  .story .t1{ font-size:15px; font-weight:800; color:#fff; }
+  .story .t2{ font-size:12.5px; color:#b9cdf0; margin-top:2px; }
+  .storyLay{ position:fixed; inset:0; z-index:880; display:flex; flex-direction:column;
+    background:#07060f; }
+  .storyLay[hidden]{ display:none !important; }
+  .storyTop{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+    padding:10px 12px; gap:10px; }
+  .storyTop .ttl{ font-size:15px; font-weight:800; color:#FFE7AD; }
+  .storyTop button{ font:inherit; font-size:15px; font-weight:800; padding:10px 20px;
+    border:0; border-radius:999px; background:#17A79B; color:#04231f; }
+  .storyBox{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; }
+  .storyBox iframe{ width:100%; height:100%; border:0; display:block; }
   .roomView{
     position:absolute; inset:0; z-index:50; background:#15102c;
     display:flex; flex-direction:column;
@@ -891,6 +907,25 @@
         <span class="t1" id="roomBarName">לעצב את החדר</span>
       </span>
     </div>
+    <div class="story" id="storyBar">
+      <svg width="38" height="44" viewBox="0 0 42 48" aria-hidden="true" style="flex:0 0 auto">
+        <rect x="2" y="7" width="38" height="28" rx="5" fill="#16233a"/>
+        <rect x="4.5" y="9.5" width="33" height="23" rx="3.5" fill="#2b4568"/>
+        <path d="M17 15 L28 21 L17 27 Z" fill="#FFC44D"/>
+        <rect x="13" y="38" width="16" height="3.4" rx="1.7" fill="#3f5f91"/>
+      </svg>
+      <span class="txt">
+        <span class="t1">הסיפור של המשפחה</span>
+        <span class="t2">איך כולם הכירו זה את זה</span>
+      </span>
+    </div>
+  </div>
+  <div class="storyLay" id="storyLay" hidden>
+    <div class="storyTop">
+      <span class="ttl">הסיפור של המשפחה</span>
+      <button type="button" id="storyX">סגירה</button>
+    </div>
+    <div class="storyBox" id="storyBox"></div>
   </div>
   <div class="stage3" id="lessonStage">
     <button class="leaveLesson" id="leaveLesson" aria-label="חזרה">
@@ -1210,6 +1245,31 @@ window.onerror = function(m, u, l){
     });
     // רשת ביטחון אחרונה: בשום מצב לא נשארים תקועים כאן
     setTimeout(function(){ if (!lay.hidden && !lay.classList.contains("rolling")) close(); }, 25000);
+  })();
+  /* ---------- הסיפור של המשפחה ---------- */
+  (function story(){
+    var bar = document.getElementById("storyBar");
+    var lay = document.getElementById("storyLay");
+    var box = document.getElementById("storyBox");
+    var x   = document.getElementById("storyX");
+    if (!bar || !lay || !box) return;
+    var ID = "vUjIHSO2kzI";
+    function open(){
+      /* המסגרת נבנית רק עכשיו. אילו ישבה בדף מראש, יוטיוב היה נטען בכל
+         פתיחה של העולם גם למי שלא ביקש אותו */
+      box.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + ID +
+        '?rel=0&playsinline=1&autoplay=1" title="הסיפור של המשפחה" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+      lay.hidden = false;
+      try{ houseMusic.hush(true); }catch(e){}
+    }
+    function close(){
+      box.innerHTML = "";          // עוצר את הסרטון באמת
+      lay.hidden = true;
+      try{ houseMusic.hush(false); }catch(e){}
+    }
+    bar.addEventListener("click", open);
+    if (x) x.addEventListener("click", close);
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !lay.hidden) close(); });
   })();
   var houseMusic = (function(){
     var m = document.getElementById("houseMusic");
