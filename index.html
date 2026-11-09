@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v273</title>
+<title>העולם של סול v274</title>
 </head>
 <body>
 <style>
@@ -135,6 +135,8 @@
     display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:18px;
     background:linear-gradient(180deg,#3a2c66,#2b2050); border:1.5px solid #51428c; cursor:pointer;
   }
+  /* כל עוד לא נפתח אף חדר, אין לאן להיכנס, והכפתור מראה את זה */
+  .room.shut{ filter:grayscale(.75); opacity:.6; }
   .room .txt{ flex:1 1 auto; }
   .room .t1{ font-size:15px; font-weight:800; color:#fff; }
   .room .t2{ font-size:12.5px; color:#b9a9e8; margin-top:2px; }
@@ -1841,10 +1843,20 @@ window.onerror = function(m, u, l){
   var toastT = 0;
   function toast(msg){
     var t = document.getElementById("toast");
+    if (!t) return;
     t.textContent = msg; t.classList.add("on");
     clearTimeout(toastT);
     toastT = setTimeout(function(){ t.classList.remove("on"); }, 3800);
   }
+  window.__solToast = toast;   // גם הבית צריך להגיד דברים
+  /* האם נפתח כבר חדר כלשהו. בלי זה אין טעם להיכנס לבית */
+  window.__solAnyRoom = function(){
+    var order = window.__solRoomOrder || [];
+    for (var i = 0; i < order.length; i++){
+      if (window.__solRoomOpen && window.__solRoomOpen(order[i])) return order[i];
+    }
+    return "";
+  };
   // ---- the floor opens when you touch Do, or the button ----
   (function floor(){
     var veil = document.getElementById("veil"), sheet = document.getElementById("sheet");
@@ -2469,6 +2481,10 @@ window.onerror = function(m, u, l){
         if (bn) bn.textContent = "לעצב את החדר";
         if (window.__solSetRoom) window.__solSetRoom(ROOM_WHO); else window.__solPendingRoom = ROOM_WHO;
       }
+      /* הכפתור נראה כבוי כל עוד אף חדר לא נפתח. נצבע בכל ציור של הלוח,
+         ולא רק כשהחדר מתחלף, אחרת בכניסה הראשונה הוא נשאר דולק */
+      var rb = document.getElementById("room");
+      if (rb) rb.classList.toggle("shut", !(window.__solAnyRoom && window.__solAnyRoom()));
       if (PREVIEW >= 0) reached = PREVIEW;
       if (CH < 0) CH = chapterOf(Math.min(reached, J.open.length - 1));
       if (CH >= CHAPTERS.length) CH = CHAPTERS.length - 1;
@@ -2820,6 +2836,11 @@ window.onerror = function(m, u, l){
     /* הכפתור פותח את הבית עם המדרגות, ומשם בוחרים דלת. המצלמה מטפסת אל
        הקומה של הדמות שעומדים עליה, ובדרך רואים את כל הקומות שמתחת */
     document.getElementById("room").addEventListener("click", function(){
+      /* בתחילת המסע אף חדר עוד לא נפתח, ובית שכולו נעול הוא מסך מתסכל */
+      if (window.__solAnyRoom && !window.__solAnyRoom()){
+        toast("עוד אין חדר לעצב. סיימו את השלבים של דו והחדר שלו ייפתח");
+        return;
+      }
       if (window.__solOpenStair){ window.__solOpenStair(window.__solRoomWho || ""); return; }
       if (window.__solOpenRoom) window.__solOpenRoom("", null); else rv.classList.add("on");
       window.__solRoomEntered();
@@ -3287,7 +3308,12 @@ window.onerror = function(m, u, l){
         h.addEventListener("click", function(){
           if (busy) return;
           var i = +h.getAttribute("data-i");
-          if (!isOpen(DOORS[i].n)){ knock(i); return; }
+          if (!isOpen(DOORS[i].n)){
+            knock(i);
+            // לא מספיק להבהב. הילד צריך לדעת למה הדלת לא נפתחת
+            if (window.__solToast) window.__solToast("החדר של " + DOORS[i].n + " עוד נעול. הוא ייפתח בהמשך המסע");
+            return;
+          }
           busy = true;
           if (hint) hint.style.opacity = "0";
           var floors = Math.abs(i - at);
