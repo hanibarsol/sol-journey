@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v279</title>
+<title>העולם של סול v281</title>
 </head>
 <body>
 <style>
@@ -311,9 +311,19 @@
   /* ---------- הפתיח, בכניסה הראשונה בלבד ---------- */
   .introLay{ position:fixed; inset:0; z-index:900; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:20px; padding:20px 14px 28px;
+    background:transparent; transition:opacity 1.6s ease; }
+  /* הרקע הסגול יושב בשכבה משלו, כי gradient לא יודע להימוג בעצמו.
+     הוא הולך ראשון, ואז התמונה לבדה נמסה אל תוך הבית */
+  .introLay::before{ content:""; position:absolute; inset:0; z-index:0;
     background:radial-gradient(120% 90% at 50% 10%, #2a1f4d 0%, #1b1038 70%);
-    transition:opacity 1.35s ease; }
+    transition:opacity .6s ease; }
+  .introLay > *{ position:relative; z-index:1; }
   .introLay.gone{ opacity:0; pointer-events:none; }
+  .introLay.gone::before{ opacity:0; }
+  .introLay video{ transition:opacity .5s ease, transform 1.7s cubic-bezier(.25,.8,.35,1),
+    box-shadow .5s ease, border-radius .5s ease; }
+  .introLay.gone video{ transform:scale(1.05); box-shadow:none; border-radius:0; }
+  .introLay.gone button{ opacity:0; transition:opacity .3s ease; }
   /* בלי זה display:flex גובר על hidden, והשכבה חוסמת את הכניסה לעולם */
   .introLay[hidden]{ display:none !important; }
   .introLay video[hidden]{ display:none !important; }
@@ -1162,12 +1172,12 @@ window.onerror = function(m, u, l){
         if (i >= steps){ clearInterval(fade); try{ v.pause(); }catch(e){} }
       }, 40);
       // המנגינה של הבית עולה בזמן שהתמונה עוד נמוגה, כך שאין רגע של שקט
-      setTimeout(function(){ try{ houseMusic.start(); }catch(e){} }, 520);
+      setTimeout(function(){ try{ houseMusic.start(); }catch(e){} }, 420);
       setTimeout(function(){
         clearInterval(fade);
         try{ v.pause(); }catch(e){}
         lay.hidden = true; v.removeAttribute("src");
-      }, 1400);
+      }, 1750);
     }
     /* הסרטון מתחיל להיטען כבר עכשיו, בשקט ומוסתר, בזמן שקוראים את הכותרת */
     v.muted = true;
