@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v285</title>
+<title>העולם של סול v286</title>
 </head>
 <body>
 <style>
@@ -352,6 +352,9 @@
   .storyTop .ttl{ font-size:15px; font-weight:800; color:#FFE7AD; }
   .storyTop button{ font:inherit; font-size:15px; font-weight:800; padding:10px 20px;
     border:0; border-radius:999px; background:#17A79B; color:#04231f; }
+  /* יש מקומות שחוסמים מסגרת של יוטיוב. הקישור הזה עובד תמיד */
+  .storyTop a{ font-size:14px; font-weight:800; padding:9px 16px; border-radius:999px;
+    background:rgba(255,255,255,.12); color:#FFE7AD; text-decoration:none; }
   .storyBox{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; }
   .storyBox iframe{ width:100%; height:100%; border:0; display:block; }
   .roomView{
@@ -922,6 +925,7 @@
   <div class="storyLay" id="storyLay" hidden>
     <div class="storyTop">
       <span class="ttl">הסיפור של המשפחה</span>
+      <a id="storyOut" href="https://youtu.be/vUjIHSO2kzI" target="_blank" rel="noopener">לפתוח ביוטיוב</a>
       <button type="button" id="storyX">סגירה</button>
     </div>
     <div class="storyBox" id="storyBox"></div>
