@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v278</title>
+<title>העולם של סול v279</title>
 </head>
 <body>
 <style>
@@ -312,7 +312,7 @@
   .introLay{ position:fixed; inset:0; z-index:900; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:20px; padding:20px 14px 28px;
     background:radial-gradient(120% 90% at 50% 10%, #2a1f4d 0%, #1b1038 70%);
-    transition:opacity .55s ease; }
+    transition:opacity 1.35s ease; }
   .introLay.gone{ opacity:0; pointer-events:none; }
   /* בלי זה display:flex גובר על hidden, והשכבה חוסמת את הכניסה לעולם */
   .introLay[hidden]{ display:none !important; }
@@ -1145,14 +1145,29 @@ window.onerror = function(m, u, l){
     window.__solIntroOn = true;
     lay.hidden = false;
     function mark(){ try{ localStorage.setItem(KEY, "1"); }catch(e){} }
+    var closing = false;
     function close(){
+      if (closing) return;
+      closing = true;
       mark();
       window.__solIntroOn = false;
-      // עכשיו תורה של מנגינת הבית, בדיוק כמו בכניסה רגילה
-      setTimeout(function(){ try{ houseMusic.start(); }catch(e){} }, 220);
-      try{ v.pause(); }catch(e){}
       lay.classList.add("gone");
-      setTimeout(function(){ lay.hidden = true; v.removeAttribute("src"); }, 600);
+      /* הקול של הסרטון יורד בהדרגה במקום להיקטע. באייפון volume של וידאו
+         לא תמיד נשמע, ולכן בסוף ממילא יש pause */
+      var steps = 22, i = 0, v0 = 1;
+      try{ v0 = v.volume; }catch(e){}
+      var fade = setInterval(function(){
+        i++;
+        try{ v.volume = Math.max(0, v0 * (1 - i/steps)); }catch(e){}
+        if (i >= steps){ clearInterval(fade); try{ v.pause(); }catch(e){} }
+      }, 40);
+      // המנגינה של הבית עולה בזמן שהתמונה עוד נמוגה, כך שאין רגע של שקט
+      setTimeout(function(){ try{ houseMusic.start(); }catch(e){} }, 520);
+      setTimeout(function(){
+        clearInterval(fade);
+        try{ v.pause(); }catch(e){}
+        lay.hidden = true; v.removeAttribute("src");
+      }, 1400);
     }
     /* הסרטון מתחיל להיטען כבר עכשיו, בשקט ומוסתר, בזמן שקוראים את הכותרת */
     v.muted = true;
