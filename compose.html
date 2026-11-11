@@ -64,7 +64,7 @@
 <body>
 <div class="wrap">
   <h1>המלחין הקטן, מוקאפ</h1>
-  <p class="sub">נוגעים בדמות, ואז במקום על החמשה. נגיעה בתו שכבר שם מוחקת אותו.
+  <p class="sub">נוגעים בדמות והתו מצטרף למנגינה. נגיעה בתו שכבר שם מוחקת אותו.
     אפשר לנגן את מה שבנית.</p>
 
   <div class="board">
@@ -153,11 +153,16 @@
     w.innerHTML = '<div class="ring"><img src="demo/faces/' + n.k + '.jpg" alt=""></div>' +
                   '<div class="nm">' + n.nm + '</div>';
     w.addEventListener("click", function(){
+      /* נגיעה בדמות מוסיפה את התו בסוף המנגינה. פעולה אחת, לא שתיים */
       pick = i;
       Array.prototype.forEach.call(castBox.children, function(c, j){
         c.className = "who" + (j === i ? " on" : "");
       });
       tone(n.f, 0.9);
+      var free = piece.indexOf(null);
+      if (free < 0) return;
+      piece[free] = i;
+      draw();
     });
     castBox.appendChild(w);
   });
@@ -171,10 +176,11 @@
       s.className = "slot";
       s.innerHTML = '<div class="led"></div><div class="dot"><img alt=""></div>';
       s.addEventListener("click", function(){
-        if (piece[i] !== null){ piece[i] = null; draw(); return; }   // נגיעה בתו מוחקת אותו
-        piece[i] = pick;
+        if (piece[i] === null) return;
+        /* מוחקים את התו והשאר נדחסים שמאלה */
+        piece.splice(i, 1);
+        piece.push(null);
         draw();
-        tone(N[pick].f, 0.9);
       });
       slotBox.appendChild(s);
       els.push(s);
