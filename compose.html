@@ -58,6 +58,8 @@
   #play.on{ background:#43225A; color:#FFD987; }
   #clear{ background:rgba(255,255,255,.12); color:#FFE7AD; }
   #save{ background:var(--katom); color:#4a2f00; }
+  /* חמשה ריקה, אין מה לשמור */
+  .row button:disabled{ opacity:.38; cursor:default; }
 
   .hint{ margin-top:12px; font-size:13px; line-height:1.6; color:#c9c0ef; }
   .hint b{ color:#FFD987; }
@@ -196,6 +198,8 @@
     })(i);
   }
 
+  var saveBtn = document.getElementById("save");
+
   function draw(){
     els.forEach(function(s, i){
       var v = piece[i];
@@ -209,6 +213,8 @@
       led.style.top = (n.y / 200 * 100) + "%";
       s.querySelector("img").src = "demo/faces/" + n.k + ".jpg";
     });
+    /* אפשר לשמור רק כשיש תו אחד לפחות על החמשה */
+    saveBtn.disabled = !piece.some(function(v){ return v !== null; });
   }
   draw();
 
@@ -246,7 +252,8 @@
     draw();
   });
 
-  document.getElementById("save").addEventListener("click", function(){
+  saveBtn.addEventListener("click", function(){
+    if (saveBtn.disabled) return;
     var names = piece.map(function(v){ return v === null ? "–" : N[v].nm; }).join(" ");
     var box = document.getElementById("saved");
     box.className = "saved on";
