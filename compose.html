@@ -17,22 +17,23 @@
   /* ---------- החמשה ---------- */
   .board{ background:#fff; border-radius:18px; padding:10px 8px 8px; position:relative;
     box-shadow:0 16px 36px -26px rgba(0,0,0,.9); }
-  .staff{ position:relative; width:100%; height:200px; padding-left:58px; }
+  .staff{ position:relative; width:100%; height:200px; }
   /* מפתח סול בראש החמשה, אותו ציור שבשיעורים */
-  .clef{ position:absolute; left:6px; top:12px; height:150px; width:auto;
+  .clef{ position:absolute; left:4px; top:24px; height:124px; width:auto;
     opacity:.9; pointer-events:none; }
   .staff svg{ width:100%; height:100%; display:block; }
   /* חמשה נקראת משמאל לימין, גם בדף בעברית */
-  .slotRow{ position:absolute; top:0; bottom:0; right:0; left:58px; display:flex; direction:ltr; }
+  /* המקומות מתחילים אחרי המפתח, עם רווח, כדי שהתו הראשון לא ידרוך עליו */
+  .slotRow{ position:absolute; top:0; bottom:0; right:0; left:76px; display:flex; direction:ltr; }
   .slot{ flex:1 1 0; position:relative; cursor:pointer; border-radius:10px; }
   .slot:active{ background:rgba(67,34,90,.06); }
   /* תו שמונח על החמשה לובש זהב. רק התו שמתנגן מקבל טבעת אחרת */
   .slot .dot{ position:absolute; left:50%; transform:translate(-50%,-50%);
-    width:38px; height:38px; border-radius:50%; overflow:hidden; background:#fdf4e2;
+    width:34px; height:34px; border-radius:50%; overflow:hidden; background:#fdf4e2;
     box-shadow:0 0 0 3px #FFD98A, 0 0 0 5px #C98A12; display:none; }
   .slot .dot img{ width:100%; height:100%; object-fit:cover; display:block; }
   .slot.full .dot{ display:block; }
-  .slot .led{ position:absolute; left:50%; transform:translateX(-50%); width:52px; height:3px;
+  .slot .led{ position:absolute; left:50%; transform:translateX(-50%); width:46px; height:3px;
     background:#43225A; opacity:.75; display:none; }
   .slot.ledger .led{ display:block; }
   .slot.now .dot{ box-shadow:0 0 0 4px #17A79B, 0 0 0 8px rgba(23,167,155,.45); }
