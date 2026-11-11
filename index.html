@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v287</title>
+<title>העולם של סול v288</title>
 </head>
 <body>
 <style>
@@ -1291,6 +1291,27 @@ window.onerror = function(m, u, l){
     bar.addEventListener("click", open);
     if (x) x.addEventListener("click", close);
     document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !lay.hidden) close(); });
+  })();
+  /* ---------- גרסה טרייה ---------- */
+  (function freshness(){
+    /* כבר נטענו עם סימן גרסה, אין מה לבדוק שוב */
+    try{ if (/[?&]v=/.test(location.search)) return; }catch(e){ return; }
+    var mine = "";
+    try{ mine = (document.title.match(/v(\d+)/) || [])[1] || ""; }catch(e){}
+    if (!mine || !window.fetch) return;
+    try{
+      fetch("version.txt?t=" + Date.now(), { cache:"no-store" })
+        .then(function(r){ return r.ok ? r.text() : null; })
+        .then(function(t){
+          if (!t) return;
+          t = String(t).trim();
+          /* רק אם באמת יש חדשה יותר. שווה או ישן, לא נוגעים */
+          if (/^\d+$/.test(t) && +t > +mine){
+            location.replace(location.pathname + "?v=" + t);
+          }
+        })
+        .catch(function(){});
+    }catch(e){}
   })();
   /* ---------- מסך הפתיחה יורד כשהכול מוכן ---------- */
   (function boot(){
