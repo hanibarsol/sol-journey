@@ -17,10 +17,13 @@
   /* ---------- החמשה ---------- */
   .board{ background:#fff; border-radius:18px; padding:10px 8px 8px; position:relative;
     box-shadow:0 16px 36px -26px rgba(0,0,0,.9); }
-  .staff{ position:relative; width:100%; height:200px; }
+  .staff{ position:relative; width:100%; height:200px; padding-left:58px; }
+  /* מפתח סול בראש החמשה, אותו ציור שבשיעורים */
+  .clef{ position:absolute; left:6px; top:12px; height:150px; width:auto;
+    opacity:.9; pointer-events:none; }
   .staff svg{ width:100%; height:100%; display:block; }
   /* חמשה נקראת משמאל לימין, גם בדף בעברית */
-  .slotRow{ position:absolute; inset:0; display:flex; direction:ltr; }
+  .slotRow{ position:absolute; top:0; bottom:0; right:0; left:58px; display:flex; direction:ltr; }
   .slot{ flex:1 1 0; position:relative; cursor:pointer; border-radius:10px; }
   .slot:active{ background:rgba(67,34,90,.06); }
   .slot .dot{ position:absolute; left:50%; transform:translate(-50%,-50%);
@@ -69,7 +72,7 @@
 
   <div class="board">
     <div class="staff">
-      <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+      <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
         <g stroke="#cfc6e4" stroke-width="2">
           <line x1="0" y1="30"  x2="600" y2="30"/>
           <line x1="0" y1="60"  x2="600" y2="60"/>
@@ -78,6 +81,7 @@
           <line x1="0" y1="150" x2="600" y2="150"/>
         </g>
       </svg>
+      <img class="clef" src="demo/clef.png" alt="">
       <div class="slotRow" id="slots"></div>
     </div>
   </div>
