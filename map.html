@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מפת המסע</title>
+<style>
+  :root{ --sagol:#43225A; --katom:#F2A412; --turkiz:#189E8A; --dim:#9d94c9; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; min-height:100%; }
+  body{ background:#f6f5f8; color:#2b2b2b; font-family:system-ui,"Segoe UI",Arial,sans-serif;
+    padding:16px 14px 40px; }
+  .wrap{ max-width:620px; margin:0 auto; }
+  h1{ margin:0 0 6px; font-size:19px; color:var(--sagol); }
+  p.sub{ margin:0 0 16px; font-size:14px; line-height:1.6; color:#6f6f6f; }
+  h2.sec{ margin:26px 0 10px; font-size:15.5px; color:var(--sagol); }
+
+  /* ---------- איפה הכפתור ---------- */
+  .phone{ border:1px solid #e2e0e6; border-radius:22px; overflow:hidden; background:#1b1038;
+    box-shadow:0 14px 34px -26px rgba(67,34,90,.8); }
+  .hud{ display:flex; align-items:center; gap:8px; padding:12px 14px;
+    background:linear-gradient(180deg, rgba(10,8,28,.9), rgba(10,8,28,.25)); }
+  .purse{ display:inline-flex; align-items:center; gap:6px; padding:5px 12px 5px 7px;
+    border-radius:999px; background:linear-gradient(180deg,#2a1f4d,#1a1336);
+    border:1px solid #4a3a7a; color:#FFE9B8; font-weight:800; font-size:14px; }
+  .dot38{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; background:rgba(20,14,46,.62); border:1px solid rgba(255,255,255,.16); }
+  .dot38 svg{ width:18px; height:18px; }
+  .dot38.ring{ box-shadow:0 0 0 3px rgba(242,164,18,.55); }
+  .capt{ padding:10px 14px 14px; color:#d6d0f0; font-size:13px; line-height:1.6; }
+  .capt b{ color:#FFD987; }
+
+  /* ---------- המפה ---------- */
+  .map{ background:radial-gradient(120% 90% at 50% 8%, #2a1f4d 0%, #1b1038 72%);
+    border-radius:22px; padding:16px 14px 20px; }
+  .mapTop{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .mapTop .t{ font-size:17px; font-weight:800; color:#FFD987; }
+  .mapTop .x{ font:inherit; font-size:14px; font-weight:800; padding:8px 16px; border:0;
+    border-radius:999px; background:#17A79B; color:#04231f; }
+
+  .row{ display:flex; align-items:center; gap:10px; padding:9px 0; }
+  .row + .row{ border-top:1px solid rgba(255,255,255,.07); }
+  .who{ position:relative; flex:0 0 auto; width:50px; height:50px; border-radius:50%;
+    background:#fdf4e2; overflow:hidden;
+    box-shadow:0 0 0 3px #FFD98A, 0 0 0 5px #C98A12, 0 0 16px 3px rgba(255,196,77,.4); }
+  .who img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .row.shut .who{ box-shadow:0 0 0 3px #4a3a7a, inset 0 0 20px 6px rgba(10,6,24,.6); filter:grayscale(.8); }
+  .row.shut .who img{ opacity:.45; }
+
+  .steps{ flex:1 1 auto; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .st{ width:15px; height:15px; border-radius:50%; background:#3b2c63; display:block; }
+  .st.done{ background:linear-gradient(180deg,#FFE9B0,#E8B13C); box-shadow:0 1px 0 0 #8A5A06; }
+  .st.now{ background:#39E0D0; box-shadow:0 0 0 4px rgba(57,224,208,.26); animation:beat 1.8s ease-in-out infinite; }
+  @keyframes beat{ 0%,100%{ box-shadow:0 0 0 3px rgba(57,224,208,.3) } 50%{ box-shadow:0 0 0 7px rgba(57,224,208,0) } }
+  .name{ flex:0 0 auto; width:34px; text-align:center; font-family:system-ui;
+    font-size:13.5px; font-weight:800; color:#d6d0f0; }
+  .row.shut .name{ color:#6d63a0; }
+  .here{ flex:0 0 auto; font-size:11.5px; font-weight:800; color:#04231f;
+    background:#39E0D0; padding:3px 9px; border-radius:999px; }
+
+  .legend{ margin-top:14px; display:flex; gap:14px; flex-wrap:wrap;
+    font-size:12.5px; color:#b9b0e0; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .legend i{ width:12px; height:12px; border-radius:50%; display:block; }
+
+  ul.note{ margin:14px 0 0; padding-inline-start:20px; font-size:13.5px; line-height:1.75; color:#2b2b2b; }
+  ul.note b{ color:var(--sagol); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>מפת המסע, מוקאפ</h1>
+  <p class="sub">תצוגה אחת של כל הדרך: שבעה פרקים, שלושים ושבע אבנים, מה נעשה, איפה הילד עומד ומה עוד מחכה.
+    הנתונים כאן אמיתיים, לקוחים מהמבנה שבעולם.</p>
+
+  <h2 class="sec">איפה הכפתור יושב</h2>
+  <div class="phone">
+    <div class="hud">
+      <span class="purse">12 ♪</span>
+      <span class="purse">3 ●</span>
+      <span class="dot38 ring" title="מפה">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f0e6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 4 L3 6.5 v13 L9 17 l6 2.5 6-2.5 v-13 L15 6.5 Z"/>
+          <path d="M9 4 v13 M15 6.5 v13"/>
+        </svg>
+      </span>
+      <span class="dot38">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.5 L18 12 L9 17.5 Z" fill="#f0e6ff"/></svg>
+      </span>
+      <span class="dot38">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f0e6ff" stroke-width="2" stroke-linecap="round">
+          <path d="M4 9v6h4l5 4V5L8 9H4z" fill="#f0e6ff" stroke="none"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/>
+        </svg>
+      </span>
+    </div>
+    <div class="capt">הרצועה העליונה, כמו שהיא היום. <b>הכפתור המסומן הוא המפה</b>, משמאל לכפתור הסיפור ולכפתור הצליל.
+      הוא קבוע בכל המסכים, ולכן אפשר לפתוח את המפה מכל מקום.</div>
+  </div>
+
+  <h2 class="sec">איך המפה נראית</h2>
+  <div class="map">
+    <div class="mapTop">
+      <span class="t">המסע של סול</span>
+      <button class="x" type="button">סגירה</button>
+    </div>
+    <div id="rows"></div>
+    <div class="legend">
+      <span><i style="background:linear-gradient(180deg,#FFE9B0,#E8B13C)"></i> נעשה</span>
+      <span><i style="background:#39E0D0"></i> כאן אני</span>
+      <span><i style="background:#3b2c63"></i> עוד מחכה</span>
+    </div>
+  </div>
+
+  <ul class="note">
+    <li><b>נגיעה באבן שכבר נעשתה</b> פותחת אותה שוב, לחזרה.</li>
+    <li><b>נגיעה בדמות</b> קופצת ללוח של הפרק שלה.</li>
+    <li>פרק שעוד לא נפתח מוצג אפור ועם הדמות כבויה, כדי שהילד יראה מה מחכה לו.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var CH = [
+    { who:"do",  name:"דו",  n:2 },
+    { who:"re",  name:"רה",  n:5 },
+    { who:"mi",  name:"מי",  n:5 },
+    { who:"fa",  name:"פה",  n:5 },
+    { who:"sol", name:"סול", n:7 },
+    { who:"la",  name:"לה",  n:7 },
+    { who:"si",  name:"סי",  n:6 }
+  ];
+  // לצורך המוקאפ: הילד נמצא באמצע הפרק של פה
+  var AT_CH = 3, AT_STEP = 2;
+
+  var host = document.getElementById("rows");
+  CH.forEach(function(c, ci){
+    var row = document.createElement("div");
+    row.className = "row" + (ci > AT_CH ? " shut" : "");
+
+    var who = document.createElement("div");
+    who.className = "who";
+    var im = document.createElement("img");
+    im.src = "demo/faces/" + c.who + ".jpg";
+    im.alt = c.name;
+    who.appendChild(im);
+    row.appendChild(who);
+
+    var nm = document.createElement("div");
+    nm.className = "name";
+    nm.textContent = c.name;
+    row.appendChild(nm);
+
+    var steps = document.createElement("div");
+    steps.className = "steps";
+    for (var i = 0; i < c.n; i++){
+      var st = document.createElement("i");
+      st.className = "st";
+      if (ci < AT_CH || (ci === AT_CH && i < AT_STEP)) st.className += " done";
+      if (ci === AT_CH && i === AT_STEP) st.className += " now";
+      steps.appendChild(st);
+    }
+    row.appendChild(steps);
+
+    if (ci === AT_CH){
+      var here = document.createElement("span");
+      here.className = "here";
+      here.textContent = "כאן";
+      row.appendChild(here);
+    }
+    host.appendChild(row);
+  });
+})();
+</script>
+</body>
+</html>
