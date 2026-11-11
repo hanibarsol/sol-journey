@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v293</title>
+<title>העולם של סול v294</title>
 </head>
 <body>
 <style>
@@ -1969,22 +1969,12 @@ window.onerror = function(m, u, l){
         });
         return;
       }
-      // what comes after what, all the way along both journeys
-      var CHAIN = { "do":"meet", "meet":"re", "re":"ear", "ear":"hunter", "hunter":"read",
-                    "read":"dore", "dore":"meetmi", "meetmi":"ear3", "ear3":"hunter3",
-                    "hunter3":"read3", "read3":"mire", "mire":"meetfa",
-                    "meetfa":"ear4", "ear4":"hunter4", "hunter4":"read4", "read4":"fasong",
-                    "fasong":"meetsol", "meetsol":"ear5", "ear5":"hunter5", "hunter5":"read5", "read5":"solsong",
-                    "solsong":"meetla", "meetla":"ear6", "ear6":"hunter6", "hunter6":"read6", "read6":"lasong" };
-      var FACE_OF = { "do":DO_IMG, "meet":DO_IMG, "read1":DO_IMG, "re":RE_FACE, "dore":RE_FACE,
-                      "ear":RE_FACE, "hunter":RE_FACE, "read":RE_FACE, "mire":MI_FACE,
-                      "meetmi":MI_FACE, "ear3":MI_FACE, "hunter3":MI_FACE, "read3":MI_FACE,
-                      "meetfa":FA_FACE, "fasong":FA_FACE, "ear4":FA_FACE,
-                      "hunter4":FA_FACE, "read4":FA_FACE,
-                      "meetsol":SOL_FACE, "solsong":SOL_FACE, "ear5":SOL_FACE,
-                      "ear5b":SOL_FACE, "hunter5":SOL_FACE, "hunter5b":SOL_FACE,
-                      "read5":SOL_FACE };
-      var nxt = CHAIN[which];
+      // מה בא אחרי מה נקרא מהמסע עצמו, ולא מרשימה שנכתבה ביד
+      var ORDER = (window.__solPath || []);
+      var WHO = (window.__solCast || {});
+      var at = ORDER.indexOf(which);
+      var nxt = (at >= 0) ? ORDER[at + 1] : null;
+      var nface = (nxt && WHO[nxt] && WHO[nxt][0]) || "";
       var boot = "window.__solBase=" + coins + ";";
       // איפה השלב הזה יושב בתוך הפרק, כדי שהשיעור יראה את זה בכניסה
       var CHS = window.__solChapters || [];
@@ -1996,9 +1986,8 @@ window.onerror = function(m, u, l){
       boot += "window.__solWhich=" + JSON.stringify(which) + ";";
       if (MODES[which]) boot += "window.__solMode=" + JSON.stringify(MODES[which]) + ";";
       if (POOLS[which]) boot += "window.__solPool=" + JSON.stringify(POOLS[which]) + ";";
-      if (nxt && FACE_OF[nxt]){
-        var nf = FACE_OF[nxt] || "";
-        boot += "window.__solNext={id:" + JSON.stringify(nxt) + ",img:" + JSON.stringify(nf) + "};";
+      if (nxt && nface){
+        boot += "window.__solNext={id:" + JSON.stringify(nxt) + ",img:" + JSON.stringify(nface) + "};";
       }
       // ההגדרות נכנסות לפני השיעור. אם הן באות אחריו, לפעמים השיעור כבר
       // הספיק להתחיל בלעדיהן, והיה נפתח עם הדמויות של ברירת המחדל
@@ -2385,6 +2374,10 @@ window.onerror = function(m, u, l){
                  "hunter6b":[LA_FACE], "read6":[LA_FACE], "lasong":[LA_FACE],
                  "meetsi":[SI_FACE], "ear7":[SI_FACE], "ear7b":[SI_FACE],
                  "hunter7":[SI_FACE], "hunter7b":[SI_FACE], "read7":[SI_FACE] };
+    // השיעור צריך לדעת מה בא אחריו ואיזו דמות שם. שתי הרשימות האלה
+    // הן המקור היחיד, ולכן כפתור "הבא" לא יכול להישאר מאחור
+    window.__solPath = PATH;
+    window.__solCast = CAST;
     var KIND = { "do":"song", "re":"song", "dore":"song", "ear":"one", "hunter":"two", "read":"read", "read1":"read", "mire":"song", "meet":"meet",
                  "meetmi":"meet", "ear3":"one", "hunter3":"two", "read3":"read",
                  "meetfa":"meet", "fasong":"song", "ear4":"one", "hunter4":"two", "read4":"read",
