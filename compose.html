@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>המלחין הקטן</title>
+<style>
+  :root{ --sagol:#43225A; --katom:#F2A412; --turkiz:#189E8A; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; min-height:100%; }
+  body{ background:radial-gradient(120% 90% at 50% 8%, #2a1f4d 0%, #1b1038 72%);
+    color:#fff; font-family:system-ui,"Segoe UI",Arial,sans-serif; padding:14px 12px 30px; }
+  .wrap{ max-width:620px; margin:0 auto; }
+  h1{ margin:0 0 4px; font-size:19px; color:#FFD987; }
+  p.sub{ margin:0 0 14px; font-size:13.5px; line-height:1.6; color:#c9c0ef; }
+
+  /* ---------- החמשה ---------- */
+  .board{ background:#fff; border-radius:18px; padding:10px 8px 8px; position:relative;
+    box-shadow:0 16px 36px -26px rgba(0,0,0,.9); }
+  .staff{ position:relative; width:100%; height:200px; }
+  .staff svg{ width:100%; height:100%; display:block; }
+  /* חמשה נקראת משמאל לימין, גם בדף בעברית */
+  .slotRow{ position:absolute; inset:0; display:flex; direction:ltr; }
+  .slot{ flex:1 1 0; position:relative; cursor:pointer; border-radius:10px; }
+  .slot:active{ background:rgba(67,34,90,.06); }
+  .slot .dot{ position:absolute; left:50%; transform:translate(-50%,-50%);
+    width:38px; height:38px; border-radius:50%; overflow:hidden; background:#fdf4e2;
+    box-shadow:0 0 0 3px #FFD98A, 0 0 0 5px #C98A12; display:none; }
+  .slot .dot img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .slot.full .dot{ display:block; }
+  .slot .led{ position:absolute; left:50%; transform:translateX(-50%); width:52px; height:3px;
+    background:#43225A; display:none; }
+  .slot.ledger .led{ display:block; }
+  .slot.now .dot{ box-shadow:0 0 0 3px #39E0D0, 0 0 0 7px rgba(57,224,208,.45); }
+
+  /* ---------- הדמויות ---------- */
+  /* הדמויות באותו סדר של החמשה: דו משמאל, סי מימין */
+  .cast{ display:flex; justify-content:center; gap:7px; margin:14px 0 4px; flex-wrap:wrap; direction:ltr; }
+  .who{ width:52px; cursor:pointer; text-align:center; }
+  .who .ring{ width:52px; height:52px; border-radius:50%; overflow:hidden; background:#fdf4e2;
+    box-shadow:0 0 0 3px #4a3a7a; }
+  .who.on .ring{ box-shadow:0 0 0 3px #FFD98A, 0 0 0 6px #C98A12, 0 0 16px 3px rgba(255,196,77,.5); }
+  .who img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .who .nm{ font-size:12px; font-weight:800; color:#b9b0e0; margin-top:3px; }
+  .who.on .nm{ color:#FFD987; }
+
+  /* ---------- הכפתורים ---------- */
+  .row{ display:flex; gap:9px; margin-top:14px; }
+  .row button{ flex:1 1 0; font:inherit; font-size:16px; font-weight:800; padding:14px 8px;
+    border:0; border-radius:999px; cursor:pointer; }
+  #play{ background:var(--turkiz); color:#042b26; }
+  #play.on{ background:#43225A; color:#FFD987; }
+  #clear{ background:rgba(255,255,255,.12); color:#FFE7AD; }
+  #save{ background:var(--katom); color:#4a2f00; }
+
+  .hint{ margin-top:12px; font-size:13px; line-height:1.6; color:#c9c0ef; }
+  .hint b{ color:#FFD987; }
+  .saved{ margin-top:14px; padding:12px 14px; border-radius:14px;
+    background:rgba(255,255,255,.07); font-size:13.5px; line-height:1.6; color:#d6d0f0; display:none; }
+  .saved.on{ display:block; }
+  .saved b{ color:#FFD987; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>המלחין הקטן, מוקאפ</h1>
+  <p class="sub">נוגעים בדמות, ואז במקום על החמשה. נגיעה בתו שכבר שם מוחקת אותו.
+    אפשר לנגן את מה שבנית.</p>
+
+  <div class="board">
+    <div class="staff">
+      <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+        <g stroke="#cfc6e4" stroke-width="2">
+          <line x1="0" y1="30"  x2="600" y2="30"/>
+          <line x1="0" y1="60"  x2="600" y2="60"/>
+          <line x1="0" y1="90"  x2="600" y2="90"/>
+          <line x1="0" y1="120" x2="600" y2="120"/>
+          <line x1="0" y1="150" x2="600" y2="150"/>
+        </g>
+      </svg>
+      <div class="slotRow" id="slots"></div>
+    </div>
+  </div>
+
+  <div class="cast" id="cast"></div>
+
+  <div class="row">
+    <button id="play" type="button">לנגן</button>
+    <button id="clear" type="button">לנקות</button>
+  </div>
+  <div class="row">
+    <button id="save" type="button">לשמור את השיר שלי</button>
+  </div>
+
+  <p class="hint">בגרסה האמיתית, שיר ששמרת מופיע במסך <b>"השירים שלי"</b> בשורה
+    "השירים שהמצאתי", לצד השירים של המשפחה.</p>
+
+  <div class="saved" id="saved"></div>
+</div>
+
+<script>
+(function(){
+  var N = [
+    { k:"do",  nm:"דו",  f:261.63, y:180, ledger:true  },
+    { k:"re",  nm:"רה",  f:293.66, y:165, ledger:false },
+    { k:"mi",  nm:"מי",  f:329.63, y:150, ledger:false },
+    { k:"fa",  nm:"פה",  f:349.23, y:135, ledger:false },
+    { k:"sol", nm:"סול", f:392.00, y:120, ledger:false },
+    { k:"la",  nm:"לה",  f:440.00, y:105, ledger:false },
+    { k:"si",  nm:"סי",  f:493.88, y:90,  ledger:false }
+  ];
+  var SLOTS = 8;
+  var piece = new Array(SLOTS).fill(null);   // איזה תו יושב בכל מקום
+  var pick = 0;                              // מי נבחרה עכשיו
+
+  /* ---------- הצליל, אותו אחד שבשיעורים ---------- */
+  var ctx = null;
+  function ac(){
+    if (!ctx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+    }
+    if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+    return ctx;
+  }
+  function tone(f, dur){
+    var c = ac(); if (!c) return;
+    var t0 = c.currentTime;
+    var out = c.createGain();
+    out.gain.setValueAtTime(0, t0);
+    out.gain.linearRampToValueAtTime(0.38, t0 + 0.012);
+    out.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    var lp = c.createBiquadFilter();
+    lp.type = "lowpass"; lp.Q.value = 0.6;
+    lp.frequency.setValueAtTime(2600, t0);
+    lp.frequency.exponentialRampToValueAtTime(1100, t0 + dur * 0.8);
+    lp.connect(out).connect(c.destination);
+    [[1,0.9,"sine",0],[1,0.5,"sine",4],[2,0.26,"sine",0],[3,0.11,"triangle",0]].forEach(function(p){
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = p[2]; o.frequency.setValueAtTime(f * p[0], t0);
+      if (p[3]) o.detune.setValueAtTime(p[3], t0);
+      g.gain.value = p[1];
+      o.connect(g).connect(lp); o.start(t0); o.stop(t0 + dur + 0.05);
+    });
+  }
+
+  /* ---------- הדמויות ---------- */
+  var castBox = document.getElementById("cast");
+  N.forEach(function(n, i){
+    var w = document.createElement("div");
+    w.className = "who" + (i === 0 ? " on" : "");
+    w.innerHTML = '<div class="ring"><img src="demo/faces/' + n.k + '.jpg" alt=""></div>' +
+                  '<div class="nm">' + n.nm + '</div>';
+    w.addEventListener("click", function(){
+      pick = i;
+      Array.prototype.forEach.call(castBox.children, function(c, j){
+        c.className = "who" + (j === i ? " on" : "");
+      });
+      tone(n.f, 0.9);
+    });
+    castBox.appendChild(w);
+  });
+
+  /* ---------- המקומות על החמשה ---------- */
+  var slotBox = document.getElementById("slots");
+  var els = [];
+  for (var i = 0; i < SLOTS; i++){
+    (function(i){
+      var s = document.createElement("div");
+      s.className = "slot";
+      s.innerHTML = '<div class="led"></div><div class="dot"><img alt=""></div>';
+      s.addEventListener("click", function(){
+        if (piece[i] !== null){ piece[i] = null; draw(); return; }   // נגיעה בתו מוחקת אותו
+        piece[i] = pick;
+        draw();
+        tone(N[pick].f, 0.9);
+      });
+      slotBox.appendChild(s);
+      els.push(s);
+    })(i);
+  }
+
+  function draw(){
+    els.forEach(function(s, i){
+      var v = piece[i];
+      if (v === null){ s.className = "slot"; return; }
+      var n = N[v];
+      s.className = "slot full" + (n.ledger ? " ledger" : "");
+      var dot = s.querySelector(".dot");
+      dot.style.top = (n.y / 200 * 100) + "%";
+      var led = s.querySelector(".led");
+      led.style.top = (n.y / 200 * 100) + "%";
+      s.querySelector("img").src = "demo/faces/" + n.k + ".jpg";
+    });
+  }
+  draw();
+
+  /* ---------- נגינה ---------- */
+  var playBtn = document.getElementById("play");
+  var timers = [];
+  function stop(){
+    timers.forEach(clearTimeout); timers = [];
+    els.forEach(function(s){ s.classList.remove("now"); });
+    playBtn.classList.remove("on");
+    playBtn.textContent = "לנגן";
+  }
+  playBtn.addEventListener("click", function(){
+    if (playBtn.classList.contains("on")){ stop(); return; }
+    ac();
+    var any = piece.some(function(v){ return v !== null; });
+    if (!any) return;
+    playBtn.classList.add("on");
+    playBtn.textContent = "לעצור";
+    var step = 620;
+    piece.forEach(function(v, i){
+      timers.push(setTimeout(function(){
+        els.forEach(function(s){ s.classList.remove("now"); });
+        if (v === null) return;
+        els[i].classList.add("now");
+        tone(N[v].f, 0.95);
+      }, i * step));
+    });
+    timers.push(setTimeout(stop, SLOTS * step + 400));
+  });
+
+  document.getElementById("clear").addEventListener("click", function(){
+    stop();
+    piece = new Array(SLOTS).fill(null);
+    draw();
+  });
+
+  document.getElementById("save").addEventListener("click", function(){
+    var names = piece.map(function(v){ return v === null ? "–" : N[v].nm; }).join(" ");
+    var box = document.getElementById("saved");
+    box.className = "saved on";
+    box.innerHTML = "<b>השיר שלך נשמר</b><br>" + names +
+      "<br>בגרסה האמיתית הוא יופיע עכשיו במסך השירים שלי, ואפשר יהיה לתת לו שם.";
+  });
+})();
+</script>
+</body>
+</html>
