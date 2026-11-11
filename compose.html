@@ -26,13 +26,14 @@
   .slotRow{ position:absolute; top:0; bottom:0; right:0; left:58px; display:flex; direction:ltr; }
   .slot{ flex:1 1 0; position:relative; cursor:pointer; border-radius:10px; }
   .slot:active{ background:rgba(67,34,90,.06); }
+  /* הטבעת נושאת את הצבע של הצליל, ולכן הצבע הוא רמז נוסף לזהות שלו */
   .slot .dot{ position:absolute; left:50%; transform:translate(-50%,-50%);
     width:38px; height:38px; border-radius:50%; overflow:hidden; background:#fdf4e2;
-    box-shadow:0 0 0 3px #FFD98A, 0 0 0 5px #C98A12; display:none; }
+    box-shadow:0 0 0 4px var(--c,#C98A12), 0 0 0 6px rgba(26,16,54,.3); display:none; }
   .slot .dot img{ width:100%; height:100%; object-fit:cover; display:block; }
   .slot.full .dot{ display:block; }
   .slot .led{ position:absolute; left:50%; transform:translateX(-50%); width:52px; height:3px;
-    background:#43225A; display:none; }
+    background:#43225A; opacity:.75; display:none; }
   .slot.ledger .led{ display:block; }
   .slot.now .dot{ box-shadow:0 0 0 3px #39E0D0, 0 0 0 7px rgba(57,224,208,.45); }
 
@@ -41,8 +42,9 @@
   .cast{ display:flex; justify-content:center; gap:7px; margin:14px 0 4px; flex-wrap:wrap; direction:ltr; }
   .who{ width:52px; cursor:pointer; text-align:center; }
   .who .ring{ width:52px; height:52px; border-radius:50%; overflow:hidden; background:#fdf4e2;
-    box-shadow:0 0 0 3px #4a3a7a; }
-  .who.on .ring{ box-shadow:0 0 0 3px #FFD98A, 0 0 0 6px #C98A12, 0 0 16px 3px rgba(255,196,77,.5); }
+    box-shadow:0 0 0 3px var(--c,#4a3a7a); }
+  .who.on .ring{ box-shadow:0 0 0 4px var(--c,#C98A12), 0 0 0 7px rgba(255,255,255,.22),
+    0 0 18px 4px color-mix(in srgb, var(--c) 55%, transparent); }
   .who img{ width:100%; height:100%; object-fit:cover; display:block; }
   .who .nm{ font-size:12px; font-weight:800; color:#b9b0e0; margin-top:3px; }
   .who.on .nm{ color:#FFD987; }
@@ -105,13 +107,13 @@
 <script>
 (function(){
   var N = [
-    { k:"do",  nm:"דו",  f:261.63, y:180, ledger:true  },
-    { k:"re",  nm:"רה",  f:293.66, y:165, ledger:false },
-    { k:"mi",  nm:"מי",  f:329.63, y:150, ledger:false },
-    { k:"fa",  nm:"פה",  f:349.23, y:135, ledger:false },
-    { k:"sol", nm:"סול", f:392.00, y:120, ledger:false },
-    { k:"la",  nm:"לה",  f:440.00, y:105, ledger:false },
-    { k:"si",  nm:"סי",  f:493.88, y:90,  ledger:false }
+    { k:"do",  nm:"דו",  f:261.63, y:180, ledger:true,  c:"#FF4D4D" },
+    { k:"re",  nm:"רה",  f:293.66, y:165, ledger:false, c:"#FF8A2B" },
+    { k:"mi",  nm:"מי",  f:329.63, y:150, ledger:false, c:"#FFC44D" },
+    { k:"fa",  nm:"פה",  f:349.23, y:135, ledger:false, c:"#34C47C" },
+    { k:"sol", nm:"סול", f:392.00, y:120, ledger:false, c:"#3B6BB2" },
+    { k:"la",  nm:"לה",  f:440.00, y:105, ledger:false, c:"#7B6BFF" },
+    { k:"si",  nm:"סי",  f:493.88, y:90,  ledger:false, c:"#A855D6" }
   ];
   var SLOTS = 8;
   var piece = new Array(SLOTS).fill(null);   // איזה תו יושב בכל מקום
@@ -154,6 +156,7 @@
   N.forEach(function(n, i){
     var w = document.createElement("div");
     w.className = "who" + (i === 0 ? " on" : "");
+    w.style.setProperty("--c", n.c);
     w.innerHTML = '<div class="ring"><img src="demo/faces/' + n.k + '.jpg" alt=""></div>' +
                   '<div class="nm">' + n.nm + '</div>';
     w.addEventListener("click", function(){
@@ -197,6 +200,7 @@
       if (v === null){ s.className = "slot"; return; }
       var n = N[v];
       s.className = "slot full" + (n.ledger ? " ledger" : "");
+      s.style.setProperty("--c", n.c);
       var dot = s.querySelector(".dot");
       dot.style.top = (n.y / 200 * 100) + "%";
       var led = s.querySelector(".led");
