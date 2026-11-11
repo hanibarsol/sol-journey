@@ -166,11 +166,12 @@
       Array.prototype.forEach.call(castBox.children, function(c, j){
         c.className = "who" + (j === i ? " on" : "");
       });
-      tone(n.f, 0.9);
       var free = piece.indexOf(null);
+      /* החמשה מלאה. אין תו להוסיף, ולכן גם אין צליל */
       if (free < 0) return;
       piece[free] = i;
       draw();
+      tone(n.f, 0.9);
     });
     castBox.appendChild(w);
   });
