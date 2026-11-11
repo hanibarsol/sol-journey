@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v295</title>
+<title>העולם של סול v296</title>
 </head>
 <body>
 <style>
@@ -730,6 +730,45 @@
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 0 0 #1d1338, 0 8px 14px -6px rgba(0,0,0,.8); }
   .stone .badge svg{ width:15px; height:15px; display:block; }
+  /* אבן של שיר: סוף הפרק והפרס שאחרי העבודה, ולכן רואים אותה מרחוק */
+  .stone.open.tune{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+               0 0 0 4px #FFF0B8, 0 0 0 8px #C98A12,
+               0 8px 0 0 #8A5A06, 0 0 52px 6px rgba(255,196,77,.95);
+  }
+  .stone .tuneNotes{ position:absolute; inset:0; z-index:2; pointer-events:none;
+    display:none; }
+  .stone.tune.now .tuneNotes{ display:block; }
+  /* התווים עולים מהצד הפנוי של האבן: החץ יושב מעליה והתג מתחת משמאל,
+     ולכן הם לא מסתירים את הפנים ולא את הסימנים */
+  .stone .tuneNotes span{ position:absolute; top:-4px; width:17px; height:17px;
+    opacity:0; animation-duration:3s; animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite; }
+  .stone .tuneNotes span svg{ width:100%; height:100%; display:block; }
+  .stone .tuneNotes span.n1{ left:76%; animation-name:tuneRiseA; }
+  .stone .tuneNotes span.n2{ left:92%; animation-name:tuneRiseB; }
+  .stone .tuneNotes span.n3{ left:64%; animation-name:tuneRiseC; }
+  @keyframes tuneRiseA{
+    0%{   transform:translate(0,8px) scale(.6) rotate(-10deg); opacity:0 }
+    22%{  opacity:1 }
+    74%{  opacity:.95 }
+    100%{ transform:translate(12px,-48px) scale(1.06) rotate(12deg); opacity:0 }
+  }
+  @keyframes tuneRiseB{
+    0%{   transform:translate(0,8px) scale(.55) rotate(8deg); opacity:0 }
+    22%{  opacity:1 }
+    74%{  opacity:.9 }
+    100%{ transform:translate(18px,-42px) scale(1) rotate(-10deg); opacity:0 }
+  }
+  @keyframes tuneRiseC{
+    0%{   transform:translate(0,8px) scale(.6) rotate(6deg); opacity:0 }
+    22%{  opacity:1 }
+    74%{  opacity:.92 }
+    100%{ transform:translate(4px,-56px) scale(1.04) rotate(14deg); opacity:0 }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .stone .tuneNotes span{ animation:none; opacity:.95; }
+  }
   @keyframes stoneBeat{ 0%,100%{ transform:translate(-50%,-50%) scale(1) } 50%{ transform:translate(-50%,-50%) scale(1.06) } }
   .stone svg{ width:22px; height:22px; }
   .trailHead{
@@ -2759,6 +2798,12 @@ window.onerror = function(m, u, l){
     ];
     // a note for a stage that plays a song, one voice for hearing one sound,
     // two voices for hearing two and giving them back in order
+    /* תו זהב עם קו כהה, כדי שייראה גם מעל החלקים הבהירים של הדרך */
+    var TUNE_NOTE = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<g stroke="#2a1f4d" stroke-width="1.8" stroke-linejoin="round">' +
+      '<rect x="13.2" y="2.6" width="3" height="13.4" rx="1.5" fill="#FFC44D"/>' +
+      '<ellipse cx="9.4" cy="16.6" rx="5.4" ry="4.2" transform="rotate(-18 9.4 16.6)" fill="#FFC44D"/>' +
+      '</g></svg>';
     var BADGE = {
       song: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
         '<rect x="13.4" y="3" width="2.6" height="13" rx="1.3" fill="#FFC44D"/>' +
@@ -3215,6 +3260,19 @@ window.onerror = function(m, u, l){
           bg.className = "badge";
           bg.innerHTML = BADGE[KIND[id] || "song"];
           d.appendChild(bg);
+          if (KIND[id] === "song"){
+            d.classList.add("tune");
+            var tn = document.createElement("div");
+            tn.className = "tuneNotes";
+            [["n1", 0], ["n2", 1], ["n3", 2]].forEach(function(p){
+              var sp = document.createElement("span");
+              sp.className = p[0];
+              sp.style.animationDelay = p[1] + "s";
+              sp.innerHTML = TUNE_NOTE;
+              tn.appendChild(sp);
+            });
+            d.appendChild(tn);
+          }
           if (i === here || (theEnd && i === shown - 1)){
             var hp = document.createElement("div");
             hp.className = "herePin";
