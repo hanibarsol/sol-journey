@@ -250,6 +250,10 @@
     stop();
     piece = new Array(SLOTS).fill(null);
     draw();
+    /* חמשה ריקה, ולכן גם הודעת השמירה יורדת */
+    var box = document.getElementById("saved");
+    box.className = "saved";
+    box.innerHTML = "";
   });
 
   saveBtn.addEventListener("click", function(){
