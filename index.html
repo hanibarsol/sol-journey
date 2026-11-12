@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v296</title>
+<title>העולם של סול v297</title>
 </head>
 <body>
 <style>
@@ -730,44 +730,30 @@
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 0 0 #1d1338, 0 8px 14px -6px rgba(0,0,0,.8); }
   .stone .badge svg{ width:15px; height:15px; display:block; }
-  /* אבן של שיר: סוף הפרק והפרס שאחרי העבודה, ולכן רואים אותה מרחוק */
-  .stone.open.tune{
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
-               0 0 0 4px #FFF0B8, 0 0 0 8px #C98A12,
-               0 8px 0 0 #8A5A06, 0 0 52px 6px rgba(255,196,77,.95);
-  }
-  .stone .tuneNotes{ position:absolute; inset:0; z-index:2; pointer-events:none;
-    display:none; }
-  .stone.tune.now .tuneNotes{ display:block; }
-  /* התווים עולים מהצד הפנוי של האבן: החץ יושב מעליה והתג מתחת משמאל,
-     ולכן הם לא מסתירים את הפנים ולא את הסימנים */
-  .stone .tuneNotes span{ position:absolute; top:-4px; width:17px; height:17px;
-    opacity:0; animation-duration:3s; animation-timing-function:ease-in-out;
-    animation-iteration-count:infinite; }
-  .stone .tuneNotes span svg{ width:100%; height:100%; display:block; }
-  .stone .tuneNotes span.n1{ left:76%; animation-name:tuneRiseA; }
-  .stone .tuneNotes span.n2{ left:92%; animation-name:tuneRiseB; }
-  .stone .tuneNotes span.n3{ left:64%; animation-name:tuneRiseC; }
-  @keyframes tuneRiseA{
-    0%{   transform:translate(0,8px) scale(.6) rotate(-10deg); opacity:0 }
-    22%{  opacity:1 }
-    74%{  opacity:.95 }
-    100%{ transform:translate(12px,-48px) scale(1.06) rotate(12deg); opacity:0 }
-  }
-  @keyframes tuneRiseB{
-    0%{   transform:translate(0,8px) scale(.55) rotate(8deg); opacity:0 }
-    22%{  opacity:1 }
-    74%{  opacity:.9 }
-    100%{ transform:translate(18px,-42px) scale(1) rotate(-10deg); opacity:0 }
-  }
-  @keyframes tuneRiseC{
-    0%{   transform:translate(0,8px) scale(.6) rotate(6deg); opacity:0 }
-    22%{  opacity:1 }
-    74%{  opacity:.92 }
-    100%{ transform:translate(4px,-56px) scale(1.04) rotate(14deg); opacity:0 }
+  /* אבן של שיר: סוף הפרק והפרס שאחרי העבודה. מאחוריה כוכב זהב שמסתובב,
+     וממנה יוצאת טבעת אור שמתרחבת. הטבעת בהירה כמעט עד לבן, אחרת היא
+     נבלעת בתוך הקרניים */
+  .tuneFx{ position:absolute; transform:translate(-50%,-50%); pointer-events:none; }
+  .tuneFx .burst{ position:absolute; inset:0; width:100%; height:100%; display:block;
+    animation:tuneSpin 15s linear infinite; }
+  .tuneFx.fin{ opacity:.55; filter:saturate(.85); }
+  .tuneFx .ring{ position:absolute; left:50%; top:50%; border-radius:50%; display:none;
+    border:3px solid rgba(255,248,224,.95);
+    /* קו כהה דק מבחוץ, אחרת הטבעת הבהירה נעלמת מעל החלקים הלבנים של הדרך */
+    box-shadow:0 0 12px 2px rgba(255,236,180,.55), 0 0 0 1.5px rgba(52,34,8,.45);
+    animation:tuneRing 2.4s ease-out infinite; }
+  .tuneFx.now .ring{ display:block; }
+  .tuneFx .ring.r2{ animation-delay:1.2s; }
+  @keyframes tuneSpin{ from{ transform:rotate(0deg) } to{ transform:rotate(360deg) } }
+  /* המרכוז נעשה בשוליים השליליים, ולכן כאן רק ההתרחבות. טרנספורם של
+     מינוס חמישים אחוז כאן היה מזיז את הטבעת בחצי גודל למעלה ולצד */
+  @keyframes tuneRing{
+    0%{   transform:scale(1);   opacity:.85 }
+    100%{ transform:scale(2.1); opacity:0 }
   }
   @media (prefers-reduced-motion:reduce){
-    .stone .tuneNotes span{ animation:none; opacity:.95; }
+    .tuneFx .burst{ animation:none; }
+    .tuneFx .ring{ animation:none; opacity:.45; }
   }
   @keyframes stoneBeat{ 0%,100%{ transform:translate(-50%,-50%) scale(1) } 50%{ transform:translate(-50%,-50%) scale(1.06) } }
   .stone svg{ width:22px; height:22px; }
@@ -993,7 +979,6 @@
   .buyDoor .go:active{ transform:translateY(2px); box-shadow:0 1px 0 0 #B07C06; }
   .buyDoor .later{ margin-top:12px; border:none; background:none; cursor:pointer;
     font-family:inherit; font-size:14px; color:#9b8dff; text-decoration:underline; }
-
   .devDoor{ position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center;
     background:rgba(10,8,28,.74); }
   .devDoor.on{ display:flex; }
@@ -1533,7 +1518,8 @@ window.onerror = function(m, u, l){
     function mineRow(){
       var cmp = window.__solComposer; if (!cmp) return;
       secTitle("המנגינות שיצרתי");
-      var canMake = cmp.met().length >= 2;
+      /* המלחין אינו חלק מהטעימה החינמית */
+      var canMake = cmp.met().length >= 2 && !!window.__solFull;
       var add = document.createElement("div");
       add.className = "songCard add" + (canMake ? "" : " shut");
       var f = document.createElement("div"); f.className = "face";
@@ -1547,7 +1533,7 @@ window.onerror = function(m, u, l){
         add.addEventListener("click", function(){ close(); cmp.open(); });
       } else {
         var lk = document.createElement("div"); lk.className = "lock";
-        lk.textContent = "ייפתח במסע"; add.appendChild(lk);
+        lk.textContent = "מחכים לכם בהמשך המסע"; add.appendChild(lk);
       }
       grid.appendChild(add);
 
@@ -1616,7 +1602,7 @@ window.onerror = function(m, u, l){
         c.appendChild(nm);
         if (!open){
           var lk = document.createElement("div"); lk.className = "lock";
-          lk.textContent = "ייפתח במסע";
+          lk.textContent = "מחכים לכם בהמשך המסע";
           c.appendChild(lk);
         } else {
           c.addEventListener("click", function(){
@@ -1810,6 +1796,7 @@ window.onerror = function(m, u, l){
     }
 
     function open(){
+      if (!window.__solFull) return;
       build();
       piece = new Array(SLOTS).fill(null);
       castRow();
@@ -2104,22 +2091,28 @@ window.onerror = function(m, u, l){
   })();
 
   /* ---- טעימה או מסע מלא ----
-     ברירת המחדל היא טעימה: הדרך נעצרת אחרי "דו ורה ביחד", ומי ואילך נעולים.
+     ברירת המחדל באתר היא טעימה: הדרך נעצרת אחרי "דו ורה ביחד", ומי ואילך נעולים.
      הרכישה פותחת דרך כתובת עם סימן, והסימן נשמר במכשיר לתמיד.
      זה מנעול מנומס ולא קופה רושמת: מי שקורא קוד ימצא את הסימן. */
   var SOL_UNLOCK = "solfull2026";
   window.__solBuy = "https://lp.smoove.io/sbgx";
   (function(){
     var KEY = "solWorld.full";
+    /* מי נעול ומי לא, בלי להסתמך על כתובת האתר.
+       סקריפט הבנייה מחליף את קידומת מפתחות הזיכרון בשני העותקים הפרטיים
+       של חני, ולכן קידומת ששונה מזו שכתובה כאן פירושה עותק פרטי.
+       העותקים לעולם אינם נעולים, והאתר תמיד כן, גם אם יעבור לכתובת אחרת.
+       הכיוון הזה נכשל לצד הבטוח: כתובת לא מוכרת נעולה, לא פתוחה. */
+    var GATED = KEY.indexOf("sol" + "World.") === 0;
     try{
       var m = location.search.match(/[?&]unlock=([^&#]*)/i);
       if (m && decodeURIComponent(m[1]).toLowerCase() === SOL_UNLOCK){
         localStorage.setItem(KEY, "1");
       }
-      window.__solFull = localStorage.getItem(KEY) === "1";
+      window.__solFull = !GATED || localStorage.getItem(KEY) === "1";
       /* הכתובת מתנקה, אחרת הסימן נשאר גלוי בשורת הכתובת ובהיסטוריה */
       if (m) location.replace(location.pathname);
-    }catch(e){ window.__solFull = false; }
+    }catch(e){ window.__solFull = !GATED; }
   })();
 
 
@@ -2871,11 +2864,22 @@ window.onerror = function(m, u, l){
     // a note for a stage that plays a song, one voice for hearing one sound,
     // two voices for hearing two and giving them back in order
     /* תו זהב עם קו כהה, כדי שייראה גם מעל החלקים הבהירים של הדרך */
-    var TUNE_NOTE = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-      '<g stroke="#2a1f4d" stroke-width="1.8" stroke-linejoin="round">' +
-      '<rect x="13.2" y="2.6" width="3" height="13.4" rx="1.5" fill="#FFC44D"/>' +
-      '<ellipse cx="9.4" cy="16.6" rx="5.4" ry="4.2" transform="rotate(-18 9.4 16.6)" fill="#FFC44D"/>' +
-      '</g></svg>';
+    /* קרני הכוכב נבנות פעם אחת. קו כהה סביבן, כדי שייראו גם מעל
+       החלקים הבהירים של הדרך */
+    var TUNE_BURST = (function(){
+      var cx = 100, cy = 100, out = 97, inr = 30, n = 12, d = "";
+      for (var i = 0; i < n; i++){
+        var a = (i / n) * Math.PI * 2, w = Math.PI / n * 0.52;
+        d += "M" + (cx + Math.cos(a) * out).toFixed(1) + " " + (cy + Math.sin(a) * out).toFixed(1) +
+             " L" + (cx + Math.cos(a - w) * inr).toFixed(1) + " " + (cy + Math.sin(a - w) * inr).toFixed(1) +
+             " L" + (cx + Math.cos(a + w) * inr).toFixed(1) + " " + (cy + Math.sin(a + w) * inr).toFixed(1) + " Z";
+      }
+      return '<defs><radialGradient id="tuneRg" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="28%" stop-color="#FFF0B8"/><stop offset="100%" stop-color="#F0A81E"/>' +
+        '</radialGradient></defs>' +
+        '<circle cx="100" cy="100" r="58" fill="rgba(255,196,77,.45)"/>' +
+        '<path d="' + d + '" fill="url(#tuneRg)" stroke="#8A5A06" stroke-width="1.6" stroke-linejoin="round"/>';
+    })();
     var BADGE = {
       song: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
         '<rect x="13.4" y="3" width="2.6" height="13" rx="1.3" fill="#FFC44D"/>' +
@@ -3341,17 +3345,24 @@ window.onerror = function(m, u, l){
           bg.innerHTML = BADGE[KIND[id] || "song"];
           d.appendChild(bg);
           if (KIND[id] === "song"){
+            /* האבן גדלה, ומאחוריה נכנס הכוכב. הוא נוסף לרצועה לפני האבן
+               עצמה, ולכן הוא מצויר מתחתיה ולא מעליה */
             d.classList.add("tune");
-            var tn = document.createElement("div");
-            tn.className = "tuneNotes";
-            [["n1", 0], ["n2", 1], ["n3", 2]].forEach(function(p){
-              var sp = document.createElement("span");
-              sp.className = p[0];
-              sp.style.animationDelay = p[1] + "s";
-              sp.innerHTML = TUNE_NOTE;
-              tn.appendChild(sp);
+            sz = Math.round(sz * 1.16);
+            d.style.width = sz + "px"; d.style.height = sz + "px";
+            var fx = document.createElement("div");
+            fx.className = "tuneFx" + (i < here ? " fin" : (i === here ? " now" : ""));
+            fx.style.left = P.x + "%"; fx.style.top = P.y + "%";
+            fx.style.width = Math.round(sz * 2.33) + "px";
+            fx.style.height = Math.round(sz * 2.33) + "px";
+            fx.innerHTML = '<svg class="burst" viewBox="0 0 200 200" aria-hidden="true">' +
+              TUNE_BURST + '</svg><i class="ring r1"></i><i class="ring r2"></i>';
+            Array.prototype.forEach.call(fx.querySelectorAll(".ring"), function(rg){
+              rg.style.width = sz + "px"; rg.style.height = sz + "px";
+              rg.style.marginTop = (-sz / 2) + "px";
+              rg.style.marginInlineStart = (-sz / 2) + "px";
             });
-            d.appendChild(tn);
+            st.appendChild(fx);
           }
           if (i === here || (theEnd && i === shown - 1)){
             var hp = document.createElement("div");
