@@ -97,8 +97,54 @@
   @keyframes pulse{ 0%{ transform:scale(1); opacity:.8 }
     100%{ transform:scale(2.1); opacity:0 } }
 
+  /* ---------- ה: זרקור ---------- */
+  .v5wrap{ position:absolute; inset:0; overflow:hidden; }
+  .v5wrap .dim{ position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 56%, rgba(8,4,20,0) 64px, rgba(8,4,20,.62) 165px); }
+  .v5wrap .beam{ position:absolute; left:50%; top:-14%; width:200px; height:190px;
+    transform:translateX(-50%); }
+  .v5 .stone{ width:98px; height:98px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+      0 0 0 4px var(--goldPale), 0 10px 0 0 var(--goldDeep),
+      0 0 60px 10px rgba(255,214,130,.95);
+    animation:beat 2.6s ease-in-out infinite; }
+
+  /* ---------- ז: גדולה, זרקור ותווים ---------- */
+  .v7wrap{ position:absolute; inset:0; overflow:hidden; }
+  .v7wrap .dim{ position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 56%, rgba(8,4,20,0) 70px, rgba(8,4,20,.6) 170px); }
+  .v7wrap .beam{ position:absolute; left:50%; top:-14%; width:200px; height:190px;
+    transform:translateX(-50%); }
+  .v7 .stone{ width:102px; height:102px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+      0 0 0 4px var(--goldPale), 0 0 0 8px #C98A12,
+      0 10px 0 0 var(--goldDeep), 0 0 64px 12px rgba(255,214,130,.95);
+    animation:beatBig 2.3s ease-in-out infinite; }
+  .v7 .riser span{ width:20px; height:20px; }
+  .v7 .riser span.n1{ left:78%; } .v7 .riser span.n2{ left:94%; }
+  .v7 .riser span.n3{ left:66%; }
+
+  /* ---------- ו: תקליט זהב ---------- */
+  .v6 .disc{ position:relative; width:112px; height:112px; border-radius:50%;
+    box-shadow:0 8px 0 0 var(--goldDeep), 0 0 46px 4px rgba(255,196,77,.85);
+    background:#8A5A06; overflow:hidden; }
+  .v6 .disc .grooves{ position:absolute; inset:0; border-radius:50%;
+    background:repeating-radial-gradient(circle at 50% 50%,
+      #F0C870 0 2px, #B07C06 2px 5px);
+    animation:spin2 7s linear infinite; }
+  .v6 .disc .shine{ position:absolute; inset:0; border-radius:50%;
+    background:linear-gradient(118deg, rgba(255,255,255,0) 36%,
+      rgba(255,240,184,.5) 48%, rgba(255,255,255,0) 60%); }
+  .v6 .disc .rim{ position:absolute; inset:0; border-radius:50%;
+    box-shadow:inset 0 0 0 5px var(--gold), inset 0 0 0 8px var(--goldDeep); }
+  .v6 .disc .label{ position:absolute; left:50%; top:50%; width:70px; height:70px;
+    margin:-35px 0 0 -35px; border-radius:50%; overflow:hidden;
+    box-shadow:0 0 0 4px var(--goldLight), 0 0 0 7px var(--goldDeep); }
+  .v6 .disc .label img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @keyframes spin2{ to{ transform:rotate(360deg) } }
+
   @media (prefers-reduced-motion:reduce){
-    .stone,.riser span,.v1 .burst,.v3 .halo,.v4 .pulse{ animation:none; }
+    .stone,.riser span,.v1 .burst,.v3 .halo,.v4 .pulse,.v6 .disc .grooves{ animation:none; }
     .riser span{ opacity:.95; }
   }
   .note{ margin:22px 2px 0; font-size:13.5px; line-height:1.7; color:#c9c0ef; }
@@ -175,6 +221,51 @@
     </div></div>
   </div>
 
+  <!-- ===== ה ===== -->
+  <div class="case">
+    <div class="caseTop"><b>ה. זרקור</b><span>אלומת אור מלמעלה, הסביבה מתכהה</span></div>
+    <div class="road"><div class="v5wrap">
+      <div class="dim"></div>
+      <svg class="beam" viewBox="0 0 200 190" aria-hidden="true"></svg>
+    </div><div class="mid v5">
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===== ו ===== -->
+  <div class="case">
+    <div class="caseTop"><b>ו. תקליט זהב</b><span>האבן עצמה היא תקליט שמסתובב</span></div>
+    <div class="road"><div class="mid v6">
+      <div class="disc">
+        <div class="grooves"></div>
+        <div class="shine"></div>
+        <div class="rim"></div>
+        <div class="label"><img src="demo/faces/mi.jpg" alt=""></div>
+      </div>
+      <div class="badge"></div>
+    </div></div>
+  </div>
+
+  <!-- ===== ז ===== -->
+  <div class="case">
+    <div class="caseTop"><b>ז. השילוב</b><span>גדולה, זרקור מלמעלה ותווים שעולים</span></div>
+    <div class="road"><div class="v7wrap">
+      <div class="dim"></div>
+      <svg class="beam" viewBox="0 0 200 190" aria-hidden="true"></svg>
+    </div><div class="mid v7">
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="riser">
+          <span class="n1"></span><span class="n2"></span><span class="n3"></span>
+        </div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
   <p class="note">האבנים הרגילות במסע נשארות בדיוק כמו שהן.
     מה שמשתנה הוא <b>רק האבן שבה מחכה שיר</b>.</p>
 </div>
@@ -236,6 +327,28 @@
       '<path d="M18 26 a9 9 0 0 0 18 -5 M54 19 a9 9 0 0 0 18 -3 M90 16 a9 9 0 0 0 18 0 M126 18 a9 9 0 0 0 18 3 M160 24 a9 9 0 0 0 18 6" fill="#FFE7AD" stroke="#8A5A06" stroke-width="1.8"/>' +
       /* רצפת הבמה */
       '<path d="M28 134 l140 0 l14 12 l-168 0 z" fill="#43225A" stroke="#1d1338" stroke-width="2.2"/>';
+  })();
+
+  /* ---- ה: אלומת הזרקור ---- */
+  (function beam(){
+    var svgs = document.querySelectorAll(".v5wrap .beam, .v7wrap .beam");
+    if (!svgs.length) return;
+    var html =
+      '<defs><linearGradient id="bm" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#FFE7AD" stop-opacity=".62"/>' +
+      '<stop offset="62%" stop-color="#FFD98A" stop-opacity=".28"/>' +
+      '<stop offset="100%" stop-color="#FFD98A" stop-opacity="0"/>' +
+      '</linearGradient>' +
+      '<radialGradient id="pool" cx="50%" cy="50%" r="50%">' +
+      '<stop offset="0%" stop-color="#FFE7AD" stop-opacity=".55"/>' +
+      '<stop offset="100%" stop-color="#FFE7AD" stop-opacity="0"/>' +
+      '</radialGradient></defs>' +
+      '<path d="M78 0 L122 0 L166 168 L34 168 Z" fill="url(#bm)"/>' +
+      '<ellipse cx="100" cy="168" rx="72" ry="20" fill="url(#pool)"/>';
+    Array.prototype.forEach.call(svgs, function(el, i){
+      el.innerHTML = html.split('"bm"').join('"bm' + i + '"').split('#bm)').join('#bm' + i + ')')
+                         .split('"pool"').join('"pool' + i + '"').split('#pool)').join('#pool' + i + ')');
+    });
   })();
 
   /* ---- ג: הילה של תווים ---- */

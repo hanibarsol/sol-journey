@@ -975,6 +975,25 @@
     box-shadow:0 4px 14px -6px rgba(0,0,0,.9);
   }
   .leaveLesson svg{ width:20px; height:20px; display:block; }
+  /* ההזמנה להמשיך, נפתחת מהאבן הנעולה של מי */
+  .buyDoor{ position:fixed; inset:0; z-index:95; display:none; align-items:center; justify-content:center;
+    background:rgba(8,6,22,.8); padding:18px; }
+  .buyDoor.on{ display:flex; }
+  .buyDoor .box{ width:min(340px,90vw); border-radius:22px; padding:20px 18px 16px; text-align:center;
+    background:linear-gradient(180deg,#2a1f4d,#1a1336); border:1.5px solid #51428c;
+    box-shadow:0 18px 40px -12px rgba(0,0,0,.85); }
+  .buyDoor .who{ width:88px; height:88px; margin:0 auto 12px; border-radius:50%;
+    overflow:hidden; border:4px solid #FFC44D; background:#211a44; }
+  .buyDoor .who img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .buyDoor h3{ margin:0 0 8px; font-size:19px; font-weight:800; color:#FFE7AD; }
+  .buyDoor p{ margin:0 0 16px; font-size:14.5px; line-height:1.7; color:#d6cdf2; }
+  .buyDoor .go{ display:block; text-decoration:none; border-radius:999px; padding:13px 10px;
+    font-size:16px; font-weight:800; color:#5a3c05;
+    background:linear-gradient(180deg,#FFE7AD,#FFC44D); box-shadow:0 3px 0 0 #B07C06; }
+  .buyDoor .go:active{ transform:translateY(2px); box-shadow:0 1px 0 0 #B07C06; }
+  .buyDoor .later{ margin-top:12px; border:none; background:none; cursor:pointer;
+    font-family:inherit; font-size:14px; color:#9b8dff; text-decoration:underline; }
+
   .devDoor{ position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center;
     background:rgba(10,8,28,.74); }
   .devDoor.on{ display:flex; }
@@ -1167,6 +1186,15 @@
     <div class="frameBox" id="frameBox"><iframe id="lessonFrame" title="שיעור" allow="autoplay; fullscreen"></iframe></div>
   </div>
   <div class="devDoor" id="devDoor"><div class="row" id="devRow"></div></div>
+  <div class="buyDoor" id="buyDoor">
+    <div class="box">
+      <div class="who"><img id="buyFace" src="" alt=""></div>
+      <h3>כאן מחכה מי</h3>
+      <p>הגעתם לסוף הטעימה. המסע ממשיך עם מי, פה, סול, לה וסי, עד שכל המשפחה מנגנת יחד.</p>
+      <a class="go" id="buyGo">להמשיך את המסע</a>
+      <button class="later" id="buyLater">לא עכשיו</button>
+    </div>
+  </div>
   <div class="toast" id="toast"></div>
   <div class="jam" id="jam">
     <div class="jamTop">
@@ -2075,6 +2103,25 @@ window.onerror = function(m, u, l){
     }catch(e){}
   })();
 
+  /* ---- טעימה או מסע מלא ----
+     ברירת המחדל היא טעימה: הדרך נעצרת אחרי "דו ורה ביחד", ומי ואילך נעולים.
+     הרכישה פותחת דרך כתובת עם סימן, והסימן נשמר במכשיר לתמיד.
+     זה מנעול מנומס ולא קופה רושמת: מי שקורא קוד ימצא את הסימן. */
+  var SOL_UNLOCK = "solfull2026";
+  window.__solBuy = "https://lp.smoove.io/sbgx";
+  (function(){
+    var KEY = "solWorld.full";
+    try{
+      var m = location.search.match(/[?&]unlock=([^&#]*)/i);
+      if (m && decodeURIComponent(m[1]).toLowerCase() === SOL_UNLOCK){
+        localStorage.setItem(KEY, "1");
+      }
+      window.__solFull = localStorage.getItem(KEY) === "1";
+      /* הכתובת מתנקה, אחרת הסימן נשאר גלוי בשורת הכתובת ובהיסטוריה */
+      if (m) location.replace(location.pathname);
+    }catch(e){ window.__solFull = false; }
+  })();
+
 
   // ---- the lessons live here, and hand their notes back when they finish ----
 
@@ -2457,6 +2504,8 @@ window.onerror = function(m, u, l){
     (function backDoor(){
       var door = document.getElementById("devDoor"), row = document.getElementById("devRow");
       if (!door || !row) return;
+      /* בטעימה הקיצור הזה היה עוקף את המנעול, ולכן הוא לא נפתח בכלל */
+      if (!window.__solFull) return;
       var LIST = [
         { id:"do", img:[DO_IMG], t:"דו" },
         { id:"re", img:[RE_FACE], t:"רה" },
@@ -2506,6 +2555,26 @@ window.onerror = function(m, u, l){
         var i = ["1","2","3","4","5","6","7","8","9"].indexOf(e.key);
         if (i >= 0 && LIST[i]) { door.classList.remove("on"); window.openLesson(LIST[i].id); }
       });
+    })();
+
+    /* ההזמנה להמשיך. נפתחת רק מהאבן הנעולה, ולכן רק בטעימה. */
+    (function buyDoor(){
+      var box = document.getElementById("buyDoor");
+      if (!box) return;
+      var face  = document.getElementById("buyFace"),
+          go    = document.getElementById("buyGo"),
+          later = document.getElementById("buyLater");
+      if (face) face.src = MI_FACE;
+      if (go && window.__solBuy){
+        go.href = window.__solBuy;
+        go.target = "_blank";
+        go.rel = "noopener";
+      }
+      function hide(){ box.classList.remove("on"); }
+      if (later) later.addEventListener("click", hide);
+      /* נגיעה ברקע סוגרת, נגיעה בתיבה עצמה לא */
+      box.addEventListener("click", function(ev){ if (ev.target === box) hide(); });
+      window.__solShowBuy = function(){ box.classList.add("on"); };
     })();
     function close(){
       stage.classList.remove("on");
@@ -2784,6 +2853,9 @@ window.onerror = function(m, u, l){
                 "meetsol", "ear5", "ear5b", "hunter5", "hunter5b", "read5", "solsong",
                 "meetla", "ear6", "ear6b", "hunter6", "hunter6b", "read6", "lasong",
                 "meetsi", "ear7", "ear7b", "hunter7", "hunter7b", "read7"];
+    /* שבעת השלבים הראשונים הם בדיוק שני הפרקים הראשונים: דו ורה */
+    var FREE_STEPS = 7;
+    if (!window.__solFull) PATH = PATH.slice(0, FREE_STEPS);
     var JOURNEYS = {
       "דו": { id:"do", face:DO_IMG,  open:PATH },
       "רה": { id:"re", face:RE_FACE, open:PATH }
@@ -2860,6 +2932,14 @@ window.onerror = function(m, u, l){
       ["meetla", "ear6", "ear6b", "hunter6", "hunter6b", "read6", "lasong"],
       ["meetsi", "ear7", "ear7b", "hunter7", "hunter7b", "read7"]
     ];
+    if (!window.__solFull){
+      /* נשמרים הפרקים השלמים שנכנסים בתוך החלק החינמי, ולא חצי פרק */
+      var keepCh = [], seen = 0;
+      for (var ci = 0; ci < CHAPTERS.length && seen < FREE_STEPS; ci++){
+        keepCh.push(CHAPTERS[ci]); seen += CHAPTERS[ci].length;
+      }
+      CHAPTERS = keepCh;
+    }
     var CH = -1;   // איזה פרק פתוח כרגע. מינוס אחד אומר: זה שבו הילד עומד
     function chapterOf(i){
       var base = 0;
@@ -3311,7 +3391,7 @@ window.onerror = function(m, u, l){
       if (mineY) placeTrack(mineY.tile, shown);
       if (mineY) aimCamera(mineY.y, !!window.__solSnapCam);
       window.__solSnapCam = false;
-      if (theEnd){
+      if (theEnd && window.__solFull){
         var gp = spineAt(0.985);
         if (gp){
           var gate = document.createElement("div");
@@ -3323,9 +3403,11 @@ window.onerror = function(m, u, l){
       }
       if (hasPrev) peek(CHAPTERS[CH-1][CHAPTERS[CH-1].length-1], 0.02, CH - 1, false, "back");
       if (hasNext) peek(CHAPTERS[CH+1][0], 0.96, CH + 1, reached < chapterBase(CH+1), "on");
+      /* בטעימה אין פרק הבא, ובמקומו עומדת מי מאחורי מנעול */
+      else if (!window.__solFull) peek("meetmi", 0.96, -1, true, "on", true);
       window.__solJustDone = "";
 
-      function peek(id, t, to, shut, dir){
+      function peek(id, t, to, shut, dir, buy){
         var P = spineAt(t);
         if (!P) return;
         var d = document.createElement("div");
@@ -3345,6 +3427,7 @@ window.onerror = function(m, u, l){
         d.appendChild(ar);
         d.addEventListener("click", function(){
           if (window.__solPanned) return;
+          if (buy){ if (window.__solShowBuy) window.__solShowBuy(); return; }
           if (shut){
             d.classList.remove("shake"); void d.getBoundingClientRect(); d.classList.add("shake");
             setTimeout(function(){ d.classList.remove("shake"); }, 460);
