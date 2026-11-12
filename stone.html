@@ -68,6 +68,18 @@
   .v1 .stone{ width:84px; height:84px; z-index:2; }
   @keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg) } }
 
+  /* ---------- א+: כוכב עם הילה שמתרחבת ---------- */
+  .v8 .burst{ position:absolute; left:50%; top:50%; width:196px; height:196px;
+    transform:translate(-50%,-50%); animation:spin 14s linear infinite; }
+  .v8 .stone{ width:84px; height:84px; z-index:2; }
+  /* הטבעת בהירה כמעט עד לבן, אחרת היא נבלעת בתוך קרני הזהב */
+  .v8 .pulse{ position:absolute; left:50%; top:50%; width:84px; height:84px;
+    margin:-42px 0 0 -42px; border-radius:50%; z-index:3;
+    border:3px solid rgba(255,248,224,.95);
+    box-shadow:0 0 12px 2px rgba(255,236,180,.55);
+    animation:pulse 2.4s ease-out infinite; }
+  .v8 .pulse.p2{ animation-delay:1.2s; }
+
   /* ---------- ב: במה עם מסך ---------- */
   .v2 .stage{ position:relative; width:196px; height:150px; }
   .v2 .arch{ position:absolute; left:0; top:0; width:100%; }
@@ -144,7 +156,7 @@
   @keyframes spin2{ to{ transform:rotate(360deg) } }
 
   @media (prefers-reduced-motion:reduce){
-    .stone,.riser span,.v1 .burst,.v3 .halo,.v4 .pulse,.v6 .disc .grooves{ animation:none; }
+    .stone,.riser span,.v1 .burst,.v8 .burst,.v8 .pulse,.v3 .halo,.v4 .pulse,.v6 .disc .grooves{ animation:none; }
     .riser span{ opacity:.95; }
   }
   .note{ margin:22px 2px 0; font-size:13.5px; line-height:1.7; color:#c9c0ef; }
@@ -176,6 +188,19 @@
     <div class="caseTop"><b>א. כוכב</b><span>קרני זהב שמסתובבות מאחור</span></div>
     <div class="road"><div class="mid v1">
       <svg class="burst" viewBox="0 0 200 200" aria-hidden="true"></svg>
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===== א+ ===== -->
+  <div class="case">
+    <div class="caseTop"><b>א+. כוכב עם הילה</b><span>הקרניים של א, והטבעת שמתרחבת מ-ד</span></div>
+    <div class="road"><div class="mid v8">
+      <svg class="burst" viewBox="0 0 200 200" aria-hidden="true"></svg>
+      <div class="pulse"></div><div class="pulse p2"></div>
       <div class="stone">
         <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
         <div class="badge"></div>
@@ -293,8 +318,8 @@
 
   /* ---- א: קרני כוכב ---- */
   (function burst(){
-    var svg = document.querySelector(".v1 .burst");
-    if (!svg) return;
+    var svgs = document.querySelectorAll(".v1 .burst, .v8 .burst");
+    if (!svgs.length) return;
     var cx = 100, cy = 100, out = 97, inr = 30, n = 12, d = "";
     for (var i = 0; i < n; i++){
       var a = (i / n) * Math.PI * 2;
@@ -303,12 +328,15 @@
            " L" + (cx + Math.cos(a - w) * inr) + " " + (cy + Math.sin(a - w) * inr) +
            " L" + (cx + Math.cos(a + w) * inr) + " " + (cy + Math.sin(a + w) * inr) + " Z";
     }
-    svg.innerHTML =
+    var html =
       '<defs><radialGradient id="rg" cx="50%" cy="50%" r="50%">' +
       '<stop offset="28%" stop-color="#FFF0B8"/><stop offset="100%" stop-color="#F0A81E"/>' +
       '</radialGradient></defs>' +
       '<circle cx="100" cy="100" r="58" fill="rgba(255,196,77,.45)"/>' +
       '<path d="' + d + '" fill="url(#rg)" stroke="#8A5A06" stroke-width="1.6" stroke-linejoin="round"/>';
+    Array.prototype.forEach.call(svgs, function(el, i){
+      el.innerHTML = html.split('"rg"').join('"rg' + i + '"').split('#rg)').join('#rg' + i + ')');
+    });
   })();
 
   /* ---- ב: קשת הבמה והווילון ---- */
