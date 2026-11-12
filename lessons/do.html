@@ -1197,8 +1197,16 @@
     if (target > clkBase + 0.35) target = clkBase + 0.35;
     if (smT < 0){ smT = target; smMark = now; smRate = 1; return target; }
     smT += (now - smMark) / 1000 * smRate; smMark = now;
+    /* התקרה למעלה היא על היעד בלבד, והשעון המוחלק היה בורח מעליה
+       בזמן שהצליל תקוע. כאן הוא נעצר בה באמת. */
+    if (smT > clkBase + 0.35){ smT = clkBase + 0.35; }
     var err = target - smT;
-    if (err > 0.3 || err < -0.3){ smT = target; smRate = 1; }
+    /* השעון מדלג קדימה כשהוא מפגר, אבל לעולם לא חוזר אחורה.
+       משיכה אחורה נראית כקפיצה של כל שורת התווים, 29 פיקסלים,
+       וזה מה שקרה בכניסה ראשונה כשפענוח השיר התעכב מעל 0.7 שניות.
+       במקום זה התווים עומדים עד שהצליל משיג אותם. */
+    if (err > 0.3){ smT = target; smRate = 1; }
+    else if (err < -0.3){ smRate = 0; }
     else { var r = err * 0.5; smRate = 1 + (r > 0.08 ? 0.08 : (r < -0.08 ? -0.08 : r)); }
     return smT;
   }
