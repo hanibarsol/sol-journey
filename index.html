@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v299</title>
+<title>העולם של סול v300</title>
 </head>
 <body>
 <style>
@@ -868,6 +868,17 @@
   .stone .tick svg{ width:16px; height:16px; display:block; }
   .stone.just .tick{ animation:tickPop .62s cubic-bezier(.34,1.56,.64,1) both; }
   /* the road keeps going past the edge of the board */
+  /* אבן הרכישה. ההצצה הרגילה קטנה, חיוורת ואפורה בכוונה, כי היא אומרת
+     "עוד מעט תגיעי לכאן". האבן הזאת אומרת משהו אחר לגמרי, והיא הרגע
+     היחיד בטעימה שבו מחליטים להמשיך, ולכן היא אבן מלאה על הדרך. */
+  .stone.open.buyStone{ opacity:1; filter:none; }
+  .stone.open.buyStone .arrow{ position:absolute; inset-inline-end:-7px; top:-7px;
+    width:28px; height:28px; z-index:4; border-radius:50%;
+    background:#2a1f4d; border:3px solid #1d1338;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 0 0 #1d1338, 0 8px 14px -6px rgba(0,0,0,.8); }
+  .stone.open.buyStone .arrow svg{ width:16px; height:16px; display:block; }
+
   .stone.open.peek{ width:50px; height:50px; opacity:.6; animation:peekFloat 2.9s ease-in-out infinite;
     box-shadow:0 5px 0 0 #8A5A06, 0 0 20px 2px rgba(255,196,77,.5); }
   .stone.open.peek.shut{ filter:grayscale(1) brightness(.78); opacity:.42; animation:none;
@@ -3371,8 +3382,11 @@ window.onerror = function(m, u, l){
       var here = Math.max(0, Math.min(list.length, reached - base));   // כמה מהפרק הזה כבר נגמר
       if (PREVIEW >= 0) here = Math.max(0, Math.min(list.length, PREVIEW - base));
       var openCount = Math.min(list.length, here + 1);        // הבא בתור תמיד פתוח
-      var shown = list.length;      // כל הדרך של הפרק עומדת שם מההתחלה, ולא נבנית תוך כדי
       var hasNext = CH + 1 < CHAPTERS.length, hasPrev = CH > 0;
+      /* בטעימה, בסוף הפרק האחרון, הדרך ממשיכה לאבן אחת נוספת והיא נעולה.
+         היא מקבלת מקום משלה על הדרך ולא נדחקת ליד האבן האחרונה. */
+      var lockOn = (!hasNext && !window.__solFull);
+      var shown = list.length + (lockOn ? 1 : 0);   // כל הדרך של הפרק עומדת שם מההתחלה, ולא נבנית תוך כדי
       var theEnd = !hasNext && reached >= J.open.length;   // אין יותר מה לשחק
       // the stones leave room at the ends of the road for the chapters on either side
       buildTiles(shown);
@@ -3383,6 +3397,7 @@ window.onerror = function(m, u, l){
       }
       var SZ = shown <= 5 ? 74 : (shown === 6 ? 65 : 58);   // אוויר בין האבנים בפנייה החדה
       pts.forEach(function(P, i){
+        if (lockOn && i === list.length) return;   // המקום הזה שייך לאבן הנעולה
         var id = (i < openCount) ? (list[i] || "") : "";
         var d = document.createElement("div");
         // איפה אני עומד: מה שמאחורי נגמר, ומה שלפני מחכה
@@ -3480,8 +3495,32 @@ window.onerror = function(m, u, l){
       }
       if (hasPrev) peek(CHAPTERS[CH-1][CHAPTERS[CH-1].length-1], 0.02, CH - 1, false, "back");
       if (hasNext) peek(CHAPTERS[CH+1][0], 0.96, CH + 1, reached < chapterBase(CH+1), "on");
-      /* בטעימה אין פרק הבא, ובמקומו עומדת מי מאחורי מנעול */
-      else if (!window.__solFull) peek("meetmi", 0.96, -1, true, "on", true);
+      /* בטעימה אין פרק הבא, ובמקומו עומדת מי מאחורי מנעול, על הדרך */
+      else if (lockOn && pts[list.length]) lockStone(pts[list.length]);
+
+      function lockStone(P){
+        var d = document.createElement("div");
+        d.className = "stone open buyStone";
+        d.style.left = P.x + "%"; d.style.top = P.y + "%";
+        d.style.width = SZ + "px"; d.style.height = SZ + "px";
+        var box = document.createElement("div");
+        box.className = "facesBox";
+        var im = document.createElement("img");
+        im.src = (CAST["meetmi"] || [J.face])[0]; im.alt = "";
+        box.appendChild(im);
+        d.appendChild(box);
+        var ar = document.createElement("div");
+        ar.className = "arrow";
+        ar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4">' +
+          '<rect x="5" y="11" width="14" height="9" rx="2.4"/>' +
+          '<path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>';
+        d.appendChild(ar);
+        d.addEventListener("click", function(){
+          if (window.__solPanned) return;
+          if (window.__solShowBuy) window.__solShowBuy();
+        });
+        st.appendChild(d);
+      }
       window.__solJustDone = "";
       /* הכפתור וההזמנה נבדקים אחרי כל ציור של השביל */
       try{ if (window.__solLevelPaint) window.__solLevelPaint(); }catch(e){}
@@ -3491,7 +3530,9 @@ window.onerror = function(m, u, l){
         var P = spineAt(t);
         if (!P) return;
         var d = document.createElement("div");
-        d.className = "stone open peek" + (shut ? " shut" : "");
+        d.className = buy ? "stone open buyStone" : ("stone open peek" + (shut ? " shut" : ""));
+        /* בגודל של אבן אמיתית בדרך הזאת, לא בגודל של הצצה */
+        if (buy){ d.style.width = SZ + "px"; d.style.height = SZ + "px"; }
         d.style.left = P.x + "%"; d.style.top = P.y + "%";
         var cast = (CAST[id] || []).slice(-1);   // רק מי שחדשה שם, אחרת זה נמרח
         var pbox = document.createElement("div");
