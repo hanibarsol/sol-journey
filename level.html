@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>דרגת קושי, לנסות באמת</title>
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#1b1038;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif; color:#e9e3ff; }
+  body{ display:flex; flex-direction:column; }
+  .top{ flex:0 0 auto; padding:12px 14px 10px; }
+  h1{ margin:0 0 4px; font-size:18px; color:#FFD987; }
+  p{ margin:0 0 10px; font-size:13.5px; line-height:1.6; color:#c9c0ef; }
+  .row{ display:flex; gap:8px; }
+  .row button{ flex:1 1 0; font:inherit; font-size:15px; font-weight:800;
+    padding:12px 8px; border:0; border-radius:999px; cursor:pointer;
+    background:rgba(255,255,255,.12); color:#FFE7AD; }
+  .row button.on{ background:#17A79B; color:#042b26; }
+  .stage{ flex:1 1 auto; min-height:0; position:relative; background:#0f0a22; }
+  .stage iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block; }
+  .wait{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:#9b8dff; }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>דרגת קושי, לנסות באמת</h1>
+  <p>זה שלב הקריאה האמיתי של סול, לא ציור. בדרגה 2 התווים מאבדים את הפנים
+    והופכים לתווים רגילים על החמשה. הפנים על הקלידים נשארות.</p>
+  <div class="row">
+    <button type="button" id="b1" class="on">דרגה 1, עם פנים</button>
+    <button type="button" id="b2">דרגה 2, בלי פנים</button>
+  </div>
+</div>
+<div class="stage" id="stage"><div class="wait" id="wait">רגע, טוען את השלב</div></div>
+
+<script>
+(function(){
+  var box  = document.getElementById("stage");
+  var wait = document.getElementById("wait");
+  var b1 = document.getElementById("b1"), b2 = document.getElementById("b2");
+  var doc = null, frame = null;
+
+  /* ההגדרות חייבות להיכנס לפני גוף השיעור, אחרת השלב נפתח עם ברירת המחדל */
+  var BOOT = '<scr' + 'ipt>' +
+    'window.__solBase=0;window.__solFirst=true;' +
+    'window.__solWhich="read5";window.__solMode="read";' +
+    'window.__solPool=[0,1,2,3,4];window.__solStep={i:5,n:7};' +
+    '</scr' + 'ipt>';
+
+  /* דרגה 2: התו מאבד את הפנים ונשאר עיגול תו רגיל */
+  var PLAIN = '<style>' +
+    '.note .head img{ display:none !important; }' +
+    '.note .head{ background:#fff !important; }' +
+    '</style>';
+
+  function show(level){
+    if (!doc) return;
+    if (frame) frame.remove();
+    frame = document.createElement("iframe");
+    frame.setAttribute("title", "שלב קריאה");
+    frame.setAttribute("allow", "autoplay; fullscreen");
+    frame.srcdoc = BOOT + (level === 2 ? PLAIN : "") + doc;
+    box.appendChild(frame);
+    b1.className = level === 1 ? "on" : "";
+    b2.className = level === 2 ? "on" : "";
+  }
+
+  b1.addEventListener("click", function(){ show(1); });
+  b2.addEventListener("click", function(){ show(2); });
+
+  fetch("lessons/stages.html")
+    .then(function(r){ return r.ok ? r.text() : null; })
+    .then(function(t){
+      if (!t){ wait.textContent = "לא הצלחתי לטעון את השלב"; return; }
+      doc = t;
+      wait.remove();
+      show(1);
+    })
+    .catch(function(){ wait.textContent = "לא הצלחתי לטעון את השלב"; });
+})();
+</script>
+</body>
+</html>
