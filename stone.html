@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>איך תיראה אבן של שיר</title>
+<style>
+  :root{
+    --gold:#FFC44D; --goldLight:#FFE7AD; --goldPale:#FFF0B8; --goldDark:#B07C06;
+    --goldDeep:#8A5A06; --ink:#1d1338; --purple:#43225A; --red:#CC3717;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:#1b1038;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif; color:#e9e3ff; }
+  .wrap{ max-width:560px; margin:0 auto; padding:16px 14px 40px; }
+  h1{ font-size:20px; margin:0 0 4px; color:#FFD987; }
+  .sub{ margin:0 0 18px; font-size:14px; line-height:1.6; color:#c9c0ef; }
+
+  .case{ margin-bottom:18px; border-radius:18px; overflow:hidden;
+    border:1.5px solid #51428c; background:#2b2050; }
+  .caseTop{ display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; }
+  .caseTop b{ font-size:15.5px; color:#FFD987; }
+  .caseTop span{ font-size:12.5px; color:#b9b0e0; }
+  .road{ position:relative; height:206px; background-image:url(demo/road_bg.webp);
+    background-size:cover; background-position:center 62%; }
+  .mid{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+
+  /* ---------- האבן כמו שהיא היום במסע ---------- */
+  .stone{ position:relative; width:72px; height:72px; border-radius:50%;
+    background:linear-gradient(180deg,var(--goldLight),var(--gold));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 6px 0 0 var(--goldDark),
+               0 0 34px -2px rgba(255,196,77,.95);
+    animation:beat 2.6s ease-in-out infinite; }
+  .stone .face{ position:absolute; inset:0; border-radius:50%; overflow:hidden; }
+  .stone .face img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @keyframes beat{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.06) } }
+  .badge{ position:absolute; inset-inline-end:-6px; bottom:-6px; width:28px; height:28px;
+    border-radius:50%; background:#2a1f4d; border:3px solid var(--ink); z-index:3;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 0 0 var(--ink), 0 8px 14px -6px rgba(0,0,0,.8); }
+  .badge svg{ width:15px; height:15px; display:block; }
+
+  /* ---------- 0: מה שיש היום ---------- */
+  .v0 .stone{ box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+      0 0 0 4px var(--goldPale), 0 0 0 8px #C98A12,
+      0 8px 0 0 var(--goldDeep), 0 0 52px 6px rgba(255,196,77,.95); }
+  .riser{ position:absolute; inset:0; pointer-events:none; }
+  .riser span{ position:absolute; top:-4px; width:17px; height:17px; opacity:0;
+    animation-duration:3s; animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite; }
+  .riser span.n1{ left:76%; animation-name:riseA; }
+  .riser span.n2{ left:92%; animation-name:riseB; }
+  .riser span.n3{ left:64%; animation-name:riseC; }
+  @keyframes riseA{ 0%{transform:translate(0,8px) scale(.6) rotate(-10deg);opacity:0}
+    22%{opacity:1} 74%{opacity:.95}
+    100%{transform:translate(12px,-48px) scale(1.06) rotate(12deg);opacity:0} }
+  @keyframes riseB{ 0%{transform:translate(0,8px) scale(.55) rotate(8deg);opacity:0}
+    22%{opacity:1} 74%{opacity:.9}
+    100%{transform:translate(18px,-42px) scale(1) rotate(-10deg);opacity:0} }
+  @keyframes riseC{ 0%{transform:translate(0,8px) scale(.6) rotate(6deg);opacity:0}
+    22%{opacity:1} 74%{opacity:.92}
+    100%{transform:translate(4px,-56px) scale(1.04) rotate(14deg);opacity:0} }
+
+  /* ---------- א: כוכב ---------- */
+  .v1 .burst{ position:absolute; left:50%; top:50%; width:196px; height:196px;
+    transform:translate(-50%,-50%); animation:spin 14s linear infinite; }
+  .v1 .stone{ width:84px; height:84px; z-index:2; }
+  @keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg) } }
+
+  /* ---------- ב: במה עם מסך ---------- */
+  .v2 .stage{ position:relative; width:196px; height:150px; }
+  .v2 .arch{ position:absolute; left:0; top:0; width:100%; }
+  .v2 .stone{ position:absolute; left:50%; top:54%; width:80px; height:80px;
+    transform:translate(-50%,-50%); animation:beatC 2.6s ease-in-out infinite; }
+  @keyframes beatC{ 0%,100%{ transform:translate(-50%,-50%) scale(1) }
+    50%{ transform:translate(-50%,-50%) scale(1.05) } }
+
+  /* ---------- ג: הילה של תווים ---------- */
+  .v3 .halo{ position:absolute; left:50%; top:50%; width:150px; height:150px;
+    transform:translate(-50%,-50%); animation:spin 18s linear infinite; }
+  .v3 .halo i{ position:absolute; left:50%; top:50%; width:25px; height:25px;
+    margin:-12.5px 0 0 -12.5px; display:block; }
+  .v3 .stone{ width:82px; height:82px; z-index:2; }
+
+  /* ---------- ד: גדולה ופועמת ---------- */
+  .v4 .stone{ width:102px; height:102px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+      0 0 0 5px var(--goldPale), 0 0 0 10px #C98A12,
+      0 10px 0 0 var(--goldDeep), 0 0 70px 14px rgba(255,196,77,.9);
+    animation:beatBig 2.2s ease-in-out infinite; }
+  @keyframes beatBig{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.09) } }
+  .v4 .pulse{ position:absolute; left:50%; top:50%; width:102px; height:102px;
+    margin:-51px 0 0 -51px; border-radius:50%; border:3px solid rgba(255,196,77,.75);
+    animation:pulse 2.2s ease-out infinite; }
+  .v4 .pulse.p2{ animation-delay:1.1s; }
+  @keyframes pulse{ 0%{ transform:scale(1); opacity:.8 }
+    100%{ transform:scale(2.1); opacity:0 } }
+
+  @media (prefers-reduced-motion:reduce){
+    .stone,.riser span,.v1 .burst,.v3 .halo,.v4 .pulse{ animation:none; }
+    .riser span{ opacity:.95; }
+  }
+  .note{ margin:22px 2px 0; font-size:13.5px; line-height:1.7; color:#c9c0ef; }
+  .note b{ color:#FFD987; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>איך תיראה אבן של שיר</h1>
+  <p class="sub">חמש אפשרויות על הרקע האמיתי של הדרך, בגודל האמיתי של האבן.
+    הראשונה היא מה שיש היום.</p>
+
+  <!-- ===== 0 ===== -->
+  <div class="case">
+    <div class="caseTop"><b>מה שיש היום</b><span>טבעת זהב ותווים שעולים</span></div>
+    <div class="road"><div class="mid v0">
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="riser">
+          <span class="n1"></span><span class="n2"></span><span class="n3"></span>
+        </div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===== א ===== -->
+  <div class="case">
+    <div class="caseTop"><b>א. כוכב</b><span>קרני זהב שמסתובבות מאחור</span></div>
+    <div class="road"><div class="mid v1">
+      <svg class="burst" viewBox="0 0 200 200" aria-hidden="true"></svg>
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===== ב ===== -->
+  <div class="case">
+    <div class="caseTop"><b>ב. במה</b><span>מסך ווילון וקשת מעל</span></div>
+    <div class="road"><div class="mid v2">
+      <div class="stage">
+        <svg class="arch" viewBox="0 0 196 150" aria-hidden="true"></svg>
+        <div class="stone">
+          <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+          <div class="badge"></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===== ג ===== -->
+  <div class="case">
+    <div class="caseTop"><b>ג. הילה של תווים</b><span>תווים שמקיפים את האבן</span></div>
+    <div class="road"><div class="mid v3">
+      <div class="halo"></div>
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===== ד ===== -->
+  <div class="case">
+    <div class="caseTop"><b>ד. גדולה ופועמת</b><span>בלי קישוט, רק גודל וגלי אור</span></div>
+    <div class="road"><div class="mid v4">
+      <div class="pulse"></div><div class="pulse p2"></div>
+      <div class="stone">
+        <div class="face"><img src="demo/faces/mi.jpg" alt=""></div>
+        <div class="badge"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <p class="note">האבנים הרגילות במסע נשארות בדיוק כמו שהן.
+    מה שמשתנה הוא <b>רק האבן שבה מחכה שיר</b>.</p>
+</div>
+
+<script>
+(function(){
+  /* תו זהב עם קו כהה, כדי שייראה גם מעל החלקים הבהירים של הדרך */
+  var NOTE = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<g stroke="#2a1f4d" stroke-width="1.8" stroke-linejoin="round">' +
+    '<rect x="13.2" y="2.6" width="3" height="13.4" rx="1.5" fill="#FFC44D"/>' +
+    '<ellipse cx="9.4" cy="16.6" rx="5.4" ry="4.2" transform="rotate(-18 9.4 16.6)" fill="#FFC44D"/>' +
+    '</g></svg>';
+
+  /* התג הקטן של "שיר", אותו אחד שיושב היום בפינת האבן */
+  var BADGE = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<rect x="13.4" y="3" width="2.6" height="13" rx="1.3" fill="#FFC44D"/>' +
+    '<ellipse cx="9.6" cy="16.4" rx="5.2" ry="4" transform="rotate(-18 9.6 16.4)" fill="#FFC44D"/></svg>';
+
+  Array.prototype.forEach.call(document.querySelectorAll(".badge"), function(b){
+    b.innerHTML = BADGE;
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".riser span"), function(s){
+    s.innerHTML = NOTE;
+  });
+
+  /* ---- א: קרני כוכב ---- */
+  (function burst(){
+    var svg = document.querySelector(".v1 .burst");
+    if (!svg) return;
+    var cx = 100, cy = 100, out = 97, inr = 30, n = 12, d = "";
+    for (var i = 0; i < n; i++){
+      var a = (i / n) * Math.PI * 2;
+      var w = Math.PI / n * 0.52;
+      d += "M" + (cx + Math.cos(a) * out) + " " + (cy + Math.sin(a) * out) +
+           " L" + (cx + Math.cos(a - w) * inr) + " " + (cy + Math.sin(a - w) * inr) +
+           " L" + (cx + Math.cos(a + w) * inr) + " " + (cy + Math.sin(a + w) * inr) + " Z";
+    }
+    svg.innerHTML =
+      '<defs><radialGradient id="rg" cx="50%" cy="50%" r="50%">' +
+      '<stop offset="28%" stop-color="#FFF0B8"/><stop offset="100%" stop-color="#F0A81E"/>' +
+      '</radialGradient></defs>' +
+      '<circle cx="100" cy="100" r="58" fill="rgba(255,196,77,.45)"/>' +
+      '<path d="' + d + '" fill="url(#rg)" stroke="#8A5A06" stroke-width="1.6" stroke-linejoin="round"/>';
+  })();
+
+  /* ---- ב: קשת הבמה והווילון ---- */
+  (function stage(){
+    var svg = document.querySelector(".v2 .arch");
+    if (!svg) return;
+    svg.innerHTML =
+      /* וילון משני הצדדים */
+      /* וילון מלא משני הצדדים, עם קפלים */
+      '<path d="M0 14 q20 34 12 70 q-7 30 8 60 l-20 0 L0 14 z" fill="#CC3717"/>' +
+      '<path d="M196 14 q-20 34 -12 70 q7 30 -8 60 l20 0 L196 14 z" fill="#CC3717"/>' +
+      '<path d="M9 16 q15 32 9 64 q-5 26 5 52 M22 18 q13 30 8 60 q-4 24 4 48" fill="none" stroke="#8d2410" stroke-width="2.2" opacity=".65"/>' +
+      '<path d="M187 16 q-15 32 -9 64 q5 26 -5 52 M174 18 q-13 30 -8 60 q4 24 -4 48" fill="none" stroke="#8d2410" stroke-width="2.2" opacity=".65"/>' +
+      /* קשת זהב מעל, עם שוליים מעוגלים */
+      '<path d="M0 30 q98 -34 196 0 l0 -16 q-98 -32 -196 0 z" fill="#FFC44D" stroke="#8A5A06" stroke-width="2.4"/>' +
+      '<path d="M18 26 a9 9 0 0 0 18 -5 M54 19 a9 9 0 0 0 18 -3 M90 16 a9 9 0 0 0 18 0 M126 18 a9 9 0 0 0 18 3 M160 24 a9 9 0 0 0 18 6" fill="#FFE7AD" stroke="#8A5A06" stroke-width="1.8"/>' +
+      /* רצפת הבמה */
+      '<path d="M28 134 l140 0 l14 12 l-168 0 z" fill="#43225A" stroke="#1d1338" stroke-width="2.2"/>';
+  })();
+
+  /* ---- ג: הילה של תווים ---- */
+  (function halo(){
+    var box = document.querySelector(".v3 .halo");
+    if (!box) return;
+    var n = 6, r = 62;
+    for (var i = 0; i < n; i++){
+      var a = (i / n) * Math.PI * 2 - Math.PI / 2;
+      var el = document.createElement("i");
+      el.style.transform = "translate(" + (Math.cos(a) * r).toFixed(1) + "px," +
+                           (Math.sin(a) * r).toFixed(1) + "px) rotate(" + (i * 24 - 30) + "deg)";
+      el.innerHTML = NOTE;
+      box.appendChild(el);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
