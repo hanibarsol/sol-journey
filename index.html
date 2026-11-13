@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v300</title>
+<title>העולם של סול v301</title>
 </head>
 <body>
 <style>
@@ -1153,9 +1153,9 @@
         <rect x="45" y="20" width="3.6" height="38" rx="1.8" fill="#e9e3ff"/>
         <circle cx="38" cy="57" r="9.5" fill="#fff" stroke="#e9e3ff" stroke-width="3"/>
       </svg></div>
-      <h3>אתם כבר קוראים תווים</h3>
-      <p>סיימתם את כל המסע. עכשיו אפשר לעבור עליו שוב, הפעם בלי הפנים על התווים.</p>
-      <button type="button" class="go" id="lvlGo">לנסות בלי הפנים</button>
+      <h3>המסע השני מחכה</h3>
+      <p>הפעם התווים בלי פנים ואתם מזהים אותם לבד. מה שעשיתם במסע הראשון נשמר.</p>
+      <button type="button" class="go" id="lvlGo">יוצאים לדרך</button>
       <button type="button" class="later" id="lvlLater">אולי אחר כך</button>
     </div>
   </div>
@@ -1634,7 +1634,8 @@ window.onerror = function(m, u, l){
       });
     }
     function paint(){
-      var done = window.__solDone || [];
+      /* שיר שנפתח בסיבוב הראשון לא נסגר בשני */
+      var done = window.__solDoneAll || window.__solDone || [];
       grid.innerHTML = "";
       LIST.forEach(function(it){
         var open = done.indexOf(it.id) >= 0;
@@ -1674,13 +1675,16 @@ window.onerror = function(m, u, l){
     }
     function set(v){
       try{ localStorage.setItem(KEY, v === 2 ? "2" : "1"); }catch(e){}
-      paint();
+      /* הדף נטען מחדש, כי כל הלוח נבנה מרשימת ההתקדמות של הסיבוב
+         שנבחר. בלי זה המתג היה משנה רק את המראה של השלב הבא */
+      location.reload();
     }
     /* דרגה 2 נפתחת רק אחרי מסע שלם. בטעימה הנתיב קצר ו-__solFull כבוי,
        ולכן התנאי לא יכול להתקיים שם */
     function unlocked(){
       if (!window.__solFull) return false;
-      var p = window.__solPath || [], d = window.__solDone || [];
+      /* נמדד תמיד מול הסיבוב הראשון, גם כשעומדים באמצע השני */
+      var p = window.__solPath || [], d = window.__solDone1 || window.__solDone || [];
       if (!p.length) return false;
       for (var i = 0; i < p.length; i++) if (d.indexOf(p[i]) < 0) return false;
       return true;
@@ -1733,7 +1737,8 @@ window.onerror = function(m, u, l){
 
     /* מי כבר נפגש במסע. הפרק הראשון של כל דמות הוא הפגישה איתה */
     function met(){
-      var ch = window.__solChapters || [], done = window.__solDone || [], out = [];
+      var ch = window.__solChapters || [], out = [];
+      var done = window.__solDoneAll || window.__solDone || [];
       for (var i = 0; i < ch.length && i < NOTE.length; i++){
         if (ch[i] && ch[i].length && done.indexOf(ch[i][0]) >= 0) out.push(i);
       }
@@ -2161,7 +2166,8 @@ window.onerror = function(m, u, l){
   // a way back to the very beginning, for testing: press R
   function solReset(){
     try{
-      ["solWorld.coins","solWorld.round","solWorld.done","solRoom.pieces",
+      ["solWorld.coins","solWorld.round","solWorld.done","solWorld.done2",
+       "solWorld.level","solWorld.levelSeen","solRoom.pieces",
        "solRoom.sofa","solRoom.sofa.v2","solRoom.sofa.v3","solHouse.sound","solRoom.test"]
         .forEach(function(k){ localStorage.removeItem(k); });
     }catch(e){}
@@ -2174,7 +2180,8 @@ window.onerror = function(m, u, l){
   (function(){
     try{
       if (location.search.toLowerCase().indexOf("reset") >= 0){
-        ["solWorld.coins","solWorld.round","solWorld.done","solRoom.pieces",
+        ["solWorld.coins","solWorld.round","solWorld.done","solWorld.done2",
+         "solWorld.level","solWorld.levelSeen","solRoom.pieces",
          "solRoom.sofa","solRoom.sofa.v2","solRoom.sofa.v3","solHouse.sound","solRoom.test"]
           .forEach(function(k){ localStorage.removeItem(k); });
         location.replace(location.pathname);   // הכתובת מתנקה, כדי שרענון לא יאפס שוב
@@ -2227,8 +2234,19 @@ window.onerror = function(m, u, l){
     var purse = document.querySelector(".purse");
 
     var coins = 0, round = 0, done = [];
+    /* לכל דרגה יש מסע משלה. דרגה 1 שומרת ב-solWorld.done ודרגה 2 ב-solWorld.done2,
+       ולכן הסיבוב השני מתחיל מדו בלי למחוק את מה שנעשה בראשון */
+    var LVL = 1;
+    try{ LVL = localStorage.getItem("solWorld.level") === "2" ? 2 : 1; }catch(e){}
+    var DKEY = LVL === 2 ? "solWorld.done2" : "solWorld.done";
     try{ round = parseInt(localStorage.getItem("solWorld.round"), 10) || 0; }catch(e){}
-    try{ done = JSON.parse(localStorage.getItem("solWorld.done") || "[]") || []; }catch(e){ done = []; }
+    try{ done = JSON.parse(localStorage.getItem(DKEY) || "[]") || []; }catch(e){ done = []; }
+    /* מה שנפתח פעם אחת נשאר פתוח: מסכי השירים והמלחין קוראים מכאן,
+       כדי שסיבוב שני שמתחיל ריק לא ינעל מחדש מה שכבר הושג */
+    var done1 = [];
+    try{ done1 = JSON.parse(localStorage.getItem("solWorld.done") || "[]") || []; }catch(e){ done1 = []; }
+    window.__solDone1 = done1;
+    window.__solDoneAll = done1.concat(done.filter(function(x){ return done1.indexOf(x) < 0; }));
     window.__solDone = done;   // השביל קורא מכאן מה כבר נעשה
     try{ coins = parseInt(localStorage.getItem("solWorld.coins"), 10) || 0; }catch(e){}
     // החדר של דו קונה בתווים, והארנק יושב כאן. שתי דלתות קטנות אליו
@@ -2694,7 +2712,9 @@ window.onerror = function(m, u, l){
         // which are the only thing the kit for the road accepts.
         var again = !!(d.which && done.indexOf(d.which) >= 0);
         window.__solJustDone = d.which || "";
-        if (d.which && !again){ done.push(d.which); try{ localStorage.setItem("solWorld.done", JSON.stringify(done)); }catch(e){} window.__solDone = done; pendingWalk = d.which; }
+        if (d.which && !again){ done.push(d.which); try{ localStorage.setItem(DKEY, JSON.stringify(done)); }catch(e){} window.__solDone = done;
+          if (window.__solDoneAll && window.__solDoneAll.indexOf(d.which) < 0) window.__solDoneAll.push(d.which);
+          pendingWalk = d.which; }
         if (got > 0){
           if (again){ round += got; } else { coins += got; }
           paintCoins();
