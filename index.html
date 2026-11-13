@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v304</title>
+<title>העולם של סול v305</title>
 </head>
 <body>
 <style>
@@ -4483,12 +4483,17 @@ window.onerror = function(m, u, l){
       if (p.plane === "wall") return 0.52 * p.size;
       return scaleAt(depthOf(p.y)) * p.size;
     }
+    /* רצפה למרחק בין הידיות. המיקומים נתונים במידות החפץ ולכן הם מתכווצים
+       איתו, בעוד הציור עצמו נשאר בגודל קבוע, וכך בחפץ קטן שתי ידיות נוגעות
+       ואז חופפות. מתחת ל-0.62 המרחק מפסיק להתכווץ. בחפץ גדול שום דבר לא משתנה. */
+    function posF(k){ return Math.max(0.62, k) / Math.max(0.0001, k); }
     function sizeHandles(p, k){
       var inv = (1 / Math.max(0.25, k)).toFixed(3);
+      var pf = posF(k);
       ["hFlip","hSize","hLift","hKill","hTurn"].forEach(function(h){
         var e = p[h];
         if (!e || typeof e.__hx !== "number") return;
-        e.setAttribute("transform", "translate(" + e.__hx + "," + e.__hy + ") scale(" + inv + ")");
+        e.setAttribute("transform", "translate(" + (e.__hx * pf).toFixed(2) + "," + (e.__hy * pf).toFixed(2) + ") scale(" + inv + ")");
       });
     }
     function draw(p){
@@ -4741,8 +4746,10 @@ window.onerror = function(m, u, l){
         // היא מתכווצת יחד עם החפץ ובורחת פנימה בזמן הגרירה
         var k = sizeK(p);
         if (k > 0.02){
-          p.hSize.__hx = (q.x - p.x) / k;
-          p.hSize.__hy = (q.y - originY()) / k;
+          /* אותו גורם כמו בציור, אחרת הידית לא נשארת מתחת לאצבע */
+          var pf = posF(k);
+          p.hSize.__hx = (q.x - p.x) / (k * pf);
+          p.hSize.__hy = (q.y - originY()) / (k * pf);
           hMoved = true;
         }
         draw(p);
