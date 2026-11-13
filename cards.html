@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>לסדר את הקלפים</title>
+<style>
+  :root{
+    --gold:#FFC44D; --goldLight:#FFE7AD; --goldDeep:#8A5A06;
+    --ink:#1d1338; --turkiz:#17A79B;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:#1b1038;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif; color:#e9e3ff;
+    touch-action:none; -webkit-user-select:none; user-select:none; }
+  body{ display:flex; flex-direction:column; }
+
+  .top{ flex:0 0 auto; padding:10px 14px 6px; text-align:center; }
+  h1{ margin:0 0 2px; font-size:17px; color:#FFD987; }
+  .sub{ margin:0; font-size:13px; line-height:1.5; color:#c9c0ef; }
+
+  .board{ flex:1 1 auto; position:relative; min-height:0; }
+
+  /* ---------- קלף ---------- */
+  /* בלי left ו-top הקלף יושב במקום הזרימה שלו, שבדף ימין לשמאל הוא הקצה הימני */
+  .card{ position:absolute; left:0; top:0; width:74px; height:96px; border-radius:14px;
+    background:linear-gradient(180deg,#fdf6e6,#f0e2c4);
+    box-shadow:0 6px 0 0 var(--goldDeep), 0 10px 22px -8px rgba(0,0,0,.75);
+    border:3px solid var(--c,#FFC44D);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:4px; cursor:grab; touch-action:none; z-index:2;
+    transition:box-shadow .2s ease; }
+  .card .ring{ width:48px; height:48px; border-radius:50%; overflow:hidden;
+    background:#fff; box-shadow:0 0 0 3px var(--c,#FFC44D); }
+  .card .ring img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card .nm{ font-size:14px; font-weight:800; color:#4a3a1a; }
+  .card.drag{ cursor:grabbing; z-index:9;
+    box-shadow:0 14px 28px -8px rgba(0,0,0,.85), 0 0 0 4px rgba(255,255,255,.25); }
+  .card.home{ cursor:default;
+    box-shadow:0 5px 0 0 var(--goldDeep), 0 0 24px 4px rgba(255,196,77,.55); }
+  .card.wrong{ animation:nope .36s ease; }
+  @keyframes nope{ 0%,100%{ transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) }
+    25%{ transform:translate(calc(var(--tx) - 9px),var(--ty)) rotate(var(--rot)) }
+    75%{ transform:translate(calc(var(--tx) + 9px),var(--ty)) rotate(var(--rot)) } }
+
+  /* ---------- השורה שמתמלאת ---------- */
+  .rail{ position:absolute; left:0; right:0; bottom:10px; height:112px;
+    display:flex; direction:ltr; align-items:flex-end; justify-content:center;
+    gap:6px; padding:0 8px; pointer-events:none; }
+  .slot{ width:74px; height:96px; border-radius:14px; flex:0 0 auto;
+    border:2.5px dashed rgba(255,255,255,.3); background:rgba(255,255,255,.05);
+    display:flex; align-items:center; justify-content:center; }
+  .slot b{ font-size:22px; font-weight:800; color:rgba(255,255,255,.28); }
+  .slot.near{ border-color:var(--gold); background:rgba(255,196,77,.16); }
+  .slot.full{ border-style:solid; border-color:transparent; background:none; }
+
+  /* ---------- מסך פתיחה, השמע נפתח רק בנגיעה ---------- */
+  .go{ position:absolute; inset:0; z-index:20; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:16px; padding:22px;
+    background:rgba(16,9,36,.93); text-align:center; }
+  .go[hidden]{ display:none; }
+  .go p{ margin:0; font-size:15.5px; line-height:1.7; color:#d6cdf2; max-width:300px; }
+  .go button{ font:inherit; font-size:18px; font-weight:800; border:0; cursor:pointer;
+    border-radius:999px; padding:15px 38px; color:#042b26; background:var(--turkiz);
+    box-shadow:0 4px 0 0 #0d6d65; }
+
+  .won{ position:absolute; left:50%; top:16px; transform:translateX(-50%); z-index:12;
+    padding:9px 22px; border-radius:999px; font-size:16px; font-weight:800;
+    color:#FFE9B8; background:linear-gradient(180deg,rgba(42,31,77,.96),rgba(26,19,54,.96));
+    border:2px solid #C98A00; box-shadow:0 6px 20px -6px rgba(0,0,0,.85);
+    opacity:0; transition:opacity .35s ease; pointer-events:none; }
+  .won.on{ opacity:1; }
+
+  .again{ position:absolute; left:50%; bottom:128px; transform:translateX(-50%);
+    z-index:12; font:inherit; font-size:15px; font-weight:800; border:0; cursor:pointer;
+    border-radius:999px; padding:11px 26px; color:#5a3c05;
+    background:linear-gradient(180deg,var(--goldLight),var(--gold));
+    box-shadow:0 3px 0 0 #B07C06; display:none; }
+  .again.on{ display:block; }
+
+  @media (max-height:520px){
+    .top{ padding:6px 14px 2px; } h1{ font-size:15px; } .sub{ font-size:12px; }
+    .card, .slot{ width:62px; height:80px; }
+    .card .ring{ width:40px; height:40px; }
+    .rail{ height:92px; bottom:6px; }
+    .again{ bottom:104px; }
+  }
+  @media (max-width:360px){
+    .card, .slot{ width:58px; height:78px; }
+    .card .ring{ width:38px; height:38px; }
+    .rail{ gap:4px; height:92px; }
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>לסדר את הקלפים</h1>
+  <p class="sub">גררו כל קלף למקום שלו בשורה, מהנמוך לגבוה. קלף שמגיע למקומו מנגן את עצמו.</p>
+</div>
+
+<div class="board" id="board">
+  <div class="rail" id="rail"></div>
+  <div class="won" id="won">כל המשפחה בסדר הנכון</div>
+  <button class="again" id="again" type="button">עוד פעם</button>
+  <div class="go" id="go">
+    <p>המשפחה התפזרה באוויר. סדרו אותה מהצליל הנמוך לגבוה.</p>
+    <button type="button" id="goBtn">להתחיל</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* הקשת הרשמית של שבעת הצלילים */
+  var ALL = [
+    { k:"do",  nm:"דו",  f:261.63, c:"#FF4D4D" },
+    { k:"re",  nm:"רה",  f:293.66, c:"#FF8A2B" },
+    { k:"mi",  nm:"מי",  f:329.63, c:"#FFC44D" },
+    { k:"fa",  nm:"פה",  f:349.23, c:"#34C47C" },
+    { k:"sol", nm:"סול", f:392.00, c:"#3B6BB2" },
+    { k:"la",  nm:"לה",  f:440.00, c:"#7B6BFF" },
+    { k:"si",  nm:"סי",  f:493.88, c:"#A855D6" }
+  ];
+  /* במוקאפ חמישה. בשיעור האמיתי אלה הצלילים של הפרק */
+  var POOL = [0, 1, 2, 3, 4];
+
+  var board = document.getElementById("board");
+  var rail  = document.getElementById("rail");
+  var wonEl = document.getElementById("won");
+  var again = document.getElementById("again");
+
+  var slots = [], cards = [], placed = 0;
+
+  /* ---------- צליל ---------- */
+  var ctx = null;
+  function ac(){
+    if (!ctx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+    }
+    if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+    return ctx;
+  }
+  function tone(f, dur){
+    var c = ac(); if (!c) return;
+    var t = c.currentTime, g = c.createGain(), lp = c.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = Math.min(7000, f * 7);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.38, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    lp.connect(g); g.connect(c.destination);
+    [[1,1],[2,0.34],[3,0.16],[4,0.07]].forEach(function(p){
+      var o = c.createOscillator(), og = c.createGain();
+      o.type = "sine"; o.frequency.value = f * p[0];
+      og.gain.value = p[1];
+      o.connect(og); og.connect(lp);
+      o.start(t); o.stop(t + dur + 0.05);
+    });
+  }
+  function thud(){
+    var c = ac(); if (!c) return;
+    var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(190, t);
+    o.frequency.exponentialRampToValueAtTime(90, t + 0.18);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + 0.25);
+  }
+
+  /* ---------- בנייה ---------- */
+  function build(){
+    rail.innerHTML = ""; slots = [];
+    cards.forEach(function(c){ c.el.remove(); });
+    cards = []; placed = 0;
+    wonEl.className = "won";
+    again.className = "again";
+
+    POOL.forEach(function(idx, i){
+      var s = document.createElement("div");
+      s.className = "slot";
+      s.innerHTML = "<b>" + (i + 1) + "</b>";
+      rail.appendChild(s);
+      slots.push({ el:s, want:idx });
+    });
+
+    /* הקלפים מתפזרים באוויר, בלי לכסות את השורה */
+    var bag = POOL.slice();
+    for (var i = bag.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = bag[i]; bag[i] = bag[j]; bag[j] = t;
+    }
+    var W = board.clientWidth, H = board.clientHeight;
+    var cw = 74, ch = 96;
+    if (W <= 360){ cw = 58; ch = 78; }
+    var top = 8, bottom = Math.max(120, H - 130) - ch;
+    bag.forEach(function(idx, i){
+      var n = ALL[idx];
+      var el = document.createElement("div");
+      el.className = "card";
+      el.style.setProperty("--c", n.c);
+      el.innerHTML = '<div class="ring"><img src="demo/faces/' + n.k + '.jpg" alt=""></div>' +
+                     '<div class="nm">' + n.nm + '</div>';
+      var cols = Math.max(1, Math.min(bag.length, Math.floor(W / (cw + 10))));
+      var rows = Math.ceil(bag.length / cols);
+      var col = i % cols, row = Math.floor(i / cols);
+      var x = 10 + col * ((W - cw - 20) / Math.max(1, cols - 1 || 1));
+      if (cols === 1) x = (W - cw) / 2;
+      /* הקלפים נפרשים על כל האוויר שמעל השורה, ולא נדחסים לפס אחד למעלה */
+      var span = Math.max(ch * 0.7, bottom - top);
+      var y = top + (rows < 2 ? span * 0.22 : row * (span / rows));
+      y += Math.random() * (ch * 0.22) - ch * 0.11;
+      y = Math.max(top, Math.min(bottom, y));
+      x = Math.max(6, Math.min(W - cw - 6, x + (Math.random() * 18 - 9)));
+      var rot = (Math.random() * 16 - 8).toFixed(1) + "deg";
+      var c = { el:el, note:idx, hx:x, hy:y, rot:rot, home:false };
+      el.style.setProperty("--tx", x + "px");
+      el.style.setProperty("--ty", y + "px");
+      el.style.setProperty("--rot", rot);
+      el.style.transform = "translate(" + x + "px," + y + "px) rotate(" + rot + ")";
+      board.appendChild(el);
+      cards.push(c);
+      hook(c);
+    });
+  }
+
+  function put(c, x, y, rot){
+    c.el.style.setProperty("--tx", x + "px");
+    c.el.style.setProperty("--ty", y + "px");
+    c.el.style.setProperty("--rot", rot);
+    c.el.style.transform = "translate(" + x + "px," + y + "px) rotate(" + rot + ")";
+  }
+
+  /* ---------- גרירה ---------- */
+  function hook(c){
+    var dx = 0, dy = 0, dragging = false;
+    c.el.addEventListener("pointerdown", function(ev){
+      if (c.home) return;
+      dragging = true;
+      var r = c.el.getBoundingClientRect(), b = board.getBoundingClientRect();
+      dx = ev.clientX - r.left; dy = ev.clientY - r.top;
+      c.el.classList.add("drag");
+      try{ c.el.setPointerCapture(ev.pointerId); }catch(e){}
+      ev.preventDefault();
+    });
+    c.el.addEventListener("pointermove", function(ev){
+      if (!dragging) return;
+      var b = board.getBoundingClientRect();
+      var x = ev.clientX - b.left - dx, y = ev.clientY - b.top - dy;
+      put(c, x, y, "0deg");
+      var s = nearest(c);
+      slots.forEach(function(q){ q.el.classList.remove("near"); });
+      if (s) s.el.classList.add("near");
+      ev.preventDefault();
+    });
+    function drop(ev){
+      if (!dragging) return;
+      dragging = false;
+      c.el.classList.remove("drag");
+      slots.forEach(function(q){ q.el.classList.remove("near"); });
+      var s = nearest(c);
+      if (s && s.want === c.note){
+        land(c, s);
+      } else {
+        thud();
+        put(c, c.hx, c.hy, c.rot);
+        c.el.classList.remove("wrong"); void c.el.offsetWidth;
+        c.el.classList.add("wrong");
+      }
+    }
+    c.el.addEventListener("pointerup", drop);
+    c.el.addEventListener("pointercancel", drop);
+  }
+
+  /* המשבצת הריקה הקרובה ביותר, אם הקלף באמת מעליה */
+  function nearest(c){
+    var r = c.el.getBoundingClientRect();
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var best = null, bd = 1e9;
+    slots.forEach(function(s){
+      if (s.taken) return;
+      var q = s.el.getBoundingClientRect();
+      var d = Math.hypot(cx - (q.left + q.width/2), cy - (q.top + q.height/2));
+      if (d < bd){ bd = d; best = s; }
+    });
+    return (best && bd < 80) ? best : null;
+  }
+
+  function land(c, s){
+    s.taken = true;
+    s.el.classList.add("full");
+    c.home = true;
+    c.el.classList.add("home");
+    var b = board.getBoundingClientRect(), q = s.el.getBoundingClientRect();
+    put(c, q.left - b.left, q.top - b.top, "0deg");
+    tone(ALL[c.note].f, 1.0);
+    placed++;
+    if (placed === slots.length) setTimeout(finish, 520);
+  }
+
+  function finish(){
+    wonEl.className = "won on";
+    slots.forEach(function(s, i){
+      setTimeout(function(){
+        var card = cards.filter(function(c){ return c.note === s.want; })[0];
+        if (card){
+          card.el.style.transform = card.el.style.transform.replace("rotate(0deg)", "rotate(0deg) scale(1.08)");
+          setTimeout(function(){
+            card.el.style.transform = card.el.style.transform.replace(" scale(1.08)", "");
+          }, 240);
+        }
+        tone(ALL[s.want].f, 0.9);
+      }, i * 420);
+    });
+    setTimeout(function(){ again.className = "again on"; }, slots.length * 420 + 500);
+  }
+
+  again.addEventListener("click", build);
+
+  /* ---------- בספארי השמע נפתח רק בתוך נגיעה ---------- */
+  var go = document.getElementById("go");
+  document.getElementById("goBtn").addEventListener("click", function(){
+    ac();
+    go.hidden = true;
+    build();
+  });
+
+  window.addEventListener("resize", function(){
+    if (!go.hidden) return;
+    /* רק המשבצות זזות, קלף שכבר בבית חוזר למקומו */
+    cards.forEach(function(c){
+      if (!c.home) return;
+      var s = slots.filter(function(q){ return q.want === c.note; })[0];
+      if (!s) return;
+      var b = board.getBoundingClientRect(), q = s.el.getBoundingClientRect();
+      put(c, q.left - b.left, q.top - b.top, "0deg");
+    });
+  });
+})();
+</script>
+</body>
+</html>
