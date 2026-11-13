@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v307</title>
+<title>העולם של סול v308</title>
 </head>
 <body>
 <style>
@@ -2244,6 +2244,9 @@ window.onerror = function(m, u, l){
        כדי שסיבוב שני שמתחיל ריק לא ינעל מחדש מה שכבר הושג */
     var done1 = [];
     try{ done1 = JSON.parse(localStorage.getItem("solWorld.done") || "[]") || []; }catch(e){ done1 = []; }
+    /* בדרגה 1 זאת אותה רשימה ממש, ולכן שלב שהסתיים עכשיו נספר מיד.
+       קודם זה היה צילום מרגע הטעינה, והמסע נראה לא גמור עד רענון */
+    if (LVL !== 2) done1 = done;
     window.__solDone1 = done1;
     window.__solDoneAll = done1.concat(done.filter(function(x){ return done1.indexOf(x) < 0; }));
     window.__solDone = done;   // השביל קורא מכאן מה כבר נעשה
@@ -3067,6 +3070,9 @@ window.onerror = function(m, u, l){
       return CHAPTERS.length - 1;
     }
     function chapterBase(c){ var b = 0; for (var i = 0; i < c; i++) b += CHAPTERS[i].length; return b; }
+    /* הדמות של כל פרק, לפי הסדר. לא דרך ROOM_OF, שמפנה את סי אל החדר של לה */
+    var CHAP_WHO = ["דו", "רה", "מי", "פה", "סול", "לה", "סי"];
+    window.__solChapWho = CHAP_WHO;
     window.__solChapters = CHAPTERS;   // כדי שפתיחת שיעור תדע באיזה פרק הוא יושב
     // הדרך כולה: עותקים של התמונה זה מעל זה, כל שני הפוך, כך שהכביש ממשיך בלי תפר
     var PER_TILE = 99;            // לוח אחד לכל פרק, בלי ערימה
@@ -3446,7 +3452,9 @@ window.onerror = function(m, u, l){
         if (id){
           var cast = CAST[id] || [J.face];
           if (i === here && cast.length === 1){
-            var liveWho = (typeof ROOM_OF !== "undefined") ? ROOM_OF[id] : "";
+            /* הפנים המונפשות הן של הדמות של הפרק עצמו. ROOM_OF היה מראה
+               כאן את לה בכל שלבי סי, כי סי מפנה לחדר שלה */
+            var liveWho = (window.__solChapWho || [])[CH] || "";
             if (liveWho && HEAD_ANIM[liveWho]) cast = [HEAD_ANIM[liveWho]];
           }
           if (cast.length > 1) d.classList.add("many");
