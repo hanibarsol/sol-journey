@@ -4505,8 +4505,11 @@ window.onerror = function(m, u, l){
       p.y = BACK_B + t * (FRONT - BACK_B);
       p.lift = Math.max(0, Math.min(250, p.lift || 0));
       var k = scaleAt(t) * p.size;
+      /* הגבול דאג שהחפץ כולו יישאר בתוך הרצפה, ולכן חפץ גדול או רחוק
+         כמעט לא יכול היה לזוז: 20 פיקסלים בסך הכל בעומק האחורי.
+         עכשיו מותר לו לחרוג מעט מקצה הרצפה, והתנועה נעשית חופשית. */
       var half = 126 * k * 0.82;
-      var lim = Math.max(10, halfAt(t) - half);
+      var lim = Math.max(60, halfAt(t) - half * 0.40);
       p.x = Math.max(240 - lim, Math.min(240 + lim, p.x));
       p.g.setAttribute("transform", "translate(" + p.x.toFixed(1) + "," + (p.y - p.lift).toFixed(1) + ") scale(" + k.toFixed(3) + ")");
       p.spin.setAttribute("transform", "rotate(" + p.rot.toFixed(1) + ") scale(" + p.flip + "," + (1 - p.tilt).toFixed(3) + ")");
