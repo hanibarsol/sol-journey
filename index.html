@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v309</title>
+<title>העולם של סול v310</title>
 </head>
 <body>
 <style>
@@ -840,7 +840,7 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px -8px rgba(0,0,0,.95),
                0 0 22px -8px rgba(255,196,77,.7); }
   .purse .n{ font-size:16px; font-weight:800; color:#FFE9B8; letter-spacing:.5px; }
-  .purse .tok{ width:30px; height:30px; display:block; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+  .purse .tok{ width:30px; height:30px; display:block; object-fit:contain; }
   .purse.coin{ background:linear-gradient(180deg,#2a1f4d,#1a1336); box-shadow:inset 0 1px 0 rgba(255,255,255,.14),
                0 6px 18px -8px rgba(0,0,0,.95), 0 0 22px -8px rgba(255,196,77,.7); }
 
@@ -2553,7 +2553,7 @@ window.onerror = function(m, u, l){
                     ear3:"ear", hunter3:"hunter", read3:"read", meetmi:"meet",
                     meetfa:"meet", ear4:"ear", hunter4:"hunter", read4:"read",
                     meetsol:"meet", ear5:"ear", ear5b:"ear", hunter5:"hunter", hunter5b:"hunter", read5:"read",
-                    meetla:"meet", ear6:"ear", ear6b:"ear", hunter6:"hunter", hunter6b:"hunter", read6:"read", meetsi:"meet", ear7:"ear", ear7b:"ear", hunter7:"hunter", hunter7b:"hunter", read7:"read" };
+                    meetla:"meet", ear6:"ear", ear6b:"ear", hunter6:"hunter", hunter6b:"hunter", read6:"read", cards5:"cards", cards6:"cards", cards7:"cards", meetsi:"meet", ear7:"ear", ear7b:"ear", hunter7:"hunter", hunter7b:"hunter", read7:"read" };
       var POOLS = { read1:[0], meet:[0],                 // דו בלבד
                     ear3:[0,1,2], hunter3:[0,1,2], read3:[0,1,2],   // דו רה ומי
                     meetmi:[2],                                      // מי לבדה
@@ -2571,7 +2571,9 @@ window.onerror = function(m, u, l){
                     /* סי נכנס עם השכנים שלו, ואז עם עוד אחד */
                     ear7:[4,5,6], ear7b:[3,4,5,6],
                     hunter7:[4,5,6], hunter7b:[3,4,5,6],
-                    read7:[0,1,2,3,4,5,6] };
+                    read7:[0,1,2,3,4,5,6],
+                    /* המשחק סוקר את כל מה שנלמד עד כה, ולכן הוא גדל עם המסע */
+                    cards5:[0,1,2,3,4], cards6:[0,1,2,3,4,5], cards7:[0,1,2,3,4,5,6] };
       var key = MODES[which] ? "stages" : which;
       if (!LESSON_URL[key]) { toast("\u05d4\u05e9\u05d9\u05e2\u05d5\u05e8 \u05d4\u05d6\u05d4 \u05e2\u05d5\u05d3 \u05d1\u05d3\u05e8\u05da"); return; }
       var doc = LESSON_BODY[key];
@@ -2808,6 +2810,7 @@ window.onerror = function(m, u, l){
     "re":"רה","dore":"רה","ear":"רה","hunter":"רה","read":"רה",
     "meetmi":"מי","mire":"מי","ear3":"מי","hunter3":"מי","read3":"מי",
     "meetfa":"פה","fasong":"פה","ear4":"פה","hunter4":"פה","read4":"פה",
+    "cards5":"סול","cards6":"לה","cards7":"לה",
     "meetsol":"סול","solsong":"סול","ear5":"סול","ear5b":"סול","hunter5":"סול","hunter5b":"סול","read5":"סול",
     "meetla":"לה","lasong":"לה","ear6":"לה","ear6b":"לה","hunter6":"לה","hunter6b":"לה","read6":"לה",
     // לסי אין עדיין חדר משלו, ולכן הפס ממשיך להראות את החדר של לה
@@ -2979,12 +2982,13 @@ window.onerror = function(m, u, l){
   if (ROOM_ART["סול"]) ROOM_ART["סול"].w = 79;
   if (ROOM_ART["לה"]) ROOM_ART["לה"].w = 161;
   window.__solRoomArt = ROOM_ART;
+    /* משחק הקלפים יושב באמצע רצף תרגולי השמיעה, כדי לרווח אותו */
     var PATH = ["do", "meet", "re", "ear", "hunter", "read", "dore",
                 "meetmi", "ear3", "hunter3", "read3", "mire",
                 "meetfa", "ear4", "hunter4", "read4", "fasong",
-                "meetsol", "ear5", "ear5b", "hunter5", "hunter5b", "read5", "solsong",
-                "meetla", "ear6", "ear6b", "hunter6", "hunter6b", "read6", "lasong",
-                "meetsi", "ear7", "ear7b", "hunter7", "hunter7b", "read7"];
+                "meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong",
+                "meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "lasong",
+                "meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7"];
     /* שבעת השלבים הראשונים הם בדיוק שני הפרקים הראשונים: דו ורה */
     var FREE_STEPS = 7;
     /* הרשימה המלאה נשמרת בנפרד. יש בדיקה אחת שחייבת לראות גם את מה שנעול:
@@ -3023,6 +3027,11 @@ window.onerror = function(m, u, l){
         '<circle cx="12" cy="13" r="5.4" fill="#FFC44D"/>' +
         '<rect x="16.2" y="3" width="2.4" height="11" rx="1.2" fill="#FFC44D"/>' +
         '<circle cx="12" cy="13" r="8.6" fill="none" stroke="#FFC44D" stroke-width="1.4" opacity=".55"/></svg>',
+      /* משחק: שלושה בגובה עולה, כלומר לסדר מהנמוך לגבוה */
+      game: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<rect x="3.6" y="13.5" width="4.4" height="6.5" rx="1.4" fill="#FFC44D" opacity=".6"/>' +
+        '<rect x="9.8" y="9.5" width="4.4" height="10.5" rx="1.4" fill="#FFC44D" opacity=".8"/>' +
+        '<rect x="16" y="5" width="4.4" height="15" rx="1.4" fill="#FFC44D"/></svg>',
       read: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
         '<path d="M3.5 7.5 h17 M3.5 16.5 h17" stroke="#FFC44D" stroke-width="2" stroke-linecap="round" opacity=".85"/>' +
         '<circle cx="12" cy="12" r="3.6" fill="#FFC44D"/></svg>'
@@ -3033,6 +3042,7 @@ window.onerror = function(m, u, l){
                  "re":[RE_FACE], "dore":[RE_FACE], "ear":[RE_FACE], "hunter":[RE_FACE], "read":[RE_FACE],
                  "meetmi":[MI_FACE], "mire":[MI_FACE], "ear3":[MI_FACE], "hunter3":[MI_FACE], "read3":[MI_FACE],
                  "meetfa":[FA_FACE], "fasong":[FA_FACE], "ear4":[FA_FACE], "hunter4":[FA_FACE], "read4":[FA_FACE],
+                 "cards5":[SOL_FACE], "cards6":[LA_FACE], "cards7":[SI_FACE],
                  "meetsol":[SOL_FACE], "solsong":[SOL_FACE], "ear5":[SOL_FACE], "ear5b":[SOL_FACE],
                  "hunter5":[SOL_FACE], "hunter5b":[SOL_FACE], "read5":[SOL_FACE],
                  "meetla":[LA_FACE], "ear6":[LA_FACE], "ear6b":[LA_FACE], "hunter6":[LA_FACE],
@@ -3050,6 +3060,7 @@ window.onerror = function(m, u, l){
                  "hunter5":"two", "hunter5b":"two", "read5":"read",
                  "meetla":"meet", "ear6":"one", "ear6b":"one", "hunter6":"two",
                  "hunter6b":"two", "read6":"read", "lasong":"song",
+                 "cards5":"game", "cards6":"game", "cards7":"game",
                  "meetsi":"meet", "ear7":"one", "ear7b":"one",
                  "hunter7":"two", "hunter7b":"two", "read7":"read" };
     // הדרך נחלקת לפרקים. כל פרק הוא לוח אחד, ובקצה שלו מציצה האבן הראשונה של הבא.
@@ -3059,9 +3070,9 @@ window.onerror = function(m, u, l){
       ["re", "ear", "hunter", "read", "dore"],
       ["meetmi", "ear3", "hunter3", "read3", "mire"],
       ["meetfa", "ear4", "hunter4", "read4", "fasong"],
-      ["meetsol", "ear5", "ear5b", "hunter5", "hunter5b", "read5", "solsong"],
-      ["meetla", "ear6", "ear6b", "hunter6", "hunter6b", "read6", "lasong"],
-      ["meetsi", "ear7", "ear7b", "hunter7", "hunter7b", "read7"]
+      ["meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong"],
+      ["meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "lasong"],
+      ["meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7"]
     ];
     if (!window.__solFull){
       /* נשמרים הפרקים השלמים שנכנסים בתוך החלק החינמי, ולא חצי פרק */
