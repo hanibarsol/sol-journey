@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v310</title>
+<title>העולם של סול v311</title>
 </head>
 <body>
 <style>
@@ -2551,14 +2551,14 @@ window.onerror = function(m, u, l){
     window.openLesson = function(which){
       var MODES = { ear:"ear", hunter:"hunter", read:"read", read1:"read", meet:"meet",
                     ear3:"ear", hunter3:"hunter", read3:"read", meetmi:"meet",
-                    meetfa:"meet", ear4:"ear", hunter4:"hunter", read4:"read",
+                    meetfa:"meet", ear4:"ear", hunter4:"hunter", read4:"read", catch4:"catch",
                     meetsol:"meet", ear5:"ear", ear5b:"ear", hunter5:"hunter", hunter5b:"hunter", read5:"read",
-                    meetla:"meet", ear6:"ear", ear6b:"ear", hunter6:"hunter", hunter6b:"hunter", read6:"read", cards5:"cards", cards6:"cards", cards7:"cards", meetsi:"meet", ear7:"ear", ear7b:"ear", hunter7:"hunter", hunter7b:"hunter", read7:"read" };
+                    meetla:"meet", ear6:"ear", ear6b:"ear", hunter6:"hunter", hunter6b:"hunter", read6:"read", catch6:"catch", cards5:"cards", cards6:"cards", cards7:"cards", meetsi:"meet", ear7:"ear", ear7b:"ear", hunter7:"hunter", hunter7b:"hunter", read7:"read" };
       var POOLS = { read1:[0], meet:[0],                 // דו בלבד
                     ear3:[0,1,2], hunter3:[0,1,2], read3:[0,1,2],   // דו רה ומי
                     meetmi:[2],                                      // מי לבדה
                     meetfa:[3],                                      // פה לבדה
-                    ear4:[0,1,2,3], hunter4:[0,1,2,3], read4:[0,1,2,3],
+                    ear4:[0,1,2,3], hunter4:[0,1,2,3], read4:[0,1,2,3], catch4:[0,1,2,3],
                     meetsol:[4],                                      // סול לבדו
                     /* לעולם לא יותר מארבעה לבחור מהם: קודם דו רה מי פה, ואז רה מי פה סול */
                     ear5:[0,1,2,3], ear5b:[1,2,3,4],
@@ -2566,7 +2566,7 @@ window.onerror = function(m, u, l){
                     meetla:[5],                                       // לה לבדה
                     /* ואצל לה: דו רה מי פה, ואז מי פה סול לה */
                     ear6:[0,1,2,3], ear6b:[2,3,4,5],
-                    hunter6:[0,1,2,3], hunter6b:[2,3,4,5], read6:[0,1,2,3,4,5],
+                    hunter6:[0,1,2,3], hunter6b:[2,3,4,5], read6:[0,1,2,3,4,5], catch6:[0,1,2,3,4,5],
                     meetsi:[6],                                       // סי לבדו
                     /* סי נכנס עם השכנים שלו, ואז עם עוד אחד */
                     ear7:[4,5,6], ear7b:[3,4,5,6],
@@ -2809,10 +2809,10 @@ window.onerror = function(m, u, l){
     "do":"דו","meet":"דו","read1":"דו",
     "re":"רה","dore":"רה","ear":"רה","hunter":"רה","read":"רה",
     "meetmi":"מי","mire":"מי","ear3":"מי","hunter3":"מי","read3":"מי",
-    "meetfa":"פה","fasong":"פה","ear4":"פה","hunter4":"פה","read4":"פה",
+    "meetfa":"פה","fasong":"פה","ear4":"פה","hunter4":"פה","read4":"פה","catch4":"פה",
     "cards5":"סול","cards6":"לה","cards7":"לה",
     "meetsol":"סול","solsong":"סול","ear5":"סול","ear5b":"סול","hunter5":"סול","hunter5b":"סול","read5":"סול",
-    "meetla":"לה","lasong":"לה","ear6":"לה","ear6b":"לה","hunter6":"לה","hunter6b":"לה","read6":"לה",
+    "meetla":"לה","lasong":"לה","ear6":"לה","ear6b":"לה","hunter6":"לה","hunter6b":"לה","read6":"לה","catch6":"לה",
     // לסי אין עדיין חדר משלו, ולכן הפס ממשיך להראות את החדר של לה
     "meetsi":"לה","ear7":"לה","ear7b":"לה","hunter7":"לה","hunter7b":"לה","read7":"לה"
   };
@@ -2985,9 +2985,9 @@ window.onerror = function(m, u, l){
     /* משחק הקלפים יושב באמצע רצף תרגולי השמיעה, כדי לרווח אותו */
     var PATH = ["do", "meet", "re", "ear", "hunter", "read", "dore",
                 "meetmi", "ear3", "hunter3", "read3", "mire",
-                "meetfa", "ear4", "hunter4", "read4", "fasong",
+                "meetfa", "ear4", "hunter4", "read4", "catch4", "fasong",
                 "meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong",
-                "meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "lasong",
+                "meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "catch6", "lasong",
                 "meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7"];
     /* שבעת השלבים הראשונים הם בדיוק שני הפרקים הראשונים: דו ורה */
     var FREE_STEPS = 7;
@@ -3034,18 +3034,24 @@ window.onerror = function(m, u, l){
         '<rect x="16" y="5" width="4.4" height="15" rx="1.4" fill="#FFC44D"/></svg>',
       read: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
         '<path d="M3.5 7.5 h17 M3.5 16.5 h17" stroke="#FFC44D" stroke-width="2" stroke-linecap="round" opacity=".85"/>' +
-        '<circle cx="12" cy="12" r="3.6" fill="#FFC44D"/></svg>'
+        '<circle cx="12" cy="12" r="3.6" fill="#FFC44D"/></svg>',
+      /* תפסו את התו. אותו רמז של חמשה כמו בקריאה, אבל עם ההילה שיוצאת
+         מהתו בנגיעה, כדי ששתי האבנים באותו פרק לא ייראו זהות. */
+      catch: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="M3.5 7.5 h17 M3.5 16.5 h17" stroke="#FFC44D" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>' +
+        '<circle cx="12" cy="12" r="3.2" fill="#FFC44D"/>' +
+        '<circle cx="12" cy="12" r="7.1" fill="none" stroke="#FFC44D" stroke-width="1.7"/></svg>'
     };
     // מי משתתף בכל שלב. האבן מראה את זה, אחרת כל האבנים נראות אותו דבר.
     // דמות אחת לכל אבן: זו שהשלב הזה עליה
     var CAST = { "do":[DO_IMG], "meet":[DO_IMG],
                  "re":[RE_FACE], "dore":[RE_FACE], "ear":[RE_FACE], "hunter":[RE_FACE], "read":[RE_FACE],
                  "meetmi":[MI_FACE], "mire":[MI_FACE], "ear3":[MI_FACE], "hunter3":[MI_FACE], "read3":[MI_FACE],
-                 "meetfa":[FA_FACE], "fasong":[FA_FACE], "ear4":[FA_FACE], "hunter4":[FA_FACE], "read4":[FA_FACE],
+                 "meetfa":[FA_FACE], "fasong":[FA_FACE], "ear4":[FA_FACE], "hunter4":[FA_FACE], "read4":[FA_FACE], "catch4":[FA_FACE],
                  "cards5":[SOL_FACE], "cards6":[LA_FACE], "cards7":[SI_FACE],
                  "meetsol":[SOL_FACE], "solsong":[SOL_FACE], "ear5":[SOL_FACE], "ear5b":[SOL_FACE],
                  "hunter5":[SOL_FACE], "hunter5b":[SOL_FACE], "read5":[SOL_FACE],
-                 "meetla":[LA_FACE], "ear6":[LA_FACE], "ear6b":[LA_FACE], "hunter6":[LA_FACE],
+                 "meetla":[LA_FACE], "ear6":[LA_FACE], "ear6b":[LA_FACE], "hunter6":[LA_FACE], "catch6":[LA_FACE],
                  "hunter6b":[LA_FACE], "read6":[LA_FACE], "lasong":[LA_FACE],
                  "meetsi":[SI_FACE], "ear7":[SI_FACE], "ear7b":[SI_FACE],
                  "hunter7":[SI_FACE], "hunter7b":[SI_FACE], "read7":[SI_FACE] };
@@ -3055,11 +3061,11 @@ window.onerror = function(m, u, l){
     window.__solCast = CAST;
     var KIND = { "do":"song", "re":"song", "dore":"song", "ear":"one", "hunter":"two", "read":"read", "read1":"read", "mire":"song", "meet":"meet",
                  "meetmi":"meet", "ear3":"one", "hunter3":"two", "read3":"read",
-                 "meetfa":"meet", "fasong":"song", "ear4":"one", "hunter4":"two", "read4":"read",
+                 "meetfa":"meet", "fasong":"song", "ear4":"one", "hunter4":"two", "read4":"read", "catch4":"catch",
                  "meetsol":"meet", "solsong":"song", "ear5":"one", "ear5b":"one",
                  "hunter5":"two", "hunter5b":"two", "read5":"read",
                  "meetla":"meet", "ear6":"one", "ear6b":"one", "hunter6":"two",
-                 "hunter6b":"two", "read6":"read", "lasong":"song",
+                 "hunter6b":"two", "read6":"read", "catch6":"catch", "lasong":"song",
                  "cards5":"game", "cards6":"game", "cards7":"game",
                  "meetsi":"meet", "ear7":"one", "ear7b":"one",
                  "hunter7":"two", "hunter7b":"two", "read7":"read" };
@@ -3069,9 +3075,9 @@ window.onerror = function(m, u, l){
       ["do", "meet"],
       ["re", "ear", "hunter", "read", "dore"],
       ["meetmi", "ear3", "hunter3", "read3", "mire"],
-      ["meetfa", "ear4", "hunter4", "read4", "fasong"],
+      ["meetfa", "ear4", "hunter4", "read4", "catch4", "fasong"],
       ["meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong"],
-      ["meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "lasong"],
+      ["meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "catch6", "lasong"],
       ["meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7"]
     ];
     if (!window.__solFull){
