@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v308</title>
+<title>העולם של סול v309</title>
 </head>
 <body>
 <style>
@@ -2165,7 +2165,7 @@ window.onerror = function(m, u, l){
   // a way back to the very beginning, for testing: press R
   function solReset(){
     try{
-      ["solWorld.coins","solWorld.round","solWorld.done","solWorld.done2",
+      ["solWorld.coins","solWorld.round","solWorld.done","solWorld.done2","solWorld.rooms",
        "solWorld.level","solWorld.levelSeen","solRoom.pieces",
        "solRoom.sofa","solRoom.sofa.v2","solRoom.sofa.v3","solHouse.sound","solRoom.test"]
         .forEach(function(k){ localStorage.removeItem(k); });
@@ -2179,7 +2179,7 @@ window.onerror = function(m, u, l){
   (function(){
     try{
       if (location.search.toLowerCase().indexOf("reset") >= 0){
-        ["solWorld.coins","solWorld.round","solWorld.done","solWorld.done2",
+        ["solWorld.coins","solWorld.round","solWorld.done","solWorld.done2","solWorld.rooms",
          "solWorld.level","solWorld.levelSeen","solRoom.pieces",
          "solRoom.sofa","solRoom.sofa.v2","solRoom.sofa.v3","solHouse.sound","solRoom.test"]
           .forEach(function(k){ localStorage.removeItem(k); });
@@ -2949,8 +2949,17 @@ window.onerror = function(m, u, l){
   window.__solShop = SHOP;
   var ROOM_ORDER = ["דו", "רה", "מי", "פה", "סול", "לה"];
   // חדר נפתח רק אחרי שכל השלבים של אותה דמות נעשו
+  /* חדר שנפתח פעם אחת נשאר פתוח לתמיד.
+     בלי זה, כל שלב חדש שמתווסף לדמות נועל מחדש חדר שכבר הרוויחו אותו,
+     כי החוק שואל "האם כל השלבים שלה נעשו" ושלב שלא היה קיים בוודאי לא נעשה.
+     התכולה לא נעלמת, רק הדלת נסגרת, ובלי שום סימן למה.
+     הפונקציה הזאת גם כותבת ולא רק שואלת, וזה מכוון: רק כך נרשמים
+     גם חדרים שנפתחו לפני שהרישום הזה היה קיים. הכתיבה חוזרת על עצמה
+     בלי נזק ועולה כלום. */
   window.__solRoomOpen = function(who){
     try{
+      var ever = JSON.parse(localStorage.getItem("solWorld.rooms") || "[]") || [];
+      if (ever.indexOf(who) >= 0) return true;
       var d = JSON.parse(localStorage.getItem("solWorld.done") || "[]") || [];
       /* על הרשימה המלאה ולא על המקוצרת, אחרת דמות שכל שלביה נעולים
          נראית כמי שסיימה הכל והחדר שלה נפתח בחינם */
@@ -2958,6 +2967,8 @@ window.onerror = function(m, u, l){
       for (var i = 0; i < list.length; i++){
         if (ROOM_OF[list[i]] === who && d.indexOf(list[i]) < 0) return false;
       }
+      ever.push(who);
+      try{ localStorage.setItem("solWorld.rooms", JSON.stringify(ever)); }catch(e){}
       return true;
     }catch(e){ return false; }
   };
