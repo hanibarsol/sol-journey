@@ -169,6 +169,21 @@
   .k.selfPlay .lip{ background:linear-gradient(180deg,#d8d3e8 0%,#bdb6d2 55%,#a49cbe 100%);
     box-shadow:inset 0 3px 7px rgba(60,40,120,.4); }
   .k.selfPlay .face{ animation:faceGlow .45s ease-out; }
+  /* תלמידה בשיעור הראשון לא ידעה שצריך ללחוץ על הקליד. היא פגשה את
+     האצבע הזו דקה קודם במסך הפתיחה, ולכן היא כבר יודעת שהיא אומרת
+     "כאן לוחצים". מופיעה רק בתור הראשון בחיים, ונעלמת בלחיצה */
+  .k .tapHint{ position:absolute; left:50%; bottom:92px; transform:translateX(-50%);
+    width:38px; height:38px; color:#241B3D; opacity:0; pointer-events:none; z-index:6;
+    transition:opacity .3s ease;
+    filter:drop-shadow(0 0 7px rgba(255,255,255,.95)) drop-shadow(0 2px 4px rgba(36,27,61,.35)); }
+  body.tall .k .tapHint{ bottom:124px; width:46px; height:46px; }
+  .k .tapHint svg{ width:100%; height:100%; display:block; }
+  .k.hint .tapHint{ opacity:1; animation:tapBeat 1.3s ease-in-out infinite; }
+  @keyframes tapBeat{ 0%,100%{ transform:translateX(-50%) translateY(0) }
+    50%{ transform:translateX(-50%) translateY(5px) } }
+  .k .tapHint .rip path{ animation:tapRip 1.3s ease-out infinite; }
+  .k .tapHint .rip path + path{ animation-delay:.16s; }
+  @keyframes tapRip{ 0%{ opacity:0 } 35%{ opacity:1 } 100%{ opacity:0 } }
   @keyframes faceGlow{ 0%{ transform:translateX(-50%) scale(1) } 40%{ transform:translateX(-50%) scale(1.14) } 100%{ transform:translateX(-50%) scale(1) } }
 
   .fx{ position:absolute; left:0; top:0; width:480px; height:384px; pointer-events:none; z-index:20; }
@@ -427,6 +442,10 @@
         var img = document.createElement("img");
         img.className = "face"; img.src = DO_IMG; img.draggable = false;
         k.appendChild(img); doKey = k;
+        var th = document.createElement("div");
+        th.className = "tapHint";
+        th.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 a2 2 0 0 1 2 2 v7.4 h1.1 a3.1 3.1 0 0 1 3.1 3.1 v2.6 a4.3 4.3 0 0 1 -4.3 4.3 h-2.6 a4.1 4.1 0 0 1 -3.6 -2.1 l-2.3 -4.2 a1.7 1.7 0 0 1 2.7 -2 l1.9 2.1 V4.6 a2 2 0 0 1 2 -2 z" fill="currentColor"/><g class="rip" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"><path d="M16.6 6.4 a4.6 4.6 0 0 1 1.6 -3"/><path d="M19.4 8.2 a7.4 7.4 0 0 1 2.2 -4.6"/></g></svg>';
+        k.appendChild(th);
       }
       pianoEl.appendChild(k);
       if (BLACK_AFTER[i]){ var bk = document.createElement("div"); bk.className = "k b"; pianoEl.appendChild(bk); }
@@ -1065,6 +1084,9 @@
       learnNotes[0].classList.remove("good");
       learnReady = true;
       doKey.classList.add("due");
+      // התור הראשון בחיים. האצבע אומרת איפה לוחצים, ואחרי הלחיצה
+      // הראשונה היא לא חוזרת, כי מכאן הילדה כבר יודעת
+      if (!window.__solTapped) doKey.classList.add("hint");
       say("");
     });
   }
@@ -1096,6 +1118,8 @@
       learnReady = true;
       say("");
     }
+    window.__solTapped = true;
+    doKey.classList.remove("hint");
     if (learnNotes[learnDone]) learnNotes[learnDone].classList.add("good");
     learnDone++;
     var c = keyCenter();

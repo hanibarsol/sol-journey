@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v324</title>
+<title>העולם של סול v325</title>
 </head>
 <body>
 <style>
@@ -124,8 +124,14 @@
   /* בגודל מלא שני הכפתורים עם האייקונים דורשים כ-450 פיקסלים, יותר
      מכל טלפון. לכן המידה המוקטנת חלה על כל הטלפונים ולא רק על הצרים */
   @media (max-width:470px){
-    .bar{ padding:12px 7px 18px; gap:7px; }
-    .cta{ font-size:15px; padding:12px 17px; gap:7px; }
+    .bar{ padding:12px 7px 18px; gap:8px; }
+    .cta{ font-size:17.5px; padding:14px 23px; gap:8px; }
+    .meetFam{ font-size:15px; padding:12px 18px; gap:7px; }
+  }
+  /* בטלפון הצר ביותר שני הכפתורים בגודל הזה כבר יוצאים מהמסך */
+  @media (max-width:380px){
+    .bar{ padding:12px 6px 18px; gap:6px; }
+    .cta{ font-size:15px; padding:12px 16px; gap:7px; }
     .meetFam{ font-size:12.5px; padding:11px 12px; gap:6px; }
   }
   .cta:active{ transform:translateY(5px); box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 1px 0 0 #4f41b8; }
