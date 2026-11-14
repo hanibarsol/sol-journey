@@ -67,6 +67,17 @@
       וזה הדבר היחיד שהציור עצמו לא מגלה לי. <b>תגידי איזה מהשלושה נכון</b> ואני מקבעת אותו.</p>
   </div>
 
+  <div class="case pick">
+    <div class="lab">ההחלטה שלך<span>אותה תמונה, שלושה עומקים</span></div>
+    <div class="room" data-k="d200"></div>
+    <p class="say" style="padding-bottom:4px"><b>רדוד.</b> הטרפז הכי חזק, הצד הקרוב גבוה בהרבה מהרחוק</p>
+    <div class="room" data-k="d480"></div>
+    <p class="say" style="padding-bottom:4px"><b>בינוני.</b> ברירת המחדל</p>
+    <div class="room" data-k="d1000"></div>
+    <p class="say good">‎<b>עמוק.</b> הטרפז הכי עדין, התמונה כמעט מלבנית.
+      תגידי רק מילה אחת: רדוד, בינוני או עמוק.</p>
+  </div>
+
   <div class="case">
     <div class="lab">שלושה גבהים<span>למה הזווית משתנה</span></div>
     <div class="room" data-k="three"></div>
@@ -190,6 +201,21 @@
   });
 
   /* ----- פאנל שלישי: שלושה גבהים ----- */
+  /* שלושת העומקים זה מתחת לזה, אותה תמונה באותו מקום על הקיר השמאלי */
+  [200, 480, 1000].forEach(function(dd){
+    var box = document.querySelector('[data-k="d' + dd + '"]');
+    if (!box) return;
+    var R = mk(box, { key:"d" + dd });
+    var im = addPic(R.scene);
+    im.style.cursor = "default";
+    var saveD = D, saveP = P;
+    D = dd; P = 3 * dd;
+    R.scene.style.perspective = P + "px";
+    var st3 = fromScreen(36, 150);
+    apply(im, st3);
+    D = saveD; P = saveP;
+  });
+
   var c = mk(document.querySelector('[data-k="three"]'));
   var three = [addPic(c.scene), addPic(c.scene), addPic(c.scene)];
   three.forEach(function(im){ im.style.width = "81px"; im.style.height = "97px";
