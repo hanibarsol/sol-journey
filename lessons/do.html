@@ -88,10 +88,12 @@
   body.tall .playhead{ height:288px; }
   /* התו נוגע בפס למעלה והקליד נדלק למטה, באותו רגע אבל בשני קצוות
      המסך. הפס מבריק כמו נורה ברגע המגע, וזה מה שמחבר בין השניים */
-  .ledOn .playhead{ animation:ledFlash .45s ease-out; }
+  /* הבהוב קטן ולא הבזק. התזמון של הפס אינו מדויק תמיד, וסימן חזק
+     על רגע לא מדויק רק מדגיש את הסטייה במקום להסתיר אותה */
+  .ledOn .playhead{ animation:ledFlash .3s ease-out; }
   @keyframes ledFlash{
     0%{ filter:brightness(1) }
-    18%{ filter:brightness(2.2); box-shadow:0 0 34px 12px rgba(57,224,208,1) }
+    22%{ filter:brightness(1.45); box-shadow:0 0 18px 5px rgba(57,224,208,.75) }
     100%{ filter:brightness(1) } }
   body.tall .note .bar{ left:21px; top:11px; height:20px; }
   body.tall .note .stem{ left:37px; top:-72px; height:94px; }
