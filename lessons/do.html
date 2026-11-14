@@ -86,6 +86,13 @@
   body.tall .note .ledge{ left:-11px; top:19.4px; width:64px; height:3.2px; }
   body.tall .doLedger{ height:3.2px; }
   body.tall .playhead{ height:288px; }
+  /* התו נוגע בפס למעלה והקליד נדלק למטה, באותו רגע אבל בשני קצוות
+     המסך. הפס מבריק כמו נורה ברגע המגע, וזה מה שמחבר בין השניים */
+  .ledOn .playhead{ animation:ledFlash .45s ease-out; }
+  @keyframes ledFlash{
+    0%{ filter:brightness(1) }
+    18%{ filter:brightness(2.2); box-shadow:0 0 34px 12px rgba(57,224,208,1) }
+    100%{ filter:brightness(1) } }
   body.tall .note .bar{ left:21px; top:11px; height:20px; }
   body.tall .note .stem{ left:37px; top:-72px; height:94px; }
 
@@ -172,11 +179,11 @@
   /* תלמידה בשיעור הראשון לא ידעה שצריך ללחוץ על הקליד. היא פגשה את
      האצבע הזו דקה קודם במסך הפתיחה, ולכן היא כבר יודעת שהיא אומרת
      "כאן לוחצים". מופיעה רק בתור הראשון בחיים, ונעלמת בלחיצה */
-  .k .tapHint{ position:absolute; left:50%; bottom:92px; transform:translateX(-50%);
+  .k .tapHint{ position:absolute; left:50%; bottom:3px; transform:translateX(-50%);
     width:38px; height:38px; color:#241B3D; opacity:0; pointer-events:none; z-index:6;
     transition:opacity .3s ease;
     filter:drop-shadow(0 0 7px rgba(255,255,255,.95)) drop-shadow(0 2px 4px rgba(36,27,61,.35)); }
-  body.tall .k .tapHint{ bottom:124px; width:46px; height:46px; }
+  body.tall .k .tapHint{ bottom:5px; width:46px; height:46px; }
   .k .tapHint svg{ width:100%; height:100%; display:block; }
   .k.hint .tapHint{ opacity:1; animation:tapBeat 1.3s ease-in-out infinite; }
   @keyframes tapBeat{ 0%,100%{ transform:translateX(-50%) translateY(0) }
@@ -1227,6 +1234,7 @@
   // הנגן מעדכן את הזמן שלו בערך ארבע פעמים בשנייה. בין עדכון לעדכון משלימים עם
   // שעון המסך ומסתנכרנים מחדש בכל דיווח, אחרת התווים קופצים במקום לזוז.
   var clkBase = -1, clkMark = 0, smT = -1, smMark = 0, smRate = 1;
+  var wasDue = false;   // האם בפריים הקודם כבר היה תו בטווח
   // השעון של הדפדפן מתקדם במדרגות של רבע שנייה. במקום לקפוץ אל כל מדרגה,
   // השעון שלנו רץ ברצף ומתקרב אליה בשינוי מהירות זעיר, כך שהתו זז חלק
   function songNow(){
@@ -1275,6 +1283,15 @@
       }
     });
 
+    /* הרגע שבו תו נכנס לטווח הוא בדיוק הרגע שבו הוא נוגע בפס.
+       מבזיקים שם, ובשיר הראשון בלבד מראים גם את האצבע על הקליד */
+    if (anyDue && !wasDue){
+      var bd = document.body;
+      bd.classList.remove("ledOn"); void bd.offsetWidth; bd.classList.add("ledOn");
+      setTimeout(function(){ bd.classList.remove("ledOn"); }, 520);
+      if (!window.__solCaught) doKey.classList.add("hint");
+    }
+    wasDue = anyDue;
     if(anyDue && !pressing) doKey.classList.add("due"); else doKey.classList.remove("due");
 
     if(!endFired && t >= PIECE_END - 0.45){
