@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v326</title>
+<title>העולם של סול v327</title>
 </head>
 <body>
 <style>
@@ -177,6 +177,28 @@
   .room .txt{ flex:1 1 auto; }
   .room .t1{ font-size:15px; font-weight:800; color:#fff; }
   .room .t2{ font-size:12.5px; color:#b9a9e8; margin-top:2px; }
+  /* תלמידה עברה משחק שלם בלי לדעת שהחדר קיים, ולכן לא ידעה בשביל מה
+     היא אוספת תווי זהב. אחרי השלב הראשון מטבע עף מהארנק אל הרצועה
+     והיא נדלקת עם אותה יד שכבר נלמדה. פעם אחת, ונעלם בנגיעה */
+  .room{ transition:transform .35s cubic-bezier(.3,1.4,.5,1), box-shadow .35s ease; }
+  .room.lift{ transform:translateY(-6px) scale(1.03);
+    box-shadow:0 10px 26px -8px rgba(255,196,77,.55), inset 0 0 0 2px rgba(255,196,77,.85); }
+  .room.beat{ animation:roomBeat 1.7s ease-in-out infinite; }
+  @keyframes roomBeat{ 0%,100%{ transform:translateY(-6px) scale(1.03) }
+    50%{ transform:translateY(-6px) scale(1.055) } }
+  .room .tapHint{ position:absolute; left:50%; top:50%; width:44px; height:44px;
+    margin:-22px 0 0 -22px; color:#FFE7AD; opacity:0; pointer-events:none; z-index:6;
+    transition:opacity .3s ease;
+    filter:drop-shadow(0 0 8px rgba(36,27,61,.95)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+  .room .tapHint svg{ width:100%; height:100%; display:block; }
+  .room.hint .tapHint{ opacity:1; animation:roomTap 1.3s ease-in-out infinite; }
+  @keyframes roomTap{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(5px) } }
+  .room .tapHint .rip path{ animation:roomRip 1.3s ease-out infinite; }
+  .room .tapHint .rip path + path{ animation-delay:.16s; }
+  @keyframes roomRip{ 0%{ opacity:0 } 35%{ opacity:1 } 100%{ opacity:0 } }
+  .roomFly{ position:fixed; width:26px; height:35px; z-index:120; pointer-events:none;
+    filter:drop-shadow(0 0 12px rgba(255,196,77,1)); }
+  .roomFly img{ width:100%; height:100%; display:block; }
   .gift{
     font-size:12px; font-weight:800; color:#5a3c05; padding:5px 12px; border-radius:999px;
     background:linear-gradient(180deg,#FFE7AD,#FFC44D); box-shadow:0 2px 0 0 #B07C06;
@@ -1203,6 +1225,7 @@
       <span class="txt">
         <span class="t1" id="roomBarName">לעצב את החדר</span>
       </span>
+      <span class="tapHint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 a2 2 0 0 1 2 2 v7.4 h1.1 a3.1 3.1 0 0 1 3.1 3.1 v2.6 a4.3 4.3 0 0 1 -4.3 4.3 h-2.6 a4.1 4.1 0 0 1 -3.6 -2.1 l-2.3 -4.2 a1.7 1.7 0 0 1 2.7 -2 l1.9 2.1 V4.6 a2 2 0 0 1 2 -2 z" fill="currentColor"/><g class="rip" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"><path d="M16.6 6.4 a4.6 4.6 0 0 1 1.6 -3"/><path d="M19.4 8.2 a7.4 7.4 0 0 1 2.2 -4.6"/></g></svg></span>
     </div>
   </div>
   <div class="lvlLay" id="lvlLay" hidden>
@@ -2779,6 +2802,8 @@ window.onerror = function(m, u, l){
         var gotGold = pendingGold; pendingGold = 0;
         close();
         if (gotGold > 0) setTimeout(function(){ coinArrive(gotGold); }, 1150);
+        // אחרי שהמטבעות נחתו, הרצועה של החדר מספרת לאן הם הולכים
+        setTimeout(function(){ if (window.__solShowRoomHint) window.__solShowRoomHint(); }, 2600);
         setTimeout(function(){
           var sh = document.getElementById("sheet");
           if (sh && !sh.classList.contains("on") && window.openJourney) window.openJourney("דו");
@@ -3934,6 +3959,46 @@ window.onerror = function(m, u, l){
       if (window.__solOpenRoom) window.__solOpenRoom("", null); else rv.classList.add("on");
       window.__solRoomEntered();
     });
+    /* הגילוי של החדר. נקרא מרגע שהמטבעות נחתו בארנק אחרי השלב הראשון */
+    (function roomHint(){
+      var KEY = "solWorld.roomHint";
+      var bar = document.getElementById("room");
+      if (!bar) return;
+      function done(){
+        bar.classList.remove("lift", "beat", "hint");
+        try{ localStorage.setItem(KEY, "1"); }catch(e){}
+      }
+      bar.addEventListener("click", done);
+      window.__solShowRoomHint = function(){
+        try{ if (localStorage.getItem(KEY) === "1") return; }catch(e){}
+        var purse = document.getElementById("purseCoin");
+        var tok = purse && purse.querySelector("img");
+        if (!tok){ bar.classList.add("lift"); setTimeout(function(){ bar.classList.add("beat", "hint"); }, 260); return; }
+        var pr = purse.getBoundingClientRect(), br = bar.getBoundingClientRect();
+        var fly = document.createElement("div");
+        fly.className = "roomFly";
+        var im = document.createElement("img"); im.src = tok.getAttribute("src"); im.alt = "";
+        fly.appendChild(im);
+        document.body.appendChild(fly);
+        var x0 = pr.left + pr.width / 2 - 13, y0 = pr.top + pr.height / 2 - 17;
+        var x1 = br.left + br.width / 2 - 13, y1 = br.top + br.height / 2 - 17;
+        fly.style.left = x0 + "px"; fly.style.top = y0 + "px";
+        var t0 = null, MS = 900;
+        function step(now){
+          if (t0 === null) t0 = now;
+          var u = Math.min(1, (now - t0) / MS);
+          var e = 1 - Math.pow(1 - u, 2);
+          fly.style.left = (x0 + (x1 - x0) * e) + "px";
+          fly.style.top  = (y0 + (y1 - y0) * e - Math.sin(Math.PI * e) * 26) + "px";
+          fly.style.transform = "rotate(" + (e * 260).toFixed(0) + "deg)";
+          if (u < 1){ requestAnimationFrame(step); return; }
+          if (fly.parentNode) fly.parentNode.removeChild(fly);
+          bar.classList.add("lift");
+          setTimeout(function(){ bar.classList.add("beat", "hint"); }, 260);
+        }
+        requestAnimationFrame(step);
+      };
+    })();
     document.getElementById("roomBack").addEventListener("click", function(){
       if (window.__solCloseShop) window.__solCloseShop();
       // חזרה מהחדר מחזירה את המנגינה, בדיוק כמו חזרה משיעור
