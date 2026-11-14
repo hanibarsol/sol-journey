@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v311</title>
+<title>העולם של סול v312</title>
 </head>
 <body>
 <style>
@@ -150,6 +150,7 @@
   .stair{
     position:absolute; inset:0; z-index:45; background:#0B0714; overflow:hidden;
     opacity:0; pointer-events:none; transition:opacity .34s ease;
+    touch-action:none;
   }
   .stair.on{ opacity:1; pointer-events:auto; }
   .stairWorld{
@@ -4337,11 +4338,44 @@ window.onerror = function(m, u, l){
       requestAnimationFrame(f);
     }
 
+    /* גלילה אנכית באצבע ובגלגלת. הסף של שבעה פיקסלים מפריד בין גרירה
+       לבין נגיעה בדלת, אחרת כל גלילה קטנה היתה פותחת חדר */
+    var panOn = false, panId = null, panFrom = 0, panY0 = 0, panMoved = false;
+    /* הגלילה ביד חופשית על כל גובה הבניין, 1920, ולא רק על טווח הדלתות.
+       הגבולות הצרים נועדו למצלמה האוטומטית, ובהם אין לאן לזוז בכלל */
+    function panClamp(y){ return Math.max(0, Math.min(Math.max(0, 1920 - viewH), y)); }
+    wrap.addEventListener("pointerdown", function(ev){
+      if (busy) return;
+      panOn = true; panId = ev.pointerId; panFrom = ev.clientY; panY0 = camY; panMoved = false;
+    });
+    wrap.addEventListener("pointermove", function(ev){
+      if (!panOn || ev.pointerId !== panId || busy) return;
+      var dy = ev.clientY - panFrom;
+      if (!panMoved && Math.abs(dy) < 7) return;
+      panMoved = true;
+      camY = panClamp(panY0 - dy / Math.max(0.0001, camK));
+      apply();
+    });
+    function panStop(){
+      if (!panOn) return;
+      panOn = false; panId = null;
+      /* הדגל נשאר רגע אחרי השחרור, כי הקליק מגיע אחרי העזיבה */
+      if (panMoved) setTimeout(function(){ panMoved = false; }, 80);
+    }
+    wrap.addEventListener("pointerup", panStop);
+    wrap.addEventListener("pointercancel", panStop);
+    wrap.addEventListener("wheel", function(ev){
+      if (busy) return;
+      camY = panClamp(camY + ev.deltaY / Math.max(0.0001, camK));
+      apply();
+      ev.preventDefault();
+    }, { passive:false });
+
     function wire(){
       var hits = ovEl.querySelectorAll(".stHit");
       Array.prototype.forEach.call(hits, function(h){
         h.addEventListener("click", function(){
-          if (busy) return;
+          if (busy || panMoved) return;   // גררו את המסך, לא נגעו בדלת
           var i = +h.getAttribute("data-i");
           if (!isOpen(DOORS[i].n)){
             knock(i);
