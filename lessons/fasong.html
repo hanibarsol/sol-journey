@@ -1193,7 +1193,17 @@
     say("");
     setLedger(false);
     clearInterval(songFadeId); songFadeId = 0;
-    song.currentTime=0; song.muted=false; song.volume=1; clkBase=-1; smT=-1;
+    /* הנגן רץ מושתק מרגע הפתיחה, כדי שהאייפון ייתן לו קול אחר כך, ואף אחד
+       לא עוצר אותו. לכן בתחילת השיר הוא נמצא באמצע ההקלטה או בסופה.
+       החזרה להתחלה אינה מיידית, והסרת ההשתקה כן, ובחלון הזה נשמע רסיס
+       מהמקום הישן. הוא נשאר אילם עד שהחזרה הסתיימה. ארבע וחצי השניות
+       הראשונות של ההקלטה הן שקט, אז העיכוב אינו גורע דבר מהשיר */
+    try{ song.muted=true; }catch(e){}
+    song.volume=1; song.currentTime=0; clkBase=-1; smT=-1;
+    var heard=false;
+    function letHear(){ if(heard) return; heard=true; try{ song.muted=false; }catch(e){} }
+    song.addEventListener("seeked", letHear, { once:true });
+    setTimeout(letHear, 400);
     var p=song.play();
     if(p&&p.catch) p.catch(function(){ say("לא הצלחתי להפעיל את הצליל. געו שוב במסך","warn"); });
     countIn();
