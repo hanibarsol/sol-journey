@@ -82,6 +82,16 @@
   .k .tapHint .rip path + path{ animation-delay:.16s; }
   @keyframes tapRip{ 0%{ opacity:0 } 35%{ opacity:1 } 100%{ opacity:0 } }
 
+  .pick{ display:flex; gap:6px; padding:0 12px 10px; flex-wrap:wrap; }
+  .pick .v{ font:inherit; font-size:12.5px; font-weight:800; border:0; cursor:pointer;
+    border-radius:999px; padding:8px 13px; color:#120a2a; background:#8d7fc4; }
+  .pick .v.on{ background:#FFC44D; color:#3b2a00; }
+  /* הבזק לד: כל הפס מבריק לרגע */
+  .ledOn .playhead{ animation:ledFlash .45s ease-out; }
+  @keyframes ledFlash{ 0%{ filter:brightness(1) }
+    18%{ filter:brightness(2.2); box-shadow:0 0 34px 12px rgba(57,224,208,1) }
+    100%{ filter:brightness(1) } }
+  .tealHand .k .tapHint{ color:var(--teal); }
   .say{ padding:9px 14px 14px; font-size:13px; line-height:1.6; margin:0; color:#c2b8e8; }
   .say b{ color:#FFD987; }
 </style>
@@ -93,7 +103,12 @@
     <b>שימי לב ששלושת הדברים קורים באותה שנייה</b>: ההבזק על הפס, הקליד שנדלק באדום, והיד.</p>
 
   <div class="case">
-    <div class="lab">ההצעה<button type="button" id="go">להריץ</button></div>
+    <div class="lab">השוואה<button type="button" id="go">להריץ שוב</button></div>
+    <div class="pick">
+      <button type="button" class="v on" data-v="a">א. נקודה, יד כהה</button>
+      <button type="button" class="v" data-v="b">ב. כל הפס, יד כהה</button>
+      <button type="button" class="v" data-v="c">ג. כל הפס, יד טורקיז</button>
+    </div>
     <div class="paper" id="paper"></div>
     <p class="say">ההבזק הוא עיגול טורקיז קצר בנקודה שבה ראש התו פגש את הפס,
       חצי שנייה והוא נעלם. היד מופיעה רק בשיר הראשון ונעלמת אחרי התו הראשון שנתפס.</p>
@@ -172,8 +187,13 @@
       note.style.left = x + "px";
       if (!fired && x <= x1 + 26){
         fired = true;
-        phHit.firstChild.style.top = DO_Y + "px";
-        phHit.classList.remove("on"); void phHit.offsetWidth; phHit.classList.add("on");
+        if (VAR === "a"){
+          phHit.firstChild.style.top = DO_Y + "px";
+          phHit.classList.remove("on"); void phHit.offsetWidth; phHit.classList.add("on");
+        } else {
+          fit.classList.remove("ledOn"); void fit.offsetWidth; fit.classList.add("ledOn");
+          setTimeout(function(){ fit.classList.remove("ledOn"); }, 520);
+        }
         doKey.classList.add("due", "hint");
         doNote();
       }
@@ -182,6 +202,15 @@
     }
     raf = requestAnimationFrame(step);
   }
+  var VAR = "a";
+  function applyVar(){ fit.classList.toggle("tealHand", VAR === "c"); }
+  Array.prototype.forEach.call(document.querySelectorAll(".pick .v"), function(b){
+    b.addEventListener("click", function(){
+      Array.prototype.forEach.call(document.querySelectorAll(".pick .v"), function(o){ o.classList.remove("on"); });
+      b.classList.add("on"); VAR = b.getAttribute("data-v"); applyVar(); ac(); run();
+    });
+  });
+  applyVar();
   document.getElementById("go").addEventListener("click", function(){ ac(); run(); });
 
   function fitIt(){
