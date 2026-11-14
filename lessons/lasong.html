@@ -451,7 +451,9 @@
     BOT = TALL ? 224 : 142;
     SH  = TALL ? 620 : 384;
     HEAD_R = TALL ? 21 : 15;
-    NY = [BOT+GAP, BOT+GAP/2, BOT, BOT-GAP/2, BOT-GAP];
+    /* שישה ערכים ולא חמישה. השיר הזה הוא היחיד שמשתמש בתו השישי,
+       ובלי לה הגובה שלה יוצא ערך לא חוקי והתו נשאר בראש הרצועה */
+    NY = [BOT+GAP, BOT+GAP/2, BOT, BOT-GAP/2, BOT-GAP, BOT-GAP*1.5];
     document.body.classList.toggle("tall", TALL);
   }
   setLayout();
