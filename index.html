@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v312</title>
+<title>העולם של סול v313</title>
 </head>
 <body>
 <style>
@@ -2000,8 +2000,10 @@ window.onerror = function(m, u, l){
     var w1 = btn && btn.querySelector("#wave1"),
         w2 = btn && btn.querySelector("#wave2"),
         mu = btn && btn.querySelector("#mute");
-    var on = false, wanted = true;
-    try{ var v = localStorage.getItem("solHouse.sound"); if (v === "0") wanted = false; }catch(e){}
+    /* המוזיקה מתחילה כבויה תמיד. היא נדלקת רק כשנוגעים בכפתור,
+       ומאותו רגע הבחירה נשמרת. צלילי התווים עצמם אינם תלויים בזה */
+    var on = false, wanted = false;
+    try{ var v = localStorage.getItem("solHouse.sound"); if (v === "1") wanted = true; }catch(e){}
     m.volume = 0.8;
     // iOS מתעלם מ-volume של נגן אודיו, ולכן ההיחלשות בסוף הברכה לא קרתה שם
     // בכלל והמנגינה פשוט נעצרה. כאן היא עוברת דרך מיקסר, ושם אפשר להחליש באמת
