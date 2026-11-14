@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v315</title>
+<title>העולם של סול v316</title>
 </head>
 <body>
 <style>
@@ -4583,7 +4583,7 @@ window.onerror = function(m, u, l){
       var pf = posF(k);
       var r = 27 * k / Math.max(0.25, k);   /* רדיוס שטח המגע במידות הבד */
       var oy = p.y - (p.lift || 0);
-      ["hFlip","hSize","hLift","hKill","hTurn"].forEach(function(h){
+      ["hSize","hLift","hKill","hTurn"].forEach(function(h){
         var e = p[h];
         if (!e || typeof e.__hx !== "number") return;
         var sx = p.x + e.__hx * pf * k, sy = oy + e.__hy * pf * k;
@@ -4619,7 +4619,7 @@ window.onerror = function(m, u, l){
     }
 
     function handles(p, on){
-      ["hFlip","hSize","hLift","hKill","hTurn"].forEach(function(h){
+      ["hSize","hLift","hKill","hTurn"].forEach(function(h){
         p[h].setAttribute("opacity", on ? "1" : "0");
         p[h].style.pointerEvents = on ? "auto" : "none";
         if (p[h].__hit) p[h].__hit.setAttribute("pointer-events", on ? "all" : "none");
@@ -4738,7 +4738,6 @@ window.onerror = function(m, u, l){
       alphaOf(src);
       var NOOP = { setAttribute:function(){}, style:{}, addEventListener:function(){} };
       p.hSpin = NOOP;
-      p.hFlip = handle(g, -166, -54, "flip");
       p.hSize = handle(g, 166, -54, "size");
       p.hLift = p.plane === "wall" ? NOOP : handle(g, 0, -206, "lift");
       p.hKill = handle(g, 0, 36, "kill");
@@ -4796,12 +4795,24 @@ window.onerror = function(m, u, l){
       window.addEventListener("pointercancel", drop, true);
       window.addEventListener("blur", function(){ drop(null); });
 
-      /* רבע סיבוב בכל נגיעה. העיגול מיישר גם הטיות ישנות אל הרשת. */
+      /* חצי סיבוב סביב הציר האנכי בכל נגיעה. החפץ נשאר עומד ופונה לצד השני.
+         רבע סיבוב סביב Y היה מעמיד תמונה שטוחה על הקצה שלה, כלומר מעלים אותה. */
+      var turning = false;
       p.hTurn.addEventListener("pointerdown", function(ev){
         ev.stopPropagation(); ev.preventDefault();
-        var q = Math.round((p.rot + 90) / 90) * 90;
-        p.rot = ((q % 360) + 360) % 360;
-        draw(p); save();
+        if (turning) return;
+        turning = true;
+        var from = p.flip, t0 = null, MS = 320;
+        function step(now){
+          if (t0 === null) t0 = now;
+          var u = Math.min(1, (now - t0) / MS);
+          var sx = from * Math.cos(u * Math.PI);
+          if (Math.abs(sx) < 0.02) sx = (sx < 0 ? -0.02 : 0.02);
+          p.spin.setAttribute("transform", "rotate(" + p.rot.toFixed(1) + ") scale(" + sx.toFixed(3) + "," + (1 - p.tilt).toFixed(3) + ")");
+          if (u < 1){ requestAnimationFrame(step); return; }
+          p.flip = -from; turning = false; draw(p); save();
+        }
+        requestAnimationFrame(step);
       });
 
       var spinning = false;
@@ -4881,8 +4892,7 @@ window.onerror = function(m, u, l){
       p.hKill.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
       p.hKill.addEventListener("click", function(ev){ ev.stopPropagation(); removePiece(p); });
 
-      p.hFlip.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
-      p.hFlip.addEventListener("click", function(ev){ p.flip = -p.flip; draw(p); save(); ev.stopPropagation(); });
+      /* כפתור ההיפוך הישן ירד: הסיבוב סביב הציר האנכי עושה בדיוק את זה, רק מונפש */
 
       return p;
     }
