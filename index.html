@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v328</title>
+<title>העולם של סול v329</title>
 </head>
 <body>
 <style>
@@ -3971,6 +3971,15 @@ window.onerror = function(m, u, l){
       bar.addEventListener("click", done);
       window.__solShowRoomHint = function(){
         try{ if (localStorage.getItem(KEY) === "1") return; }catch(e){}
+        /* חדר נפתח רק כשכל השלבים של אותה דמות הושלמו. בלי הבדיקה
+           הזו הרמז מצביע על דלת נעולה, וזה גרוע מלא להראות אותו.
+           לא מסמנים שנראה, כדי שינסה שוב בפעם הבאה */
+        var order = window.__solRoomOrder || [];
+        var any = false;
+        for (var q = 0; q < order.length; q++){
+          if (window.__solRoomOpen && window.__solRoomOpen(order[q])){ any = true; break; }
+        }
+        if (!any) return;
         var purse = document.getElementById("purseCoin");
         var tok = purse && purse.querySelector("img");
         if (!tok){ bar.classList.add("lift"); setTimeout(function(){ bar.classList.add("beat", "hint"); }, 260); return; }
