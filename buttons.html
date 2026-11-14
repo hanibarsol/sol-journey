@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>שני הכפתורים</title>
+<style>
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; background:#1b1038;
+    font-family:system-ui,"Segoe UI",Arial,sans-serif; color:#e9e3ff; }
+  .wrap{ max-width:600px; margin:0 auto; padding:16px 12px 48px; }
+  h1{ font-size:19px; margin:0 0 4px; color:#FFD987; }
+  .sub{ margin:0 0 18px; font-size:13.5px; line-height:1.65; color:#c9c0ef; }
+  .sub b{ color:#FFD987; }
+  .case{ margin-bottom:16px; border-radius:16px; overflow:hidden;
+    border:1.5px solid #51428c; background:#2b2050; }
+  .lab{ display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:9px 14px; font-size:14.5px; font-weight:800; color:#FFD987; }
+  .lab span{ font-weight:400; font-size:12.5px; color:#b9b0e0; }
+  .phones{ display:flex; flex-direction:column; gap:12px; padding:10px 12px 14px; align-items:center; }
+  .phone{ flex:0 0 auto; border-radius:14px; overflow:hidden;
+    border:1.5px solid #6a5aa8; background:#120c28; }
+  .phone .tag{ font:11px monospace; color:#b9b0e0; text-align:center; padding:4px 0 2px; }
+  .stageBox{ position:relative; background:#0d0820; }
+
+  /* ----- הפס עצמו, כמו במשחק ----- */
+  .bar{ position:relative; padding:12px 14px 16px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:linear-gradient(0deg, rgba(9,7,26,.92) 40%, rgba(9,7,26,0)); }
+  .bar.col{ flex-direction:column; }
+  .cta{ border:none; cursor:pointer; font-family:inherit;
+    font-size:18px; font-weight:800; color:#fff; padding:15px 44px; border-radius:999px;
+    background:linear-gradient(180deg,#9b8dff,#7B6BFF); text-shadow:0 1px 4px rgba(0,0,0,.3);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 6px 0 0 #4f41b8, 0 0 36px -4px rgba(123,107,255,.95);
+    white-space:nowrap; }
+  .meetFam{ border:none; cursor:pointer; font-family:inherit;
+    font-size:15.5px; font-weight:800; color:#f0e6ff; padding:12px 26px;
+    border-radius:999px; background:rgba(255,255,255,.1);
+    box-shadow:inset 0 0 0 1.5px rgba(240,230,255,.4); white-space:nowrap; }
+
+  /* שלושת הגוונים לבחירה */
+  .v1 .meetFam{ color:#2a1f5e; background:linear-gradient(180deg,#d6cfff,#b3a6ff);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 5px 0 0 #7d6fd4; }
+  .v2 .meetFam{ color:#2a1f5e; background:linear-gradient(180deg,#c3b6ff,#9b8dff);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 5px 0 0 #6b5cc4; }
+  .v3 .meetFam{ color:#efeaff; background:rgba(155,141,255,.42);
+    box-shadow:inset 0 0 0 2px rgba(190,180,255,.85); }
+
+  /* בנייד צר שניהם קטנים יותר, אחרת הם לא נכנסים בשורה אחת */
+  .narrow .cta{ font-size:15.5px; padding:12px 20px; box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 5px 0 0 #4f41b8, 0 0 30px -6px rgba(123,107,255,.9); }
+  .narrow .meetFam{ font-size:13.5px; padding:11px 14px; }
+  .narrow .bar{ padding:10px 8px 14px; gap:7px; }
+
+  .say{ padding:2px 14px 13px; font-size:13px; line-height:1.6; margin:0; color:#c2b8e8; }
+  .say b{ color:#FFD987; }
+  .note{ margin-top:20px; font-size:13.5px; line-height:1.7; color:#c9c0ef; }
+  .note b{ color:#FFD987; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>שני הכפתורים בשורה אחת</h1>
+  <p class="sub">כל מלבן הוא רוחב מסך אמיתי. <b>320</b> הוא הנייד הצר ביותר שאנחנו תומכות בו,
+    <b>390</b> הוא אייפון רגיל, ו<b>משולב</b> הוא מסך רחב.</p>
+
+  <div class="case">
+    <div class="lab">מה שיש היום<span>אחד מתחת לשני</span></div>
+    <div class="phones" data-mode="now"></div>
+    <p class="say">"בואו נתחיל" סגול מלא, ו"להכיר את המשפחה" שקוף עם מסגרת דקה מתחתיו.</p>
+  </div>
+
+  <div class="case">
+    <div class="lab">א. סגול בהיר<span>הכי בהיר</span></div>
+    <div class="phones" data-mode="v1"></div>
+  </div>
+
+  <div class="case">
+    <div class="lab">ב. סגול בינוני<span>קרוב יותר לסגול של המותג</span></div>
+    <div class="phones" data-mode="v2"></div>
+  </div>
+
+  <div class="case">
+    <div class="lab">ג. סגול שקוף עם מסגרת<span>שומר על ההיררכיה</span></div>
+    <div class="phones" data-mode="v3"></div>
+  </div>
+
+  <p class="note">ב-320 שני הכפתורים יחד רחבים מהמסך בגודל הנוכחי, ולכן שם הם
+    <b>מוקטנים מעט</b>, שניהם יחד. ב-390 ומעלה הם בגודל המלא.
+    תגידי איזה גוון, ואם ההקטנה ב-320 נראית לך סבירה.</p>
+</div>
+
+<script>
+(function(){
+  var WIDTHS = [320, 390, 560];
+  function bar(mode, w){
+    var d = document.createElement("div");
+    d.className = "phone" + (mode === "now" ? "" : " " + mode);
+    d.style.width = w + "px";
+    var narrow = w < 380;
+    d.innerHTML = '<div class="tag">' + w + 'px</div>' +
+      '<div class="stageBox' + (narrow && mode !== "now" ? " narrow" : "") + '">' +
+        '<div class="bar' + (mode === "now" ? " col" : "") + '">' +
+          '<button type="button" class="cta">בואו נתחיל</button>' +
+          '<button type="button" class="meetFam">להכיר את המשפחה</button>' +
+        '</div>' +
+      '</div>';
+    return d;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".phones"), function(box){
+    var mode = box.getAttribute("data-mode");
+    WIDTHS.forEach(function(w){ box.appendChild(bar(mode, w)); });
+  });
+})();
+</script>
+</body>
+</html>
