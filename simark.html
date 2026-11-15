@@ -17,6 +17,10 @@
     border-radius:999px; padding:10px 18px; color:#042b26; background:#39E0D0; }
   button.g{ background:#8d7fc4; color:#120a2a; }
   button.r{ background:#E07A7A; color:#2a0a0a; }
+  .speeds{ align-items:center; }
+  .sp{ font-size:13px; color:#c9c0ef; font-weight:800; }
+  button.s{ font-size:13px; padding:8px 13px; background:#3b2f6b; color:#d9d0ff; }
+  button.s.on{ background:#FFC44D; color:#3b2a00; }
   .next{ background:#2b2050; border:1.5px solid #51428c; border-radius:16px;
     padding:12px 14px; margin-bottom:10px; text-align:center; }
   .next .lbl{ font-size:12.5px; color:#b9b0e0; }
@@ -41,15 +45,23 @@
 <body>
 <div class="wrap">
   <h1>להקיש את השיר של סי</h1>
-  <p class="sub">לוחצים על <b>להשמיע</b>, ואז מקישים על הריבוע הגדול <b>פעם אחת בכל תו</b>,
-    בדיוק כשהוא נשמע. יש שתי שניות וחצי של שקט בהתחלה, התו הראשון מגיע אחריהן.
-    אם טעית, <b>אחורה</b> מוחק את ההקשה האחרונה.</p>
+  <p class="sub">השיר מתנגן <b>מואט</b>, כדי שיהיה זמן להקיש. הזמן שנרשם הוא המיקום
+    בשיר ולא הזמן על השעון, אז הקשה על נגינה איטית נותנת בדיוק את אותם מספרים.
+    לוחצים <b>להשמיע</b>, מחכים לשתי השניות וחצי של שקט, ומקישים על הריבוע הגדול
+    <b>פעם אחת בכל תו</b>. אם טעית, <b>אחורה</b> מוחק את ההקשה האחרונה.</p>
 
   <div class="row">
     <button type="button" id="play">להשמיע</button>
     <button type="button" class="g" id="back">אחורה</button>
     <button type="button" class="r" id="reset">להתחיל מחדש</button>
     <button type="button" class="g" id="check">לשמוע את הסימון</button>
+  </div>
+  <div class="row speeds">
+    <span class="sp">מהירות:</span>
+    <button type="button" class="s" data-r="1">רגילה</button>
+    <button type="button" class="s on" data-r="0.5">חצי</button>
+    <button type="button" class="s" data-r="0.35">איטית</button>
+    <button type="button" class="s" data-r="0.25">איטית מאוד</button>
   </div>
 
   <div class="next">
@@ -100,8 +112,24 @@
   }
   render();
 
+  /* המספר שנרשם הוא המיקום בשיר ולא הזמן על השעון, ולכן הקשה על
+     נגינה מואטת נותנת בדיוק את אותם זמנים, רק עם יותר זמן להגיב */
+  var RATE = 0.5;
+  function applyRate(){
+    try{ song.playbackRate = RATE; }catch(e){}
+    try{ song.preservesPitch = true; song.webkitPreservesPitch = true;
+         song.mozPreservesPitch = true; }catch(e){}
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("button.s"), function(b){
+    b.addEventListener("click", function(){
+      Array.prototype.forEach.call(document.querySelectorAll("button.s"), function(o){ o.classList.remove("on"); });
+      b.classList.add("on");
+      RATE = parseFloat(b.getAttribute("data-r"));
+      applyRate();
+    });
+  });
   document.getElementById("play").addEventListener("click", function(){
-    try{ song.currentTime = 0; song.play(); }catch(e){}
+    try{ song.currentTime = 0; applyRate(); song.play(); }catch(e){}
   });
   document.getElementById("tap").addEventListener("pointerdown", function(ev){
     ev.preventDefault();
@@ -120,7 +148,8 @@
     timers.forEach(clearTimeout); timers.length = 0;
     if (!ctx){ var A = window.AudioContext || window.webkitAudioContext; ctx = new A(); }
     if (ctx.state === "suspended" && ctx.resume) ctx.resume();
-    try{ song.currentTime = 0; song.play(); }catch(e){}
+    /* הבדיקה תמיד במהירות רגילה, כדי לשמוע את השיר כמו שהוא */
+    try{ song.playbackRate = 1; song.currentTime = 0; song.play(); }catch(e){}
     marks.forEach(function(t){
       timers.push(setTimeout(function(){
         var o = ctx.createOscillator(), g = ctx.createGain(), n = ctx.currentTime;
