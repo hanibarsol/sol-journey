@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v329</title>
+<title>העולם של סול v330</title>
 </head>
 <body>
 <style>
@@ -1025,13 +1025,50 @@
   /* נייד מסובב לרוחב: הבית והלוח נכנסים לפי הגובה, בלי שייחתכו */
   @media (orientation:landscape) and (max-height:560px){
     /* .houseWrap ביקש גובה 100%, אבל .world שמעליו לא היה בעל גובה כלל,
-       ולכן הבקשה התפוגגה והבית נחתך למעלה ולמטה. כאן הוא מקבל גובה. */
+       ולכן הבקשה התפוגגה והבית נחתך למעלה ולמטה.
+       וגם אחרי שנתתי לו גובה, הבית נעלם באייפון: aspect-ratio על פריט
+       שהוא גם בעל גובה 100% בתוך קופסה גמישה מתקפל שם לרוחב אפס, ונשאר
+       רק פס שחור בצד. לכן אין כאן aspect-ratio בכלל: הסרטון קובע את
+       הרוחב מתוך היחס הטבעי שלו, וכל השאר נצמד אליו. */
     .world{ height:100%; max-width:none; width:auto; display:flex; align-items:center; justify-content:center; }
-    .houseWrap{ width:auto; height:100%; max-width:100%; aspect-ratio:680/786; margin:0 auto; }
+    /* הרוחב מחושב מהגובה לפי היחס הידוע של הבית, ולא נשען על שום דבר
+       שעלול לא להיות שם בזמן הפריסה הראשונה: לא aspect-ratio, שמתקפל
+       לאפס בספארי על פריט גמיש עם גובה מלא, ולא המידות הטבעיות של
+       הסרטון, שמגיעות רק כשהמטא-דאטה נטענת. */
+    .houseWrap{ height:100vh; width:calc(100vh * 680 / 786); max-width:100%; margin:0 auto; }
     .houseVid{ width:100%; height:100%; object-fit:contain; }
     /* לרוחב הפס עומד בשוליים הצרים שליד הבית, ושם אין מקום לשורה */
     .bar{ left:auto; right:2%; bottom:50%; transform:translateY(50%); width:auto; padding:0;
       background:none; flex-direction:column; }   /* הכפתור עובר לשוליים הפנויים ולא מכסה את הבית */
+  }
+
+  /* ---------- הנייד לרוחב: המסע מבקש לאורך ----------
+     לוח הדרך מצויר ביחס 1328/1600, כלומר מלבן עומד, ולכן בנייד מסובב
+     הוא נדחף מעל קצה המסך. הני בחרה שער אחד בכניסה ולא תיקון לכל מסך.
+     דף אינטרנט לא יכול לסובב מכשיר, בספארי iOS הפקודה לא קיימת כלל,
+     ולכן מבקשים. השער הוא CSS בלבד: ברגע שמסובבים הוא נעלם מעצמו,
+     בלי JS, בלי orientationchange ובלי השהיה.
+     הנעילה לגובה מסך קטן היא חובה, אחרת מחשב שולחני, שתמיד לרוחב,
+     היה מתבקש להסתובב. */
+  .turnGate{ display:none; }
+  @media (orientation:landscape) and (max-height:560px){
+    /* מעל הכל, כולל מסך הטעינה (1000) וההנפשה (900): לרוחב לא נכנסים */
+    .turnGate{
+      display:flex; position:fixed; inset:0; z-index:1200;
+      flex-direction:column; align-items:center; justify-content:center;
+      gap:20px; padding:0 30px; text-align:center;
+      background:linear-gradient(180deg,#2a1f4d,#140820);
+      color:#fff; font-weight:800; font-size:21px; line-height:1.6;
+    }
+    .turnGate p{ margin:0; }
+    /* הסיבוב על אלמנט ה-svg עצמו ולא על קבוצה בתוכו: transform-box
+       על קבוצת SVG אינו אמין בספארי, וכאן אין סיבה להמר. */
+    .turnGate svg{ width:58px; height:58px; display:block;
+      animation:turnHint 3.2s ease-in-out infinite; }
+  }
+  @keyframes turnHint{
+    0%, 14%   { transform:rotate(-90deg) }
+    40%, 100% { transform:rotate(0) }
   }
 
 
@@ -1145,6 +1182,14 @@
     <video id="introClip" playsinline preload="auto" hidden></video>
     <button type="button" class="skip" id="introSkip">לדלג</button>
   </div>
+<div class="turnGate" id="turnGate">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="7.6" y="2" width="8.8" height="20" rx="2.2" stroke="#FFC44D" stroke-width="1.8"/>
+    <path d="M10.4 4.4h3.2" stroke="#FFC44D" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="12" cy="19.2" r="1" fill="#FFC44D"/>
+  </svg>
+  <p>אפשר לסובב את הנייד לאורך</p>
+</div>
 <div id="app">
   <div class="scroll" id="scroll">
     <div class="world">
@@ -4888,7 +4933,13 @@ window.onerror = function(m, u, l){
       p.hSize = handle(g, 166, -54, "size");
       p.hLift = p.plane === "wall" ? NOOP : handle(g, 0, -206, "lift");
       p.hKill = handle(g, 0, 36, "kill");
-      p.hTurn = handle(g, -166, 36, "turn");
+      /* ידית הסיבוב הוסרה 16.11.2026. הני ראתה אותה עובדת ואמרה
+         "התחרטתי לגבי הידיות כי ראיתי שזה מסורבל מדיי לילד", ובלשונה
+         רק אצבעות יזיזו, יעלו, יורידו, יקטינו ויגדילו. סיבוב איננו
+         ברשימה שלה ולכן אינו פיצ'ר. NOOP ולא מחיקה, כי זה בדיוק מה
+         שהקובץ כבר עושה ל-hSpin ול-hLift על הקיר, ו-sizeHandles כבר
+         מדלגת על ידית בלי __hx. המודל המלא בלי ידיות הוא סיבוב נפרד. */
+      p.hTurn = NOOP;
       layer.appendChild(g);
       pieces.push(p);
       draw(p);

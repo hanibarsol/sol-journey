@@ -1236,7 +1236,6 @@
   // הנגן מעדכן את הזמן שלו בערך ארבע פעמים בשנייה. בין עדכון לעדכון משלימים עם
   // שעון המסך ומסתנכרנים מחדש בכל דיווח, אחרת התווים קופצים במקום לזוז.
   var clkBase = -1, clkMark = 0, smT = -1, smMark = 0, smRate = 1;
-  var wasDue = false;   // האם בפריים הקודם כבר היה תו בטווח
   // השעון של הדפדפן מתקדם במדרגות של רבע שנייה. במקום לקפוץ אל כל מדרגה,
   // השעון שלנו רץ ברצף ומתקרב אליה בשינוי מהירות זעיר, כך שהתו זז חלק
   function songNow(){
@@ -1267,7 +1266,7 @@
   function loop(){
     if(!running) return;
     var nowMs=performance.now(), dt=Math.min(0.05,(nowMs-lastT)/1000); lastT=nowMs;
-    var t=songNow(), anyDue=false;
+    var t=songNow(), anyDue=false, ledNow=false;
 
     notes.forEach(function(o){
       var x=PLAYHEAD+(o.arrive-t)*SPEED;
@@ -1277,6 +1276,10 @@
       if (TALL){ var fd = (x - 120) / 60; o.el.style.opacity = fd >= 1 ? "" : (fd <= 0 ? "0" : fd.toFixed(2)); }
       else if (o.el.style.opacity) o.el.style.opacity = "";
       var d=t-o.arrive;
+      /* הפס נדלק ברגע שהתו באמת נוגע בו. קודם לכן הוא נדלק כשהתו נכנס
+         לטווח הסליחה, שנפתח 0.45 שניות קודם, ולכן ההבהוב
+         הקדים את ההקשה בכ-45 פיקסלים ולא ישב עליה */
+      if(d>=0 && !o.led){ o.led=true; ledNow=true; }
       if(o.state==="wait"){
         if(Math.abs(d)<=WIN) anyDue=true;
         if(d>WIN){ o.state="missed"; o.el.classList.add("miss"); onMiss(""); }
@@ -1285,15 +1288,13 @@
       }
     });
 
-    /* הרגע שבו תו נכנס לטווח הוא בדיוק הרגע שבו הוא נוגע בפס.
-       מבזיקים שם, ובשיר הראשון בלבד מראים גם את האצבע על הקליד */
-    if (anyDue && !wasDue){
+    /* מבהבים במגע עצמו, ובשיר הראשון בלבד מראים גם את האצבע על הקליד */
+    if (ledNow){
       var bd = document.body;
       bd.classList.remove("ledOn"); void bd.offsetWidth; bd.classList.add("ledOn");
       setTimeout(function(){ bd.classList.remove("ledOn"); }, 520);
       if (!window.__solCaught) doKey.classList.add("hint");
     }
-    wasDue = anyDue;
     if(anyDue && !pressing) doKey.classList.add("due"); else doKey.classList.remove("due");
 
     if(!endFired && t >= PIECE_END - 0.45){
