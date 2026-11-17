@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v334</title>
+<title>העולם של סול v335</title>
 </head>
 <body>
 <style>
@@ -3620,8 +3620,15 @@ window.onerror = function(m, u, l){
       var done = window.__solDone || [];
       var reached = 0;
       while (reached < J.open.length && done.indexOf(J.open[reached]) >= 0) reached++;
-      var atLesson = J.open[Math.min(reached, J.open.length - 1)];
-      var whoRoom = ROOM_OF[atLesson] || "דו";
+      if (PREVIEW >= 0) reached = PREVIEW;
+      if (CH < 0) CH = chapterOf(Math.min(reached, J.open.length - 1));
+      if (CH >= CHAPTERS.length) CH = CHAPTERS.length - 1;
+      /* 17.11.2026: החדר הולך אחרי הפרק שעל המסך, ולא אחרי השלב
+         הראשון שעוד לא נעשה. reached סופר שלבים גמורים ברצף מההתחלה,
+         ולכן שלב בודד שדולג באמצע עצר אותו שם לתמיד: הני היתה בפרק
+         של סול והפס המשיך לשלוח אותה לעצב את החדר של רה. */
+      var whoRoom = CHAP_WHO[CH] || "דו";
+      if (whoRoom === "סי") whoRoom = "לה";   /* לסי אין חדר משלה */
       if (whoRoom !== ROOM_WHO){
         ROOM_WHO = whoRoom;
         var bn = document.getElementById("roomBarName");
@@ -3629,9 +3636,6 @@ window.onerror = function(m, u, l){
         if (bn) bn.textContent = "לעצב את החדר";
         if (window.__solSetRoom) window.__solSetRoom(ROOM_WHO); else window.__solPendingRoom = ROOM_WHO;
       }
-      if (PREVIEW >= 0) reached = PREVIEW;
-      if (CH < 0) CH = chapterOf(Math.min(reached, J.open.length - 1));
-      if (CH >= CHAPTERS.length) CH = CHAPTERS.length - 1;
       var list = CHAPTERS[CH], base = chapterBase(CH);
       var here = Math.max(0, Math.min(list.length, reached - base));   // כמה מהפרק הזה כבר נגמר
       if (PREVIEW >= 0) here = Math.max(0, Math.min(list.length, PREVIEW - base));
