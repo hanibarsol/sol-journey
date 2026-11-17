@@ -286,7 +286,7 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
   @media (max-width:560px){
     .ovPair .ovFace{ width:72px; height:72px; border-width:4px; }
     .ovPair #ovFace2, .ovPair #ovFace3, .ovPair #ovFace4,
-    .ovPair #ovFace5, .ovPair #ovFace6{ margin-right:-16px; }
+    .ovPair #ovFace5, .ovPair #ovFace6, .ovPair #ovFace7{ margin-right:-16px; }
   }
 
   .ovPair #ovFace{ z-index:4; transform:rotate(-4deg); }
@@ -299,6 +299,8 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
     box-shadow:0 0 0 6px rgba(67,34,90,.16), 0 10px 26px -10px rgba(36,27,61,.6); }
   .ovPair #ovFace6{ margin-right:-20px; z-index:0; transform:rotate(3deg); border-color:#CC3717;
     box-shadow:0 0 0 6px rgba(204,55,23,.16), 0 10px 26px -10px rgba(36,27,61,.6); }
+  /* סי היא הדלת, והיא נכנסה חסרה ממסך הפתיחה */
+  .ovPair #ovFace7{ margin-right:-20px; z-index:0; transform:rotate(-3deg); border-color:#A855D6; }
   .btn.play{ width:86px; height:86px; padding:0; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
     animation:playBeat 2.4s ease-in-out infinite; }
@@ -401,7 +403,7 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
       </div>
 
       <div class="overlay" id="ov">
-        <div class="ovPair" id="ovPair"><div class="ovFace" id="ovFace"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace2"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace3"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace4"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace5"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace6"><img alt="" draggable="false"></div></div>
+        <div class="ovPair" id="ovPair"><div class="ovFace" id="ovFace"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace2"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace3"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace4"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace5"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace6"><img alt="" draggable="false"></div><div class="ovFace" id="ovFace7"><img alt="" draggable="false"></div></div>
         <h2 id="ovT"></h2>
         <p id="ovP"></p>
         <button class="btn play" id="ovB" aria-label="להתחיל">
@@ -478,6 +480,8 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
   if (ovFace2) ovFace2.querySelector("img").src = FACE[1];
   var ovFace5 = document.getElementById("ovFace5");
   if (ovFace5) ovFace5.querySelector("img").src = FACE[4];
+  var ovFace7 = document.getElementById("ovFace7");
+  if (ovFace7) ovFace7.querySelector("img").src = FACE[6];
   var ovFace6 = document.getElementById("ovFace6");
   if (ovFace6) ovFace6.querySelector("img").src = FACE[5];
   var song = document.getElementById("song");
