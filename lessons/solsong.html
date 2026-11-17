@@ -1524,7 +1524,9 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
   function finish(){
     running=false; cancelAnimationFrame(raf); holdStop();
     cueStop();
-    try{ song.pause(); }catch(e){}
+    /* ההקלטה נעצרה באמצע צליל. הסיום נשמע חתוך, ולכן היא נמוגה
+       ברבע שנייה במקום להיקטע */
+    try{ if (!song.paused) songFadeOut(900); else song.pause(); }catch(e){}
     [0,1,2,3,4].forEach(function(kk){ if(keyEl[kk]) keyEl[kk].classList.remove("due","down","hit","bad"); });
     var base = (window.__solBase | 0);
     // what this run is worth: everything caught the first time, the bonus on a repeat
