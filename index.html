@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v331</title>
+<title>העולם של סול v332</title>
 </head>
 <body>
 <style>
@@ -4726,6 +4726,15 @@ window.onerror = function(m, u, l){
           for (var i = 0; i < AW * AH; i++) a[i] = d[i*4 + 3];
           e.nw = img.naturalWidth || 1; e.nh = img.naturalHeight || 1;
           e.data = a; e.ready = true;
+          /* המפה מגיעה אחרי שהחפץ כבר צויר, וכפתור המחיקה חושב עד כה
+             לפי פינת הקופסה. ציור מחדש כאן מצמיד אותו לציור עצמו מיד,
+             ולא רק אחרי שנוגעים בחפץ. חפץ שנקנה נבחר מיד, ובלי זה
+             הכפתור שלו היה תלוי באוויר עד הנגיעה הבאה. */
+          try{
+            for (var pi = 0; pi < pieces.length; pi++){
+              if (pieces[pi].src === src) draw(pieces[pi]);
+            }
+          }catch(e3){}
         }catch(err){ e.ready = false; }
       };
       img.src = src;
@@ -4792,16 +4801,44 @@ window.onerror = function(m, u, l){
        0.82 ולא 0.62, כי שטח המגע של ידית הוא עיגול ברדיוס 27 ולא הציור ברדיוס 18,
        והוא פעיל בדיוק כשהחפץ נבחר, כלומר כשנוגעים בידיות. על 0.62 שני שטחי
        המגע היו נפגשים במרווח של פחות משני פיקסלים. */
-    function posF(k){ return Math.max(0.82, k) / Math.max(0.0001, k); }
+    function posF(){ return 1; }
     /* הבד הוא 480 על 360, ומה שיוצא ממנו פשוט לא מצויר ולא ניתן לנגיעה.
        ידית שנדחפה החוצה נעלמת בלי שום סימן, וזה גרוע מידית צפופה. */
     var VW = 480, VH = 360;
+    /* פינת הציור האמיתי, לא פינת הקופסה. הקופסה היא תמיד 252 על 166,
+       והציור יושב בתוכה ממורכז ונצמד למטה, ולכן פינת הקופסה היא לרוב
+       אוויר ריק: כפתור שנתלה עליה נראה שייך לחלון שמאחור ולא לחפץ.
+       מפת האלפא כבר נבנית לצורך בדיקת הנגיעה, ולכן הגבול כאן חינם. */
+    function visCorner(p){
+      var e = alphaOf(p.src);
+      if (!e.ready || !e.data) return { x:126, y:-166 };
+      if (!e.box){
+        var maxX = -1, minY = AH;
+        for (var y = 0; y < AH; y++){
+          for (var x = 0; x < AW; x++){
+            if (e.data[y * AW + x] > 24){ if (x > maxX) maxX = x; if (y < minY) minY = y; }
+          }
+        }
+        if (maxX < 0){ e.box = { x:126, y:-166 }; }
+        else {
+          var kk = Math.min(252 / e.nw, 166 / e.nh);
+          var dw = e.nw * kk, dh = e.nh * kk;
+          e.box = { x:((maxX + 1) / AW) * dw - dw / 2, y:(minY / AH) * dh - dh };
+        }
+      }
+      return e.box;
+    }
     function sizeHandles(p, k){
+      /* הכפתור נצמד לפינה הימנית העליונה של הציור עצמו, בכל גודל */
+      if (p.hKill && typeof p.hKill.__hx === "number"){
+        var vc = visCorner(p);
+        p.hKill.__hx = vc.x + 22; p.hKill.__hy = vc.y - 22;
+      }
       var inv = (1 / Math.max(0.25, k)).toFixed(3);
       var pf = posF(k);
       var r = 27 * k / Math.max(0.25, k);   /* רדיוס שטח המגע במידות הבד */
       var oy = p.y - (p.lift || 0);
-      ["hSize","hLift","hKill","hTurn"].forEach(function(h){
+      ["hKill"].forEach(function(h){
         var e = p[h];
         if (!e || typeof e.__hx !== "number") return;
         var sx = p.x + e.__hx * pf * k, sy = oy + e.__hy * pf * k;
@@ -4810,6 +4847,20 @@ window.onerror = function(m, u, l){
         var lx = (sx - p.x) / k, ly = (sy - oy) / k;
         e.setAttribute("transform", "translate(" + lx.toFixed(2) + "," + ly.toFixed(2) + ") scale(" + inv + ")");
       });
+    }
+    /* הקיר אינו מקום על הרצפה אלא מצב אחר: שם הגודל קבוע 0.52 והגבולות
+       שונים, בעוד על הרצפה הגודל נגזר מהעומק. לכן אי אפשר פשוט לגרור
+       למעלה, וצריך להחליף מצב באמצע הגרירה. שני ספים ולא אחד, אחרת
+       החפץ מהבהב בין קיר לרצפה כשהאצבע עומדת בדיוק על הגבול. */
+    var WALL_IN = 272, WALL_OUT = 276;
+    function planeByDrag(p, q){
+      if (p.flat) return;              /* שטיח שוכב, אין מה לתלות */
+      if (p.plane === "wall"){ if (q.y > WALL_OUT) p.plane = "floor"; }
+      else if (q.y < WALL_IN){ p.plane = "wall"; }
+      /* הגובה מעל הרצפה היה ידית, וידית אין. חפץ שמרחף מגרסה קודמת
+         היה נתקע באוויר בלי שום דרך להוריד אותו, ולכן הנגיעה הראשונה
+         בגרירה מנחיתה אותו. "יורידו" עובד שוב, באצבע. */
+      if (p.plane !== "wall") p.lift = 0;
     }
     function draw(p){
       if (p.plane === "wall"){
@@ -4841,7 +4892,11 @@ window.onerror = function(m, u, l){
     }
 
     function handles(p, on){
-      ["hSize","hLift","hKill","hTurn"].forEach(function(h){
+      /* מפת האלפא נטענת אחרי הציור הראשון, ולכן המיקום שחושב אז עדיין
+         מצביע על פינת הקופסה. חישוב מחדש ברגע ההצגה מצמיד את הכפתור
+         לציור עצמו כבר בבחירה הראשונה ולא רק אחרי שמזיזים את החפץ. */
+      if (on) sizeHandles(p, sizeK(p));
+      ["hKill"].forEach(function(h){
         p[h].setAttribute("opacity", on ? "1" : "0");
         p[h].style.pointerEvents = on ? "auto" : "none";
         if (p[h].__hit) p[h].__hit.setAttribute("pointer-events", on ? "all" : "none");
@@ -4971,9 +5026,16 @@ window.onerror = function(m, u, l){
       alphaOf(src);
       var NOOP = { setAttribute:function(){}, style:{}, addEventListener:function(){} };
       p.hSpin = NOOP;
-      p.hSize = handle(g, 166, -54, "size");
-      p.hLift = p.plane === "wall" ? NOOP : handle(g, 0, -206, "lift");
-      p.hKill = handle(g, 0, 36, "kill");
+      /* 17.11.2026: אין יותר ידיות גודל וגובה. הני ראתה אותן ואמרה
+         "ראיתי שזה מסורבל מדיי לילד", ובלשונה רק אצבעות יזיזו, יעלו,
+         יורידו, יקטינו ויגדילו. אצבע אחת גוררת, שתיים משנות גודל. */
+      p.hSize = NOOP;
+      p.hLift = NOOP;
+      /* המחיקה נשארת כפתור, הכפתור היחיד, אבל לא מתחת לחפץ:
+         שם היא היתה בדיוק במקום שהאצבע נוחתת בו בגרירה, והני
+         אמרה "הרבה פעמים אני בטעות מוחקת את האובייקט". עכשיו היא
+         בפינה העליונה, מחוץ לציור ומחוץ לדרך של שתי אצבעות. */
+      p.hKill = handle(g, 146, -186, "kill");
       /* ידית הסיבוב הוסרה 16.11.2026. הני ראתה אותה עובדת ואמרה
          "התחרטתי לגבי הידיות כי ראיתי שזה מסורבל מדיי לילד", ובלשונה
          רק אצבעות יזיזו, יעלו, יורידו, יקטינו ויגדילו. סיבוב איננו
@@ -5019,7 +5081,10 @@ window.onerror = function(m, u, l){
         if (!dragging) return;
         if (ev.pointerType === "mouse" && ev.buttons === 0){ drop(ev); return; }
         var q = toScene(ev); if (!q) return;
-        p.x = q.x + gx; p.y = q.y + gy; moved = true; draw(p); restack(); ev.preventDefault();
+        if (pinching) return;          /* שתי אצבעות משנות גודל, לא מזיזות */
+        p.x = q.x + gx; p.y = q.y + gy; moved = true;
+        planeByDrag(p, q);
+        draw(p); restack(); ev.preventDefault();
       });
       function drop(ev){
         if (!dragging && !sizing && !lifting) return;
@@ -5500,8 +5565,49 @@ window.onerror = function(m, u, l){
     // the room itself is an image too, so only a touch on a piece keeps the handles
     svg.addEventListener("pointerdown", function(ev){
       var onPiece = pieces.some(function(p){ return p.g.contains(ev.target); });
-      if (!onPiece) select(-1);
+      /* האצבע השנייה של צביטה נוחתת כמעט תמיד על הרצפה ולא על החפץ,
+         ובלי השורה הזאת היא היתה מבטלת את הבחירה באמצע שינוי הגודל */
+      if (!onPiece && ptrN() === 0) select(-1);
     }, true);
+
+    /* ---------- שתי אצבעות משנות גודל ----------
+       המדידה יושבת על הלוח ולא על החפץ, כי האצבע השנייה נוחתת לרוב
+       על הרצפה או על חפץ אחר. שלב ההאזנה הוא capture, ולכן גם אצבע
+       שנתפסה על ידי setPointerCapture של החפץ עוברת כאן בדרך. */
+    var ptrs = {}, pinching = false, pinchD0 = 1, pinchS0 = 1;
+    function ptrN(){ var n = 0; for (var k in ptrs) n++; return n; }
+    function pinchDist(){
+      var a = null, b = null;
+      for (var k in ptrs){ if (!a) a = ptrs[k]; else if (!b) b = ptrs[k]; }
+      if (!a || !b) return 0;
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+    svg.addEventListener("pointerdown", function(ev){
+      var q = toScene(ev); if (!q) return;
+      ptrs[ev.pointerId] = q;
+      if (ptrN() === 2 && sel >= 0 && pieces[sel]){
+        pinching = true; pinchD0 = pinchDist() || 1; pinchS0 = pieces[sel].size;
+      }
+    }, true);
+    svg.addEventListener("pointermove", function(ev){
+      if (!ptrs[ev.pointerId]) return;
+      var q = toScene(ev); if (!q) return;
+      ptrs[ev.pointerId] = q;
+      if (!pinching) return;
+      var p = pieces[sel]; if (!p) return;
+      var d = pinchDist(); if (!d) return;
+      /* אותם גבולות שהיו לידית: 0.25 כדי שאפשר יהיה להקטין באמת */
+      p.size = Math.max(0.25, Math.min(1.8, pinchS0 * d / pinchD0));
+      draw(p); ev.preventDefault();
+    }, true);
+    function ptrOff(ev){
+      if (ev && ev.pointerId !== undefined) delete ptrs[ev.pointerId];
+      else ptrs = {};
+      if (pinching && ptrN() < 2){ pinching = false; save(); }
+    }
+    svg.addEventListener("pointerup", ptrOff, true);
+    svg.addEventListener("pointercancel", ptrOff, true);
+    window.addEventListener("blur", function(){ ptrOff(null); });
   })();
   var sc = document.getElementById("scroll");
   function toBottom(){ sc.scrollTop = sc.scrollHeight; }
