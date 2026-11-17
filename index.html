@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v332</title>
+<title>העולם של סול v333</title>
 </head>
 <body>
 <style>
@@ -1683,7 +1683,8 @@ window.onerror = function(m, u, l){
       { id:"mire",    nm:"השיר של מי",            face:MI_FACE },
       { id:"fasong",  nm:"השיר של פה",            face:FA_FACE },
       { id:"solsong", nm:"השיר של סול",      face:SOL_FACE },
-      { id:"lasong",  nm:"השיר של לה",            face:LA_FACE }
+      { id:"lasong",  nm:"השיר של לה",            face:LA_FACE },
+      { id:"sisong",  nm:"השיר של סי",            face:SI_FACE }
     ];
     function secTitle(t){
       var h = document.createElement("div");
@@ -2687,7 +2688,7 @@ window.onerror = function(m, u, l){
 
     // the lessons are files of their own now. they are fetched quietly in the
     // background, starting with the one the child can actually reach next
-    var LESSON_URL = {"do":"lessons/do.html","re":"lessons/re.html","dore":"lessons/dore.html","stages":"lessons/stages.html","mire":"lessons/mire.html","fasong":"lessons/fasong.html","solsong":"lessons/solsong.html","lasong":"lessons/lasong.html"};
+    var LESSON_URL = {"do":"lessons/do.html","re":"lessons/re.html","dore":"lessons/dore.html","stages":"lessons/stages.html","mire":"lessons/mire.html","fasong":"lessons/fasong.html","solsong":"lessons/solsong.html","lasong":"lessons/lasong.html","sisong":"lessons/sisong.html"};
     var LESSON_BODY = {}, LESSON_WAIT = {};
     function getLesson(key, done){
       if (LESSON_BODY[key] !== undefined){ if (done) done(LESSON_BODY[key]); return; }
@@ -2994,7 +2995,7 @@ window.onerror = function(m, u, l){
     "meetsol":"סול","solsong":"סול","ear5":"סול","ear5b":"סול","hunter5":"סול","hunter5b":"סול","read5":"סול",
     "meetla":"לה","lasong":"לה","ear6":"לה","ear6b":"לה","hunter6":"לה","hunter6b":"לה","read6":"לה","catch6":"לה",
     // לסי אין עדיין חדר משלו, ולכן הפס ממשיך להראות את החדר של לה
-    "meetsi":"לה","ear7":"לה","ear7b":"לה","hunter7":"לה","hunter7b":"לה","read7":"לה"
+    "meetsi":"לה","ear7":"לה","ear7b":"לה","hunter7":"לה","hunter7b":"לה","read7":"לה","sisong":"לה"
   };
   var ROOM_WHO = "דו";
   // החנות: לכל דמות הסט שלה, עם המחיר של כל פריט
@@ -3168,7 +3169,7 @@ window.onerror = function(m, u, l){
                 "meetfa", "ear4", "hunter4", "read4", "catch4", "fasong",
                 "meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong",
                 "meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "catch6", "lasong",
-                "meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7"];
+                "meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7", "sisong"];
     /* שבעת השלבים הראשונים הם בדיוק שני הפרקים הראשונים: דו ורה */
     var FREE_STEPS = 7;
     /* הרשימה המלאה נשמרת בנפרד. יש בדיקה אחת שחייבת לראות גם את מה שנעול:
@@ -3234,7 +3235,8 @@ window.onerror = function(m, u, l){
                  "meetla":[LA_FACE], "ear6":[LA_FACE], "ear6b":[LA_FACE], "hunter6":[LA_FACE], "catch6":[LA_FACE],
                  "hunter6b":[LA_FACE], "read6":[LA_FACE], "lasong":[LA_FACE],
                  "meetsi":[SI_FACE], "ear7":[SI_FACE], "ear7b":[SI_FACE],
-                 "hunter7":[SI_FACE], "hunter7b":[SI_FACE], "read7":[SI_FACE] };
+                 "hunter7":[SI_FACE], "hunter7b":[SI_FACE], "read7":[SI_FACE],
+                 "sisong":[SI_FACE] };
     // השיעור צריך לדעת מה בא אחריו ואיזו דמות שם. שתי הרשימות האלה
     // הן המקור היחיד, ולכן כפתור "הבא" לא יכול להישאר מאחור
     window.__solPath = PATH;
@@ -3248,7 +3250,7 @@ window.onerror = function(m, u, l){
                  "hunter6b":"two", "read6":"read", "catch6":"catch", "lasong":"song",
                  "cards5":"game", "cards6":"game", "cards7":"game",
                  "meetsi":"meet", "ear7":"one", "ear7b":"one",
-                 "hunter7":"two", "hunter7b":"two", "read7":"read" };
+                 "hunter7":"two", "hunter7b":"two", "read7":"read", "sisong":"song" };
     // הדרך נחלקת לפרקים. כל פרק הוא לוח אחד, ובקצה שלו מציצה האבן הראשונה של הבא.
     // כל פרק הוא מקום אחר: אותה דרך, צבעים אחרים
     var CHAPTERS = [
@@ -3258,7 +3260,7 @@ window.onerror = function(m, u, l){
       ["meetfa", "ear4", "hunter4", "read4", "catch4", "fasong"],
       ["meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong"],
       ["meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "catch6", "lasong"],
-      ["meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7"]
+      ["meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7", "sisong"]
     ];
     if (!window.__solFull){
       /* נשמרים הפרקים השלמים שנכנסים בתוך החלק החינמי, ולא חצי פרק */
