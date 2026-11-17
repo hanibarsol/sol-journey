@@ -1170,42 +1170,15 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
       iClip.removeEventListener("timeupdate", watch);
       iClip.style.opacity = "0";
 
-      // העיגול נתפס בדיוק במקום ובגודל שבהם הסרטון השאיר אותה, כדי שלא תהיה קפיצה
-      var BIG = 253, BX = 221, BY = 207;
-      iBadge.style.transition = "none";
-      iBadge.style.width = BIG + "px"; iBadge.style.height = BIG + "px";
-      iBadge.style.margin = (-BIG/2) + "px 0 0 " + (-BIG/2) + "px";
-      iBadge.style.left = BX + "px"; iBadge.style.top = BY + "px";
-      iBadge.style.opacity = "1"; iBadge.style.transform = "scale(1)";
-
-      // ואז המצלמה נסוגה: העיגול מתכווץ אל הגודל של תו על החמשה, במקום שלה
-      at(70, function(){
-        iBadge.style.transition = "width .85s cubic-bezier(.4,0,.2,1), height .85s cubic-bezier(.4,0,.2,1), " +
-          "left .85s cubic-bezier(.4,0,.2,1), top .85s cubic-bezier(.4,0,.2,1), margin .85s cubic-bezier(.4,0,.2,1)";
-        iBadge.style.width = "32px"; iBadge.style.height = "32px";
-        iBadge.style.margin = "-16px 0 0 -16px";
-        iBadge.style.left = CX + "px"; iBadge.style.top = CY + "px";
-      });
-
-      // המקל והניצוצות מחכים שהיא תנחת, אחרת הם מופיעים הרחק ממנה
-      at(900, function(){
-        iNote.style.opacity = "1";
-        // הנחיתה בסוף ההנפשה נשארת שקטה. הצלצול שהיה כאן נשמע מתכתי
-        spawn(CX, CY, 20, { ang0:-Math.PI, ang1:Math.PI, spdMin:40, spdMax:140, g:120,
-          decay:1.1, rMin:1.6, rMax:4, colors:["#FFC44D","#FFE7AD","#39E0D0","#FFFFFF"] });
-        rings.push({ x:CX, y:CY, r:10, life:1 });
-      });
-
-      // ואז החמשה נבנית מעליה, קו אחרי קו, כדי שיראו שהקו שלה בתוכה
-      var sl = iLines.querySelectorAll(".sline");
-      for (var k=0; k<sl.length; k++){
-        (function(node, n){ at(1100 + n*170, function(){ node.setAttribute("opacity",".8"); }); })(sl[k], k);
-      }
-
-      at(1200, function(){ songFadeOut(4000); });
-
-      at(4000, function(){ intro.classList.add("hide"); });
-      at(4550, function(){ intro.classList.add("gone"); LAYOUT_ON = true; relayout(); done(); });
+      /* כאן הייתה הנפשת ההיכרות: העיגול נוחת על החמשה, החמשה נבנית
+         מתחתיו והניצוצות נפרצות. היא שייכת לאבן הראשונה של הפרק, לא
+         לשיר שבסופו. הילד כבר עשה את כל הפרק של סי לפני שהגיע לכאן,
+         ולהציג לו את סי שוב זה להחזיר אותו אחורה. נשאר רק הדיסולב */
+      iBadge.style.opacity = "0";
+      iNote.style.opacity = "0";
+      at(200, function(){ songFadeOut(1400); });
+      at(500, function(){ intro.classList.add("hide"); });
+      at(1050, function(){ intro.classList.add("gone"); LAYOUT_ON = true; relayout(); done(); });
     }
 
     function watch(){
