@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v335</title>
+<title>העולם של סול v336</title>
 </head>
 <body>
 <style>
@@ -2875,6 +2875,8 @@ window.onerror = function(m, u, l){
     })();
     function close(){
       stage.classList.remove("on");
+      /* חדר שנשאר פתוח מביקור קודם היה נחשף כאן במקום הדרך */
+      try{ if (window.__solRoomForceClose) window.__solRoomForceClose(); }catch(e){}
       try{ houseMusic.hush(false); }catch(e){}
       setTimeout(function(){ frame.srcdoc = "about:blank"; }, 520);
     }
@@ -4109,6 +4111,25 @@ window.onerror = function(m, u, l){
       else { var bk0 = document.getElementById("roomBack"); if (bk0) bk0.textContent = "חזרה למסע"; }
       setTimeout(function(){ rv.classList.remove("fromWin", "shrunk"); rv.style.transformOrigin = ""; }, 520);
     });
+
+    /* 17.11.2026: החדר נסגר תמיד כשחוזרים משיעור אל הדרך, בלי תנאי.
+       הני דיווחה שאחרי שלבים מסוימים היא נוחתת ישר בעיצוב החדר, ולא
+       הצלחנו לשחזר ואין לה דרך לזכור. ההסבר הסביר הוא חדר שנשאר פתוח
+       מביקור קודם, שכן סגירת מסגרת השיעור חושפת את מה שמתחתיה. סגירה
+       כאן הורגת את כל המשפחה הזאת, גם את הגרסה שלא חשבנו עליה, ואינה
+       עולה דבר כשהחדר ממילא סגור.
+       מיידית ולא מונפשת, כי בשלב הזה אין מה לראות.
+       ואין כאן שמירה ואין זריקה: החדר שומר בכל הנחה ובכל קנייה, ולכן
+       אין מצב שחפץ באמצע גרירה נשמר או נמחק בלי ידיעתה. */
+    window.__solRoomForceClose = function(){
+      try{ if (window.__solCloseShop) window.__solCloseShop(); }catch(e){}
+      try{ if (window.__solCloseStair) window.__solCloseStair(); }catch(e){}
+      if (!rv) return;
+      rv.classList.remove("on", "fromWin", "shrunk");
+      rv.style.transformOrigin = "";
+      var bkF = document.getElementById("roomBack");
+      if (bkF) bkF.textContent = "חזרה למסע";
+    };
   })();
 
 
