@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v333</title>
+<title>העולם של סול v334</title>
 </head>
 <body>
 <style>
@@ -4834,7 +4834,7 @@ window.onerror = function(m, u, l){
       /* הכפתור נצמד לפינה הימנית העליונה של הציור עצמו, בכל גודל */
       if (p.hKill && typeof p.hKill.__hx === "number"){
         var vc = visCorner(p);
-        p.hKill.__hx = vc.x + 22; p.hKill.__hy = vc.y - 22;
+        p.hKill.__hx = vc.x + 46; p.hKill.__hy = vc.y - 52;
       }
       var inv = (1 / Math.max(0.25, k)).toFixed(3);
       var pf = posF(k);
@@ -4854,11 +4854,17 @@ window.onerror = function(m, u, l){
        שונים, בעוד על הרצפה הגודל נגזר מהעומק. לכן אי אפשר פשוט לגרור
        למעלה, וצריך להחליף מצב באמצע הגרירה. שני ספים ולא אחד, אחרת
        החפץ מהבהב בין קיר לרצפה כשהאצבע עומדת בדיוק על הגבול. */
-    var WALL_IN = 272, WALL_OUT = 276;
-    function planeByDrag(p, q){
+    var WALL_IN = 270, WALL_OUT = 274;
+    /* 17.11.2026: נשפט לפי החפץ ולא לפי האצבע, וזה היה הבאג.
+       האצבע אוחזת בגוף החפץ, כלומר גבוה מהבסיס שלו, לעיתים ב-80
+       פיקסלים. לכן חפץ שעומד באמצע הרצפה כבר נתפס מעל הסף, קפץ
+       לקיר כמעט בכל גרירה, ושם נתקע: כדי להוריד אותו היה צריך
+       להביא את האצבע מתחת ל-276, והאצבע על חפץ תלוי אף פעם לא
+       מגיעה לשם. זה מה שהני דיווחה בשלושה חדרים ועל התמונות. */
+    function planeByDrag(p, rawY){
       if (p.flat) return;              /* שטיח שוכב, אין מה לתלות */
-      if (p.plane === "wall"){ if (q.y > WALL_OUT) p.plane = "floor"; }
-      else if (q.y < WALL_IN){ p.plane = "wall"; }
+      if (p.plane === "wall"){ if (rawY > WALL_OUT) p.plane = "floor"; }
+      else if (rawY < WALL_IN){ p.plane = "wall"; }
       /* הגובה מעל הרצפה היה ידית, וידית אין. חפץ שמרחף מגרסה קודמת
          היה נתקע באוויר בלי שום דרך להוריד אותו, ולכן הנגיעה הראשונה
          בגרירה מנחיתה אותו. "יורידו" עובד שוב, באצבע. */
@@ -4906,7 +4912,10 @@ window.onerror = function(m, u, l){
     }
     function select(i){
       sel = i;
-      pieces.forEach(function(p, j){ handles(p, j === i); });
+      pieces.forEach(function(p, j){
+        if (j !== i && p.killDisarm) p.killDisarm();
+        handles(p, j === i);
+      });
     }
 
     function toScene(ev){
@@ -4930,7 +4939,7 @@ window.onerror = function(m, u, l){
       c.setAttribute("fill", kind === "kill" ? "#5A1230" : "#2a1f4d");
       c.setAttribute("stroke", kind === "kill" ? "#FF9A86" : "#FFC44D");
       c.setAttribute("stroke-width", "2.5");
-      g.appendChild(c);
+      g.appendChild(c); g.__c = c;
       var p = document.createElementNS(NS, "path");
       p.setAttribute("fill", "none");
       p.setAttribute("stroke", kind === "kill" ? "#FFE1D8" : "#FFE7AD");
@@ -5085,7 +5094,7 @@ window.onerror = function(m, u, l){
         var q = toScene(ev); if (!q) return;
         if (pinching) return;          /* שתי אצבעות משנות גודל, לא מזיזות */
         p.x = q.x + gx; p.y = q.y + gy; moved = true;
-        planeByDrag(p, q);
+        planeByDrag(p, p.y);   /* הבסיס של החפץ, לא מקום האצבע */
         draw(p); restack(); ev.preventDefault();
       });
       function drop(ev){
@@ -5200,8 +5209,31 @@ window.onerror = function(m, u, l){
       });
       p.hLift.addEventListener("pointerup", function(ev){ drop(ev); ev.stopPropagation(); });
 
+      /* הני: "הרבה פעמים אני בטעות מוחקת את האובייקט", וגם אחרי
+         שהרחקנו אותו זה עדיין קרה. לכן נגיעה אחת רק דורכת את
+         הכפתור, והוא נפתח לאדום ומתנפח, ורק נגיעה שנייה מוחקת.
+         אחרי שתי שניות וחצי הוא חוזר לעצמו לבד. */
+      var armed = 0, armT = null;
+      function disarm(){
+        armed = 0;
+        if (armT){ clearTimeout(armT); armT = null; }
+        if (p.hKill.__c){
+          p.hKill.__c.setAttribute("r", 18);
+          p.hKill.__c.setAttribute("fill", "#5A1230");
+        }
+      }
+      p.killDisarm = disarm;
       p.hKill.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
-      p.hKill.addEventListener("click", function(ev){ ev.stopPropagation(); removePiece(p); });
+      p.hKill.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        if (armed){ disarm(); removePiece(p); return; }
+        armed = 1;
+        if (p.hKill.__c){
+          p.hKill.__c.setAttribute("r", 23);
+          p.hKill.__c.setAttribute("fill", "#C21E4B");
+        }
+        armT = setTimeout(disarm, 2500);
+      });
 
       /* כפתור ההיפוך הישן ירד: הסיבוב סביב הציר האנכי עושה בדיוק את זה, רק מונפש */
 
