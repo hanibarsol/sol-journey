@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v345</title>
+<title>העולם של סול v346</title>
 </head>
 <body>
 <style>
@@ -3367,6 +3367,11 @@ window.onerror = function(m, u, l){
       CHAPTERS = keepCh;
     }
     var CH = -1;   // איזה פרק פתוח כרגע. מינוס אחד אומר: זה שבו הילד עומד
+    /* 19.11.2026: הדרך היא אחת, גם בין פרקים. הלוח של כל פרק נגמר למטה
+       בהתחלה שלו ולמעלה בסוף שלו, ולכן אצבע שממשיכה מעבר לקצה התחתון
+       ממשיכה אל הפרק הקודם, ומעבר לעליון אל הבא. אין על מה ללחוץ. */
+    var CARRY_EDGE = "";     // איפה להעמיד את המצלמה בפרק החדש: "top" או "bottom"
+    var FWD_SHUT = true;     // האם הפרק הבא עדיין נעול, בדיוק כמו באבן של ההצצה
     function chapterOf(i){
       var base = 0;
       for (var c = 0; c < CHAPTERS.length; c++){
@@ -3497,6 +3502,23 @@ window.onerror = function(m, u, l){
       cam.style.transform = "translate(-50%, " + (-y).toFixed(1) + "px)";
     }
     // מעבר בין פרקים: המצלמה עולה בדרך. מה שמאחור יורד ויוצא, ומה שלפנים נכנס מלמעלה.
+    function boardRoom(){
+      var cam = document.getElementById("boardCam"), wrap = document.getElementById("trailWrap");
+      if (!cam || !wrap) return 0;
+      return Math.max(0, cam.offsetHeight - wrap.offsetHeight);
+    }
+    /* להעמיד את המצלמה על קצה הלוח במקום לכוון אל האבן שעומדים עליה.
+       LAST_AIM מתאפס בכוונה: makeSureSeen נשען עליו, ובלי האיפוס הוא היה
+       מחזיר את המצלמה אל האבן אחרי שישית שנייה ומבטל את המעבר. */
+    function edgeCamera(side){
+      var cam = document.getElementById("boardCam");
+      if (!cam) return 0;
+      var y = (side === "top") ? 0 : -boardRoom();
+      LAST_AIM = null;
+      cam.style.transition = "none";
+      cam.style.transform = "translate(-50%, " + y.toFixed(1) + "px)";
+      return y;
+    }
     function slideChapter(to, after){
       var st = document.getElementById("steps");
       var cam = document.getElementById("boardCam");
@@ -3837,7 +3859,8 @@ window.onerror = function(m, u, l){
       if (head) head.innerHTML = '<img src="' + curFace + '" alt="">';
       var mineY = pts[Math.min(here, pts.length - 1)];
       if (mineY) placeTrack(mineY.tile, shown);
-      if (mineY) aimCamera(mineY.y, !!window.__solSnapCam);
+      if (CARRY_EDGE){ edgeCamera(CARRY_EDGE); CARRY_EDGE = ""; }
+      else if (mineY) aimCamera(mineY.y, !!window.__solSnapCam);
       window.__solSnapCam = false;
       if (theEnd && window.__solFull){
         var gp = spineAt(0.985);
@@ -3849,6 +3872,7 @@ window.onerror = function(m, u, l){
           st.appendChild(gate);
         }
       }
+      FWD_SHUT = hasNext ? (reached < chapterBase(CH + 1)) : true;
       if (hasPrev) peek(CHAPTERS[CH-1][CHAPTERS[CH-1].length-1], 0.02, CH - 1, false, "back");
       if (hasNext) peek(CHAPTERS[CH+1][0], 0.96, CH + 1, reached < chapterBase(CH+1), "on");
       /* בטעימה אין פרק הבא, ובמקומו עומדת מי מאחורי מנעול, על הדרך */
@@ -3940,24 +3964,87 @@ window.onerror = function(m, u, l){
         c.style.transition = smooth ? "transform .35s ease-out" : "none";
         c.style.transform = "translate(-50%, " + y.toFixed(1) + "px)";
       }
-      var holding = false, y0 = 0, c0 = 0, far = 0;
+      /* מעבר לקצה הלוח: לא לעצור קשה אלא להימשך, כדי שיהיה ברור שיש המשך */
+      function setRaw(y){
+        var c = cam(); if (!c) return;
+        c.style.transition = "none";
+        c.style.transform = "translate(-50%, " + y.toFixed(1) + "px)";
+      }
+      var GRAB = 78;                      // כמה ממשיכים מעבר לקצה כדי שהדרך תעבור פרק
+      function pull(x){ return x / 2.6; }
+      /* אחד קדימה, מעבר לקצה העליון שהוא סוף הפרק. מינוס אחד אחורה, מעבר
+         לתחתון שהוא תחילתו. מגיעים לקצה הנגדי של הפרק החדש, ולכן הדרך
+         ממשיכה מאותה נקודה שאליה האבן עם החץ הצביעה. */
+      function carry(dir){
+        var to = CH + dir;
+        if (to < 0 || to >= CHAPTERS.length) return 0;
+        if (dir > 0 && FWD_SHUT){
+          var sh = document.querySelector("#steps .wayStone.shut");
+          if (sh){
+            sh.classList.remove("shake"); void sh.getBoundingClientRect(); sh.classList.add("shake");
+            setTimeout(function(){ sh.classList.remove("shake"); }, 460);
+          }
+          return 0;
+        }
+        CARRY_EDGE = (dir > 0) ? "bottom" : "top";
+        CH = to;
+        paintJourney();
+        var st = document.getElementById("steps");
+        if (st){                          // האבנים נכנסות ברכות, הדרך עצמה לא מהבהבת
+          st.style.transition = "none"; st.style.opacity = "0";
+          void st.getBoundingClientRect();
+          st.style.transition = "opacity .22s ease";
+          st.style.opacity = "1";
+        }
+        return 1;
+      }
+      var holding = false, y0 = 0, c0 = 0, far = 0, carried = 0;
       wrap.addEventListener("pointerdown", function(e){
-        holding = true; far = 0; y0 = e.clientY; c0 = camY();
+        holding = true; far = 0; carried = 0; y0 = e.clientY; c0 = camY();
       });
       window.addEventListener("pointermove", function(e){
         if (!holding) return;
         var d = e.clientY - y0;
         if (Math.abs(d) > far) far = Math.abs(d);
-        if (far > 7){ window.__solPanned = 1; setCam(c0 + d, false); }
+        if (far <= 7) return;
+        window.__solPanned = 1;
+        var room = boardRoom(), want = c0 + d;
+        if (want > 0 || want < -room){
+          var edge = want > 0 ? 0 : -room;
+          var extra = want - edge;        // חיובי מעבר לסוף הפרק, שלילי מעבר להתחלתו
+          if (!carried && Math.abs(extra) > GRAB && carry(extra > 0 ? 1 : -1)){
+            carried = 1;
+            y0 = e.clientY; c0 = camY();  // האצבע עדיין למטה, וממשיכים למדוד מכאן
+            return;
+          }
+          setRaw(edge + pull(extra));
+        } else {
+          carried = 0;                    // חזרנו לתוך הלוח, ואפשר להמשיך גם לפרק הבא
+          setCam(want, false);
+        }
       });
       function letGo(){
         if (!holding) return;
-        holding = false;
+        holding = false; carried = 0;
+        var y = camY(), room = boardRoom();
+        if (y > 0 || y < -room) setCam(y, true);   // חזרה רכה אל תוך הלוח
         setTimeout(function(){ window.__solPanned = 0; }, 80);
       }
       window.addEventListener("pointerup", letGo, true);
       window.addEventListener("pointercancel", letGo, true);
-      wrap.addEventListener("wheel", function(e){ setCam(camY() - e.deltaY, false); e.preventDefault(); }, { passive:false });
+      /* במחשב אין אצבע, ולכן אותו דבר נספר מגלגלת העכבר */
+      var spin = 0, spinT = null;
+      wrap.addEventListener("wheel", function(e){
+        e.preventDefault();
+        var room = boardRoom(), want = camY() - e.deltaY;
+        if (want > 0 || want < -room){
+          spin += want - (want > 0 ? 0 : -room);
+          if (Math.abs(spin) > GRAB * 1.6 && carry(spin > 0 ? 1 : -1)) spin = 0;
+        } else spin = 0;
+        setCam(want, false);
+        clearTimeout(spinT);
+        spinT = setTimeout(function(){ spin = 0; }, 320);
+      }, { passive:false });
     })();
     window.openJourney = function(who){ WHO = who; CH = -1; window.__solSnapCam = true; paintJourney(); open(); };
     window.repaintJourney = function(){ CH = -1; paintJourney(); };
