@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v340</title>
+<title>העולם של סול v341</title>
 </head>
 <body>
 <style>
@@ -413,6 +413,38 @@
     background:linear-gradient(180deg,#FFE7AD,#FFC44D); box-shadow:0 3px 0 0 #B07C06; }
   .lvlLay .later{ margin-top:12px; border:0; background:none; cursor:pointer;
     font-family:inherit; font-size:14px; color:#9b8dff; text-decoration:underline; }
+
+  /* ---------- סוף המסע ----------
+     עד כה המסע הראשון נגמר בכוכב ובהזמנה לדרגה 2, והמסע השני נגמר
+     בלי כלום: אותו כוכב, ושום דבר שאומר לילד שסיים. */
+  .endLay{ position:fixed; inset:0; z-index:895; display:flex; align-items:center;
+    justify-content:center; padding:18px; background:rgba(8,6,22,.86); overflow:hidden; }
+  .endLay[hidden]{ display:none !important; }
+  .endLay .box{ width:min(340px,92vw); border-radius:22px; padding:24px 18px 18px;
+    text-align:center; background:linear-gradient(180deg,#2a1f4d,#1a1336);
+    border:1.5px solid #51428c; box-shadow:0 18px 40px -12px rgba(0,0,0,.85);
+    position:relative; z-index:2; }
+  .endLay h3{ margin:0 0 16px; font-size:22px; font-weight:800; line-height:1.5; color:#FFE7AD; }
+  .endLay .cup{ width:104px; height:104px; margin:0 auto 14px; display:block;
+    animation:cupPop .7s cubic-bezier(.2,1.3,.4,1) both; }
+  .endLay .go{ display:block; width:100%; font:inherit; font-size:17px; font-weight:800;
+    border:0; border-radius:999px; padding:13px 10px; cursor:pointer; color:#5a3c05;
+    background:linear-gradient(180deg,#FFE7AD,#FFC44D); box-shadow:0 3px 0 0 #B07C06; }
+  @keyframes cupPop{ 0%{ transform:scale(.3) rotate(-14deg); opacity:0 }
+    60%{ transform:scale(1.12) rotate(4deg); opacity:1 }
+    100%{ transform:scale(1) rotate(0); opacity:1 } }
+  /* הקונפטי הוא זה שבשיעורים, אותם צבעים ואותה נפילה, כדי שהחגיגה
+     תיראה המשך של מה שהילד כבר מכיר ולא משהו אחר */
+  .endLay .conf{ position:absolute; top:-24px; width:13px; height:18px; z-index:1;
+    pointer-events:none; border-radius:2px; will-change:transform, opacity; }
+  @keyframes confFall{
+    0%{   transform:translate3d(0,0,0) rotate(0deg); opacity:1 }
+    78%{  opacity:1 }
+    100%{ transform:translate3d(var(--cx), var(--cy), 0) rotate(var(--cr)); opacity:0 }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .endLay .conf{ display:none } .endLay .cup{ animation:none }
+  }
   /* השירים שלי */
   .sound.songs svg{ width:19px; height:19px; }
   .songsLay{ position:fixed; inset:0; z-index:880; display:flex; flex-direction:column;
@@ -1273,6 +1305,20 @@
       <span class="tapHint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 a2 2 0 0 1 2 2 v7.4 h1.1 a3.1 3.1 0 0 1 3.1 3.1 v2.6 a4.3 4.3 0 0 1 -4.3 4.3 h-2.6 a4.1 4.1 0 0 1 -3.6 -2.1 l-2.3 -4.2 a1.7 1.7 0 0 1 2.7 -2 l1.9 2.1 V4.6 a2 2 0 0 1 2 -2 z" fill="currentColor"/><g class="rip" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"><path d="M16.6 6.4 a4.6 4.6 0 0 1 1.6 -3"/><path d="M19.4 8.2 a7.4 7.4 0 0 1 2.2 -4.6"/></g></svg></span>
     </div>
   </div>
+  <div class="endLay" id="endLay" hidden>
+    <div class="box">
+      <svg class="cup" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M14 10 h36 v12 a18 18 0 0 1 -36 0 z" fill="#FFC44D" stroke="#B07C06" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M14 13 h-6 a7 7 0 0 0 7 9" fill="none" stroke="#B07C06" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M50 13 h6 a7 7 0 0 1 -7 9" fill="none" stroke="#B07C06" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M28 40 h8 v6 h-8 z" fill="#B07C06"/>
+        <path d="M20 46 h24 v6 h-24 z" fill="#FFC44D" stroke="#B07C06" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M32 15.5 l2.6 5.4 l5.9 .8 l-4.3 4 l1.1 5.8 l-5.3 -2.9 l-5.3 2.9 l1.1 -5.8 l-4.3 -4 l5.9 -.8 z" fill="#FFE7AD"/>
+      </svg>
+      <h3>כל הכבוד שהגעתם עד לפה</h3>
+      <button type="button" class="go" id="endGo">יש!</button>
+    </div>
+  </div>
   <div class="lvlLay" id="lvlLay" hidden>
     <div class="box">
       <div class="art"><svg class="staffMini" viewBox="0 0 96 96" aria-hidden="true">
@@ -1847,6 +1893,49 @@ window.onerror = function(m, u, l){
     window.__solLevelGet = get;
     window.__solLevelPaint = paint;
     window.__solLevelInvite = invite;
+
+    /* "בסוף המסע נכתוב כל הכבוד שהגעתם עד לפה, קונפטי, חגיגה" (הני,
+       17.11.2026; הנוסח ברבים לפי התיקון שלה למחרת). פעם אחת לכל מסע:
+       המפתח נושא את דרגת הקושי, ולכן המסע השני חוגג בנפרד מהראשון. */
+    function partyConfetti(lay, n){
+      var cols = ["#F2A412","#FFE7AD","#189E8A","#3B6BB2","#CC3717","#FFFFFF","#43225A"];
+      for (var i = 0; i < n; i++){
+        (function(i){
+          var d = document.createElement("i");
+          d.className = "conf";
+          d.style.background = cols[i % cols.length];
+          d.style.left = (2 + Math.random() * 96).toFixed(1) + "%";
+          d.style.setProperty("--cx", (Math.random() * 240 - 120).toFixed(0) + "px");
+          d.style.setProperty("--cy", (620 + Math.random() * 420).toFixed(0) + "px");
+          d.style.setProperty("--cr", (Math.random() * 900 - 450).toFixed(0) + "deg");
+          d.style.width = (8 + Math.random() * 8).toFixed(0) + "px";
+          d.style.height = (12 + Math.random() * 10).toFixed(0) + "px";
+          var dur = (1.8 + Math.random() * 1.8).toFixed(2);
+          d.style.animation = "confFall " + dur + "s linear " + (Math.random() * 0.9).toFixed(2) + "s forwards";
+          lay.appendChild(d);
+          setTimeout(function(){ d.remove(); }, 5200);
+        })(i);
+      }
+    }
+    window.__solEndParty = function(){
+      var el = document.getElementById("endLay");
+      if (!el) return false;
+      var lvl = 1; try{ lvl = get(); }catch(e){}
+      var KEY = "solWorld.endParty" + lvl;
+      try{ if (localStorage.getItem(KEY) === "1") return false; }catch(e){ return false; }
+      try{ localStorage.setItem(KEY, "1"); }catch(e){}
+      el.hidden = false;
+      partyConfetti(el, 72);
+      setTimeout(function(){ partyConfetti(el, 48); }, 1200);
+      return true;
+    };
+    var endGo = document.getElementById("endGo");
+    if (endGo) endGo.addEventListener("click", function(){
+      var el = document.getElementById("endLay");
+      if (el) el.hidden = true;
+      /* ההזמנה לדרגה 2 מחכה שהחגיגה תיגמר, ולא נפתחת מתחתיה */
+      setTimeout(function(){ try{ invite(); }catch(e){} }, 350);
+    });
     paint();
   })();
   /* ---------- המנגינות שיצרתי ---------- */
@@ -3786,7 +3875,15 @@ window.onerror = function(m, u, l){
       window.__solJustDone = "";
       /* הכפתור וההזמנה נבדקים אחרי כל ציור של השביל */
       try{ if (window.__solLevelPaint) window.__solLevelPaint(); }catch(e){}
-      try{ if (theEnd && window.__solLevelInvite) setTimeout(window.__solLevelInvite, 900); }catch(e){}
+      /* החגיגה קודמת להזמנה לדרגה 2, ואם היא כבר נראתה, ההזמנה רצה
+         לבד בדיוק כמו קודם */
+      try{
+        if (theEnd) setTimeout(function(){
+          var partied = false;
+          try{ if (window.__solEndParty) partied = window.__solEndParty(); }catch(e){}
+          if (!partied){ try{ if (window.__solLevelInvite) window.__solLevelInvite(); }catch(e){} }
+        }, 900);
+      }catch(e){}
 
       function peek(id, t, to, shut, dir, buy){
         var P = spineAt(t);
