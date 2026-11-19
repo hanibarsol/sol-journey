@@ -1571,12 +1571,22 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
   // ---- meeting the real note: the face dissolves into it, round by round ----
   function modeMeet(){
     var k = POOL[0], el = null, waiting = false;
+    var lastHide = null, runSame = 0;
     TARGET = 6;                             // שלוש פעמים התמונה, שלוש פעמים העיגול השחור
     function round(){
       clearNotes();
       el = makeNote(k, 240, 0);
-      // לסירוגין: פעם עיגול עם הפנים שלה, פעם עיגול שחור מלא שנפתח רק כשפוגעים
-      if (done % 2 === 1) el.classList.add('blank');
+      /* הראשון תמיד שחור וסגור, כי ההקלטה שואלת מי מתחבא בעיגול.
+         ומשם אקראי ולא מכסה קבועה: שלוש ושלוש לסירוגין היא תבנית
+         שילד קולט, והוא מתחיל לנחש לפי התור ולא לפי התו.
+         השמירה היחידה היא לא שלושה מאותו סוג ברצף */
+      var hide;
+      if (done === 0) hide = true;
+      else if (runSame >= 2) hide = !lastHide;
+      else hide = Math.random() < 0.5;
+      runSame = (hide === lastHide) ? runSame + 1 : 1;
+      lastHide = hide;
+      if (hide) el.classList.add('blank');
       waiting = true;
       due([k]);
     }
