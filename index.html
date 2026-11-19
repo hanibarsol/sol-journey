@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
-<title>העולם של סול v344</title>
+<title>העולם של סול v345</title>
 </head>
 <body>
 <style>
@@ -978,15 +978,15 @@
     box-shadow:0 4px 0 0 #1d1338, 0 8px 14px -6px rgba(0,0,0,.8); }
   .stone.open.buyStone .arrow svg{ width:16px; height:16px; display:block; }
 
-  .stone.open.peek{ width:50px; height:50px; opacity:.6; animation:peekFloat 2.9s ease-in-out infinite;
+  .stone.open.wayStone{ width:50px; height:50px; opacity:.6; animation:peekFloat 2.9s ease-in-out infinite;
     box-shadow:0 5px 0 0 #8A5A06, 0 0 20px 2px rgba(255,196,77,.5); }
-  .stone.open.peek.shut{ filter:grayscale(1) brightness(.78); opacity:.42; animation:none;
+  .stone.open.wayStone.shut{ filter:grayscale(1) brightness(.78); opacity:.42; animation:none;
     box-shadow:0 4px 0 0 #3a3550, 0 8px 14px -6px rgba(0,0,0,.7); }
-  .stone.open.peek.shut .arrow{ background:#3a3550; box-shadow:0 3px 0 0 #241B3D; }
-  .stone.open.peek .arrow{ position:absolute; inset-inline-end:-7px; top:-7px; width:25px; height:25px; z-index:4;
+  .stone.open.wayStone.shut .arrow{ background:#3a3550; box-shadow:0 3px 0 0 #241B3D; }
+  .stone.open.wayStone .arrow{ position:absolute; inset-inline-end:-7px; top:-7px; width:25px; height:25px; z-index:4;
     border-radius:50%; background:#7B6BFF; box-shadow:0 3px 0 0 #4f41b8;
     display:flex; align-items:center; justify-content:center; }
-  .stone.open.peek .arrow svg{ width:15px; height:15px; display:block; }
+  .stone.open.wayStone .arrow svg{ width:15px; height:15px; display:block; }
   @keyframes peekFloat{ 0%,100%{ transform:translate(-50%,-50%) translateY(0) } 50%{ transform:translate(-50%,-50%) translateY(-5px) } }
   /* אבן שנפתחה ברגע זה */
   .stone.born{ animation:stoneBorn .85s cubic-bezier(.34,1.56,.64,1) both, nowBeat 1.7s ease-in-out 1s infinite; }
@@ -3894,7 +3894,7 @@ window.onerror = function(m, u, l){
         var P = spineAt(t);
         if (!P) return;
         var d = document.createElement("div");
-        d.className = buy ? "stone open buyStone" : ("stone open peek" + (shut ? " shut" : ""));
+        d.className = buy ? "stone open buyStone" : ("stone open wayStone" + (shut ? " shut" : ""));
         /* בגודל של אבן אמיתית בדרך הזאת, לא בגודל של הצצה */
         if (buy){ d.style.width = SZ + "px"; d.style.height = SZ + "px"; }
         d.style.left = P.x + "%"; d.style.top = P.y + "%";
