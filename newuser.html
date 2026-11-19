@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
 <meta name="robots" content="noindex, nofollow">
-<title>העולם של סול v342</title>
+<title>העולם של סול v343</title>
 </head>
 <body>
 <style>
@@ -4870,8 +4870,27 @@ window.onerror = function(m, u, l){
       img.src = src;
       return e;
     }
+    /* כמה מהתמונה בכלל מצוירת. מנורה דקה היא כ-13 אחוז בלבד, כלומר
+       כמעט כל שטח המגע שלה הוא אוויר, והנגיעה נופלת בצדק אל הכלום.
+       הספירה נעשית פעם אחת לכל תמונה ונשמרת לצד מפת האלפא. */
+    function alphaCov(e){
+      if (!e.ready || !e.data) return 1;
+      if (typeof e.cov === "number") return e.cov;
+      var on = 0;
+      for (var i = 0; i < AW * AH; i++) if (e.data[i] > 24) on++;
+      e.cov = on / (AW * AH);
+      return e.cov;
+    }
+    /* ככל שהחפץ דק יותר, כך הוא זקוק ליותר סליחה. 0 פירושו בדיקה
+       מדויקת, וזו עדיין הבדיקה הראשונה תמיד. */
+    function tolOf(e){
+      var c = alphaCov(e);
+      if (c < 0.20) return 3;
+      if (c < 0.35) return 2;
+      return 1;
+    }
     /* האם הפיקסל שמתחת לאצבע באמת מצויר. כל עוד המפה לא מוכנה, מניחים שכן */
-    function paintedAt(p, ev){
+    function paintedAt(p, ev, tol){
       var e = alphaOf(p.src);
       if (!e.ready || !p.im) return true;
       var m; try{ m = p.im.getScreenCTM(); }catch(err){ return true; }
@@ -4883,23 +4902,48 @@ window.onerror = function(m, u, l){
       var k = Math.min(252 / e.nw, 166 / e.nh);
       var dw = e.nw * k, dh = e.nh * k;
       var u = (loc.x + dw / 2) / dw, v = (loc.y + dh) / dh;
-      if (u < 0 || u > 1 || v < 0 || v > 1) return false;
+      tol = tol || 0;
+      /* בבדיקה הסלחנית מותר לנגוע גם קצת מחוץ לקופסה, אחרת קצה דק
+         שיושב על הגבול נשאר בלתי ניתן לתפיסה */
+      var pad = tol / AW;
+      if (u < -pad || u > 1 + pad || v < -pad || v > 1 + pad) return false;
       var x = Math.min(AW - 1, Math.max(0, Math.floor(u * AW)));
       var y = Math.min(AH - 1, Math.max(0, Math.floor(v * AH)));
-      return e.data[y * AW + x] > 24;
+      if (e.data[y * AW + x] > 24) return true;
+      if (!tol) return false;
+      /* סריקה של הסביבה הקרובה: מספיק שפיקסל מצויר אחד נמצא בטווח */
+      var x0 = Math.max(0, x - tol), x1 = Math.min(AW - 1, x + tol);
+      var y0 = Math.max(0, y - tol), y1 = Math.min(AH - 1, y + tol);
+      for (var yy = y0; yy <= y1; yy++){
+        var row = yy * AW;
+        for (var xx = x0; xx <= x1; xx++){
+          if (e.data[row + xx] > 24) return true;
+        }
+      }
+      return false;
     }
-    /* מי באמת מתחת לאצבע: מלמעלה למטה לפי סדר הציור, הראשון שמצויר שם */
-    function pickAt(ev){
+    /* מי באמת מתחת לאצבע: מלמעלה למטה לפי סדר הציור, הראשון שמצויר שם.
+       שני סיבובים בכוונה. הראשון מדויק לגמרי, וזה מה ששומר על התיקון
+       של הני מ-v263, שבריבוי חפצים לא תתפוס אחד דרך הפינה השקופה של
+       אחר. רק אם אף חפץ לא נתפס במדויק, כלומר האצבע נפלה על כלום,
+       מגיע סיבוב שני סלחני. כך חפץ דק כמו המנורה נתפס, ובלי לפגוע
+       בדיוק כשיש במה לפגוע. */
+    function pickPass(ev, forgiving){
       var kids = layer.childNodes;
       for (var i = kids.length - 1; i >= 0; i--){
         for (var j = 0; j < pieces.length; j++){
           var p = pieces[j];
           if (p.g !== kids[i]) continue;
-          if (paintedAt(p, ev)) return p;
+          var tol = 0;
+          if (forgiving){ try{ tol = tolOf(alphaOf(p.src)); }catch(e){ tol = 1; } }
+          if (paintedAt(p, ev, tol)) return p;
           break;
         }
       }
       return null;
+    }
+    function pickAt(ev){
+      return pickPass(ev, false) || pickPass(ev, true);
     }
     function restack(){
       var list = pieces.map(function(p){
