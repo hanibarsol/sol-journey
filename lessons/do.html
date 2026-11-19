@@ -1180,7 +1180,23 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
       at(1100, startLearn3);
     } else {
       say("מעולה! עכשיו עם המוזיקה", "good");
-      at(1500, function(){ phase = "play"; startPlay(); });
+      /* "כשדו מגיע לקו, געו בקליד שלו". זאת הוראה לשיר ולא ברכה,
+         ולכן מקומה כאן, כשהחמשה והקו כבר מול הילד. בפתיחה היא
+         נשמעה תלושה, כי שם עוד אין קו ואין מה לנגן.
+         מופעלת בתוך ההקשה האחרונה של החימום, שהיא מגע אמיתי */
+      var wentOn = false;
+      function toTheSong(){
+        if (wentOn) return; wentOn = true;
+        phase = "play"; startPlay();
+      }
+      try{
+        voiceEl.src = VOICE_DO;
+        voiceEl.addEventListener("ended", function(){ at(500, toTheSong); }, { once:true });
+        var pv = voiceEl.play();
+        if (pv && pv.catch) pv.catch(function(){ at(1500, toTheSong); });
+      }catch(e){ at(1500, toTheSong); }
+      /* שעון ביטחון: אם השמע לא נפתח, השיר מתחיל בלי ההסבר */
+      at(9000, toTheSong);
     }
   }
 
@@ -1196,22 +1212,7 @@ try{ if (window.__solLevel === 2) document.documentElement.classList.add("lvl2")
       song.currentTime = 0; songVol(0.8);
       var ps = song.play(); if (ps && ps.catch) ps.catch(function(){});
     }catch(e){}
-    /* ההסבר הוא הדבר הראשון שנשמע בשיעור הראשון במסע, לפני ההנפשה.
-       הוא גם רוכב ישירות על הנגיעה בכפתור ההתחלה, וזה המגע הבטוח
-       ביותר לפתיחת שמע באייפון. ההנפשה מחכה שהוא ייגמר */
-    var opened = false;
-    function toIntro(){
-      if (opened) return; opened = true;
-      runIntro(startLearn1);
-    }
-    try{
-      voiceEl.src = VOICE_DO;
-      voiceEl.addEventListener("ended", function(){ at(350, toIntro); }, { once:true });
-      var pv = voiceEl.play();
-      if (pv && pv.catch) pv.catch(function(){ at(700, toIntro); });
-    }catch(e){ at(700, toIntro); }
-    /* שעון ביטחון: אם השמע לא נפתח, השיעור ממשיך בלי ההסבר */
-    at(9000, toIntro);
+    runIntro(startLearn1);
   }
 
   // המנגינה נמוגה כשהפתיחה מוסרת את המסך לחמשה, וחוזרת להתחלה בעוצמה מלאה
