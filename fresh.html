@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1038">
 <meta name="robots" content="noindex, nofollow">
-<title>העולם של סול v349</title>
+<title>העולם של סול v350</title>
 </head>
 <body>
 <style>
@@ -3267,8 +3267,10 @@ window.onerror = function(m, u, l){
                 "meetsol", "ear5", "ear5b", "cards5", "hunter5", "hunter5b", "read5", "solsong",
                 "meetla", "ear6", "ear6b", "cards6", "hunter6", "hunter6b", "read6", "catch6", "lasong",
                 "meetsi", "ear7", "ear7b", "cards7", "hunter7", "hunter7b", "read7", "sisong"];
-    /* שבעת השלבים הראשונים הם בדיוק שני הפרקים הראשונים: דו ורה */
-    var FREE_STEPS = 7;
+    /* שמונת השלבים הראשונים הם בדיוק שני הפרקים הראשונים, דו ורה.
+       המספר הזה חייב לזוז עם כל אבן שנוספת לאחד מהם, אחרת הטעימה
+       נעצרת באמצע פרק. האבן של משחק הזיכרון היא שהזיזה אותו מ-7 */
+    var FREE_STEPS = 8;
     /* הרשימה המלאה נשמרת בנפרד. יש בדיקה אחת שחייבת לראות גם את מה שנעול:
        פתיחת חדר שואלת "האם כל השלבים של הדמות הזאת נעשו", ועל רשימה מקוצרת
        היא לא מוצאת שום שלב חסר ומסיקה שהכל הושלם. כך נפתחו כל הדלתות בטעימה. */
